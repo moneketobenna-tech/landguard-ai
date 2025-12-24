@@ -256,7 +256,7 @@ export default function HomePage() {
               <div className="text-4xl font-bold mb-4">$0<span className="text-lg text-lg-muted">/month</span></div>
               <ul className="space-y-3 mb-8">
                 {[
-                  '5 scans per month',
+                  '3 scans per month',
                   'Basic risk analysis',
                   'Chrome extension',
                   'Manual scanning'
