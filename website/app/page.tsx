@@ -34,8 +34,12 @@ export default function HomePage() {
       <nav className="fixed top-0 left-0 right-0 z-50 glass">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl overflow-hidden bg-gradient-to-br from-lg-blue/20 to-lg-green/20 border border-white/20 flex items-center justify-center p-1">
-              <img src="/logo.png" alt="LandGuard AI" className="w-full h-full object-contain" />
+            <div className="w-10 h-10 rounded-xl overflow-hidden border border-lg-blue/50 shadow-md shadow-lg-blue/30">
+              <img 
+                src="/logo.png" 
+                alt="LandGuard AI" 
+                className="w-full h-full object-cover object-top scale-150"
+              />
             </div>
             <span className="text-xl font-bold text-lg-silver">LandGuard AI</span>
           </div>
@@ -322,8 +326,12 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg overflow-hidden bg-gradient-to-br from-lg-blue/20 to-lg-green/20 border border-white/20 flex items-center justify-center p-0.5">
-                <img src="/logo.png" alt="LandGuard AI" className="w-full h-full object-contain" />
+              <div className="w-8 h-8 rounded-lg overflow-hidden border border-lg-blue/50 shadow-sm shadow-lg-blue/30">
+                <img 
+                  src="/logo.png" 
+                  alt="LandGuard AI" 
+                  className="w-full h-full object-cover object-top scale-150"
+                />
               </div>
               <span className="font-semibold text-lg-silver">LandGuard AI</span>
             </div>
