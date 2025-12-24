@@ -1,0 +1,170 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --lg-blue: #0A5CFF;
+  --lg-green: #2ECC71;
+  --lg-red: #E74C3C;
+  --lg-amber: #F39C12;
+  --lg-safe: #27AE60;
+  --lg-dark: #0B1220;
+  --lg-darker: #060d17;
+  --lg-light: #F5F7FA;
+  --lg-silver: #C9D1D9;
+  --lg-muted: #8b949e;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background: var(--lg-dark);
+  color: var(--lg-silver);
+  min-height: 100vh;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--lg-darker);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Animation classes */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+.animate-pulse-slow {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--lg-blue), var(--lg-green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass effect */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Button styles */
+.btn-primary {
+  background: linear-gradient(135deg, var(--lg-blue), #0848cc);
+  color: white;
+  padding: 12px 28px;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(10, 92, 255, 0.3);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--lg-silver);
+  padding: 12px 28px;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  border-color: var(--lg-blue);
+  color: var(--lg-blue);
+}
+
+/* Card styles */
+.card {
+  background: var(--lg-darker);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  border-color: rgba(10, 92, 255, 0.3);
+  transform: translateY(-4px);
+}
+
+/* Risk level colors */
+.risk-low { color: var(--lg-safe); }
+.risk-medium { color: var(--lg-amber); }
+.risk-high { color: var(--lg-red); }
+
+.risk-pill {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.risk-pill-low {
+  background: rgba(39, 174, 96, 0.2);
+  color: var(--lg-safe);
+  border: 1px solid var(--lg-safe);
+}
+
+.risk-pill-medium {
+  background: rgba(243, 156, 18, 0.2);
+  color: var(--lg-amber);
+  border: 1px solid var(--lg-amber);
+}
+
+.risk-pill-high {
+  background: rgba(231, 76, 60, 0.2);
+  color: var(--lg-red);
+  border: 1px solid var(--lg-red);
+}
+

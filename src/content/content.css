@@ -1,0 +1,373 @@
+/**
+ * LandGuard AI - Content Script Styles
+ * Security banner that appears on supported listing pages
+ */
+
+/* Banner Container */
+#landguard-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2147483647;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background: linear-gradient(135deg, #0B1220 0%, #1a2332 100%);
+  border-bottom: 3px solid #0A5CFF;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  padding: 0;
+  margin: 0;
+  animation: landguard-slideDown 0.3s ease-out;
+}
+
+@keyframes landguard-slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Banner Content */
+.landguard-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+/* Logo Section */
+.landguard-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.landguard-logo-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #0A5CFF, #2ECC71);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.landguard-logo-text {
+  color: #C9D1D9;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Score Section */
+.landguard-score-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.landguard-score-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.landguard-score-label {
+  color: #8b949e;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.landguard-score-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #C9D1D9;
+}
+
+.landguard-score-max {
+  color: #8b949e;
+  font-size: 14px;
+}
+
+/* Risk Level Pill */
+.landguard-risk-pill {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.landguard-risk-low {
+  background: rgba(39, 174, 96, 0.2);
+  color: #27AE60;
+  border: 1px solid #27AE60;
+}
+
+.landguard-risk-medium {
+  background: rgba(243, 156, 18, 0.2);
+  color: #F39C12;
+  border: 1px solid #F39C12;
+}
+
+.landguard-risk-high {
+  background: rgba(231, 76, 60, 0.2);
+  color: #E74C3C;
+  border: 1px solid #E74C3C;
+}
+
+/* Flags Section */
+.landguard-flags {
+  flex: 1;
+  max-width: 500px;
+}
+
+.landguard-flags-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.landguard-flag-item {
+  color: #C9D1D9;
+  font-size: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.landguard-flag-icon {
+  color: #F39C12;
+  flex-shrink: 0;
+}
+
+.landguard-flag-icon.high {
+  color: #E74C3C;
+}
+
+/* Actions Section */
+.landguard-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.landguard-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.landguard-btn-primary {
+  background: #0A5CFF;
+  color: white;
+}
+
+.landguard-btn-primary:hover {
+  background: #0848cc;
+  transform: translateY(-1px);
+}
+
+.landguard-btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #C9D1D9;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.landguard-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.landguard-btn-close {
+  background: transparent;
+  color: #8b949e;
+  padding: 8px;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.landguard-btn-close:hover {
+  color: #E74C3C;
+}
+
+/* Loading State */
+.landguard-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #C9D1D9;
+  font-size: 14px;
+}
+
+.landguard-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(10, 92, 255, 0.3);
+  border-top-color: #0A5CFF;
+  border-radius: 50%;
+  animation: landguard-spin 0.8s linear infinite;
+}
+
+@keyframes landguard-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Disclaimer */
+.landguard-disclaimer {
+  text-align: center;
+  padding: 4px 20px 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.landguard-disclaimer-text {
+  color: #6e7681;
+  font-size: 10px;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .landguard-content {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .landguard-flags {
+    order: 4;
+    width: 100%;
+    max-width: none;
+  }
+  
+  .landguard-flags-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .landguard-flag-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+}
+
+/* Detail Modal (injected when "View Details" clicked) */
+#landguard-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 2147483648;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: landguard-fadeIn 0.2s ease;
+}
+
+@keyframes landguard-fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+#landguard-modal {
+  background: #0B1220;
+  border-radius: 12px;
+  border: 1px solid rgba(10, 92, 255, 0.3);
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.landguard-modal-header {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.landguard-modal-title {
+  color: #C9D1D9;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.landguard-modal-body {
+  padding: 20px;
+}
+
+.landguard-detail-section {
+  margin-bottom: 20px;
+}
+
+.landguard-detail-title {
+  color: #0A5CFF;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.landguard-recommendations {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.landguard-recommendation-item {
+  color: #C9D1D9;
+  font-size: 13px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  margin-bottom: 8px;
+  border-left: 3px solid #2ECC71;
+}
+
+.landguard-flags-detail {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.landguard-flag-detail-item {
+  color: #C9D1D9;
+  font-size: 13px;
+  padding: 10px 12px;
+  background: rgba(231, 76, 60, 0.1);
+  border-radius: 6px;
+  margin-bottom: 8px;
+  border-left: 3px solid #E74C3C;
+}

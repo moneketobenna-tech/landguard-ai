@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LandGuard AI</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-brand">
+        <div class="logo-icon">🛡️</div>
+        <div class="brand-text">
+          <h1 class="brand-name">LandGuard AI</h1>
+          <span class="brand-version">v1.0.0</span>
+        </div>
+      </div>
+      <button class="settings-btn" id="settingsBtn" title="Settings">⚙️</button>
+    </header>
+
+    <!-- Tagline -->
+    <div class="tagline">
+      Protects buyers from land and property scams before money changes hands.
+    </div>
+
+    <!-- Current Page Section -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-icon">🔗</span>
+        <span class="section-title">Current Listing</span>
+      </div>
+      <div class="url-display" id="currentUrl">Loading...</div>
+    </section>
+
+    <!-- Optional Inputs -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-icon">📝</span>
+        <span class="section-title">Seller Information (Optional)</span>
+      </div>
+      <div class="input-group">
+        <label for="sellerPhone">Phone Number</label>
+        <input type="text" id="sellerPhone" placeholder="e.g., +1 555-123-4567">
+      </div>
+      <div class="input-group">
+        <label for="sellerEmail">Email Address</label>
+        <input type="email" id="sellerEmail" placeholder="e.g., seller@example.com">
+      </div>
+      <div class="input-group">
+        <label for="agentName">Agent / Company Name</label>
+        <input type="text" id="agentName" placeholder="e.g., ABC Realty">
+      </div>
+    </section>
+
+    <!-- Scan Button -->
+    <button class="scan-btn" id="scanBtn">
+      <span class="scan-btn-icon">🔍</span>
+      <span class="scan-btn-text">Scan Listing</span>
+    </button>
+
+    <!-- Results Section (Hidden initially) -->
+    <section class="section results-section" id="resultsSection" style="display: none;">
+      <div class="section-header">
+        <span class="section-icon">📊</span>
+        <span class="section-title">Risk Analysis</span>
+      </div>
+      
+      <!-- Score Display -->
+      <div class="score-container">
+        <div class="score-ring" id="scoreRing">
+          <div class="score-value" id="scoreValue">--</div>
+          <div class="score-label">Risk Score</div>
+        </div>
+        <div class="risk-pill" id="riskPill">--</div>
+      </div>
+
+      <!-- Flags -->
+      <div class="flags-container" id="flagsContainer">
+        <div class="flags-title">🚩 Risk Flags</div>
+        <ul class="flags-list" id="flagsList"></ul>
+      </div>
+
+      <!-- Recommendations -->
+      <div class="recommendations-container" id="recommendationsContainer">
+        <div class="recommendations-title">💡 Recommendations</div>
+        <ul class="recommendations-list" id="recommendationsList"></ul>
+      </div>
+
+      <!-- Explanation -->
+      <div class="explanation-container" id="explanationContainer">
+        <div class="explanation-title">📋 Summary</div>
+        <p class="explanation-text" id="explanationText"></p>
+      </div>
+
+      <!-- Save Button -->
+      <button class="save-btn" id="saveBtn">
+        <span>💾</span> Save Scan to History
+      </button>
+    </section>
+
+    <!-- Disclaimer -->
+    <footer class="disclaimer">
+      ⚠️ This is a risk analysis tool, not legal advice or ownership verification.
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

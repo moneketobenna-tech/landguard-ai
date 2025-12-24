@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LandGuard AI - Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="options-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-brand">
+        <div class="logo-icon">🛡️</div>
+        <div class="brand-text">
+          <h1 class="brand-name">LandGuard AI</h1>
+          <span class="brand-tagline">Settings & Scan History</span>
+        </div>
+      </div>
+      <span class="version">v1.0.0</span>
+    </header>
+
+    <!-- Settings Section -->
+    <section class="section">
+      <h2 class="section-title">⚙️ Settings</h2>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <label for="autoScan" class="setting-label">Auto-scan on Supported Sites</label>
+          <p class="setting-description">Automatically analyze listings when visiting Facebook Marketplace, Kijiji, or Craigslist</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="autoScan" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <label for="showBannerAll" class="setting-label">Show Banner on All Pages</label>
+          <p class="setting-description">Display the security banner on every website (not just supported listing sites)</p>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="showBannerAll">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Scan History Section -->
+    <section class="section">
+      <div class="section-header-row">
+        <h2 class="section-title">📋 Scan History</h2>
+        <button class="btn btn-danger" id="clearHistoryBtn">🗑️ Clear All</button>
+      </div>
+      
+      <div class="history-stats" id="historyStats">
+        <span>Loading...</span>
+      </div>
+      
+      <div class="history-list" id="historyList">
+        <!-- Populated by JavaScript -->
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="section">
+      <h2 class="section-title">ℹ️ About</h2>
+      <div class="about-content">
+        <p class="about-text">
+          <strong>LandGuard AI</strong> protects buyers from land and property scams before money changes hands.
+        </p>
+        <p class="about-disclaimer">
+          ⚠️ <strong>Disclaimer:</strong> This is a risk analysis tool, not legal advice or ownership verification. 
+          Always verify property ownership through official land registries and consult with licensed professionals.
+        </p>
+        <div class="supported-sites">
+          <p class="supported-title">Supported Sites:</p>
+          <ul>
+            <li>✅ Facebook Marketplace</li>
+            <li>✅ Kijiji</li>
+            <li>✅ Craigslist</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>LandGuard AI v1.0.0 • Built to protect property buyers</p>
+    </footer>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
