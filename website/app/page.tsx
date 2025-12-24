@@ -34,9 +34,7 @@ export default function HomePage() {
       <nav className="fixed top-0 left-0 right-0 z-50 glass">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-lg-blue to-lg-green rounded-xl flex items-center justify-center text-xl">
-              🛡️
-            </div>
+            <img src="/logo.png" alt="LandGuard AI" className="h-10 w-auto" />
             <span className="text-xl font-bold text-lg-silver">LandGuard AI</span>
           </div>
           <div className="flex items-center gap-6">
@@ -322,9 +320,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-lg-blue to-lg-green rounded-lg flex items-center justify-center">
-                🛡️
-              </div>
+              <img src="/logo.png" alt="LandGuard AI" className="h-8 w-auto" />
               <span className="font-semibold text-lg-silver">LandGuard AI</span>
             </div>
             <div className="flex gap-8 text-lg-muted text-sm">
