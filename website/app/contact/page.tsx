@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import LanguageSelector from '@/components/LanguageSelector'
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -44,6 +45,7 @@ export default function Contact() {
               <Link href="/pricing" className="text-gray-600 hover:text-green-600 transition-colors">
                 Pricing
               </Link>
+              <LanguageSelector />
               <Link href="/app" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
                 Dashboard
               </Link>

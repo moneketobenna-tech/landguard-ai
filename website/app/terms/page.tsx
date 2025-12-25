@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import LanguageSelector from '@/components/LanguageSelector'
 
 export default function TermsOfService() {
   const lastUpdated = 'December 25, 2024'
@@ -24,6 +25,7 @@ export default function TermsOfService() {
               <Link href="/privacy" className="text-gray-600 hover:text-green-600 transition-colors">
                 Privacy
               </Link>
+              <LanguageSelector />
             </nav>
           </div>
         </div>

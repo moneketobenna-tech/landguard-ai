@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import LanguageSelector from '@/components/LanguageSelector'
 
 export default function DownloadPage() {
   const chromeStoreUrl = 'https://chrome.google.com/webstore/detail/landguard-ai' // Update when published
@@ -16,6 +17,9 @@ export default function DownloadPage() {
             </div>
             <span className="text-xl font-bold text-lg-silver">LandGuard AI</span>
           </Link>
+          <div className="flex items-center gap-4">
+            <LanguageSelector />
+          </div>
         </div>
       </nav>
 
