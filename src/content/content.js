@@ -5,7 +5,7 @@
 
 (function() {
   'use strict';
-
+  
   // Constants
   const VERSION = '2.0.0';
   const API_BASE = 'https://landguardai.co/api/v1';
@@ -255,11 +255,11 @@
     
     // Show banner with Scan button initially (not just loading)
     showInitialBanner();
-
+    
     document.body.insertBefore(bannerElement, document.body.firstChild);
     document.body.style.marginTop = bannerElement.offsetHeight + 'px';
   }
-
+  
   // Show initial banner with Scan button
   function showInitialBanner() {
     if (!bannerElement) return;
@@ -380,13 +380,13 @@
   // Update banner with results
   function updateBanner(result) {
     if (!bannerElement) return;
-
+    
     console.log('[LandGuard AI] Updating banner with results:', result);
     
     currentScan = result;
     const { score, riskLevel, flags, recommendations } = result;
     const color = COLORS[riskLevel] || COLORS.medium;
-
+    
     const riskLabels = {
       safe: '✅ Safe',
       low: '✓ Low Risk',
@@ -396,7 +396,7 @@
     };
 
     const displayFlags = (flags || []).slice(0, 4);
-
+    
     bannerElement.innerHTML = `
       <div class="lg-content">
         <div class="lg-logo">
@@ -471,7 +471,7 @@
         </div>
       </div>
     `;
-
+    
     attachBannerEventListeners();
   }
 
@@ -490,7 +490,7 @@
     // Remove any existing modal
     const existingModal = document.getElementById('lg-modal-overlay');
     if (existingModal) existingModal.remove();
-
+    
     const overlay = document.createElement('div');
     overlay.id = 'lg-modal-overlay';
     overlay.innerHTML = `
@@ -506,7 +506,7 @@
           <div class="lg-modal-score">
             <div class="lg-modal-score-circle" style="border-color: ${color}">
               <span class="lg-modal-score-value" style="color: ${color}">${score}</span>
-            </div>
+                </div>
             <div class="lg-risk-pill lg-risk-${riskLevel}" style="font-size: 14px; padding: 10px 20px;">
               ${riskLevel.toUpperCase()} RISK
             </div>
@@ -533,9 +533,9 @@
         </div>
       </div>
     `;
-
+    
     document.body.appendChild(overlay);
-
+    
     // Close button
     document.getElementById('lg-modal-close')?.addEventListener('click', () => {
       console.log('[LandGuard AI] Modal close clicked');
@@ -550,7 +550,7 @@
       }
     });
   }
-
+  
   // Close banner
   function closeBanner() {
     console.log('[LandGuard AI] Closing banner');
@@ -592,7 +592,7 @@
       }
       
       updateBanner(result);
-
+      
       // Save to history
       try {
         chrome.runtime.sendMessage({
@@ -602,8 +602,8 @@
             url: data.url,
             timestamp: Date.now()
           }
-        });
-      } catch (e) {
+      });
+    } catch (e) {
         console.log('[LandGuard AI] Could not save scan to history');
       }
       
@@ -635,7 +635,7 @@
       console.log('[LandGuard AI] Not a supported site');
       return;
     }
-
+    
     console.log(`[LandGuard AI] v${VERSION}: Detected ${site.name}`);
 
     // Load settings

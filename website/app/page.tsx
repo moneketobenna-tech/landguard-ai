@@ -1,13 +1,41 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import LanguageSelector from '@/components/LanguageSelector'
+
+interface PricingData {
+  country: string
+  localCurrency: string
+  localCurrencySymbol: string
+  baseCurrency: string
+  pro: {
+    monthly: { cad: string; local: string | null; localCode: string | null; localAmount: number | null }
+    yearly: { cad: string; local: string | null; localCode: string | null; localAmount: number | null }
+    yearlyMonthly: { cad: string; local: string | null; localCode: string | null; localAmount: number | null }
+    yearlySavings: string
+  }
+}
 
 function HomePageContent() {
   const [url, setUrl] = useState('')
   const [scanning, setScanning] = useState(false)
   const [result, setResult] = useState<any>(null)
+  const [pricing, setPricing] = useState<PricingData | null>(null)
+
+  // Fetch pricing data
+  useEffect(() => {
+    fetch('/api/pricing')
+      .then(res => res.json())
+      .then(data => setPricing(data))
+      .catch(err => console.error('Failed to fetch pricing:', err))
+  }, [])
+
+  // Helper to display price
+  const displayPrice = (priceData: { cad: string; local: string | null } | undefined, fallback: string) => {
+    if (!priceData) return fallback
+    return priceData.local || priceData.cad
+  }
 
   const handleScan = async () => {
     if (!url) return
@@ -287,7 +315,16 @@ function HomePageContent() {
                 POPULAR
               </div>
               <div className="text-lg-green text-sm font-semibold mb-2">PRO</div>
-              <div className="text-4xl font-bold mb-4 text-lg-text">$9.99<span className="text-lg text-lg-text-muted">/month</span></div>
+              <div className="text-4xl font-bold mb-1 text-lg-text">
+                {displayPrice(pricing?.pro.monthly, 'CA$14.99')}
+                <span className="text-lg text-lg-text-muted">/month</span>
+              </div>
+              {/* Show CAD equivalent for non-Canadian users */}
+              {pricing?.country && pricing.country !== 'CA' && pricing.pro.monthly.local && (
+                <div className="text-sm text-lg-text-muted mb-3">
+                  ≈ {pricing.pro.monthly.cad} CAD
+                </div>
+              )}
               <ul className="space-y-3 mb-8">
                 {[
                   'Unlimited scans',
