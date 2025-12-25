@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { LanguageProvider } from '@/lib/i18n/LanguageContext'
+import LanguageSelector from '@/components/LanguageSelector'
 
-export default function HomePage() {
+function HomePageContent() {
   const [url, setUrl] = useState('')
   const [scanning, setScanning] = useState(false)
   const [result, setResult] = useState<any>(null)
@@ -49,6 +51,7 @@ export default function HomePage() {
             <Link href="#api" className="text-lg-text-muted hover:text-lg-green transition">API</Link>
             <Link href="#mobile" className="text-lg-text-muted hover:text-lg-green transition">Mobile App</Link>
             <Link href="/app/login" className="text-lg-text-muted hover:text-lg-green transition">Login</Link>
+            <LanguageSelector />
             <Link href="/download" className="btn-primary text-sm">Get Extension</Link>
           </div>
         </div>
@@ -656,5 +659,14 @@ const result = await response.json();
         </div>
       </footer>
     </main>
+  )
+}
+
+// Wrap with LanguageProvider
+export default function HomePage() {
+  return (
+    <LanguageProvider>
+      <HomePageContent />
+    </LanguageProvider>
   )
 }
