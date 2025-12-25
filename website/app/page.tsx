@@ -47,6 +47,7 @@ export default function HomePage() {
             <Link href="#features" className="text-lg-text-muted hover:text-lg-green transition">Features</Link>
             <Link href="#pricing" className="text-lg-text-muted hover:text-lg-green transition">Pricing</Link>
             <Link href="#api" className="text-lg-text-muted hover:text-lg-green transition">API</Link>
+            <Link href="#mobile" className="text-lg-text-muted hover:text-lg-green transition">Mobile App</Link>
             <Link href="/app/login" className="text-lg-text-muted hover:text-lg-green transition">Login</Link>
             <Link href="/download" className="btn-primary text-sm">Get Extension</Link>
           </div>
@@ -475,6 +476,132 @@ const result = await response.json();
               <Link href="/api/docs" className="text-lg-green hover:underline font-medium">
                 View Full API Documentation →
               </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mobile App Coming Soon */}
+      <section id="mobile" className="py-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <span className="inline-flex items-center gap-2 bg-lg-green/10 border border-lg-green/30 rounded-full px-4 py-2 mb-4">
+              <span className="text-lg-green text-sm font-medium">📱 Coming Soon</span>
+            </span>
+            <h2 className="text-4xl font-bold mb-4 text-lg-text">
+              LandGuard AI <span className="gradient-text">Mobile App</span>
+            </h2>
+            <p className="text-xl text-lg-text-muted max-w-2xl mx-auto">
+              Scan property listings on-the-go. Get instant risk alerts right from your phone.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-12 items-center max-w-5xl mx-auto">
+            {/* Phone Mockup */}
+            <div className="relative">
+              <div className="relative mx-auto w-64">
+                {/* Phone Frame */}
+                <div className="relative bg-gray-900 rounded-[3rem] p-3 shadow-2xl">
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-gray-900 rounded-b-2xl"></div>
+                  <div className="bg-white rounded-[2.5rem] overflow-hidden">
+                    {/* App Screen Preview */}
+                    <div className="p-4 bg-gradient-to-b from-lg-green/10 to-white min-h-[400px]">
+                      <div className="flex items-center gap-2 mb-6">
+                        <div className="w-8 h-8 bg-lg-green rounded-lg flex items-center justify-center text-white text-sm">🏠</div>
+                        <span className="font-bold text-lg-text">LandGuard AI</span>
+                      </div>
+                      
+                      {/* Sample Scan Result */}
+                      <div className="bg-white rounded-xl p-4 shadow-lg mb-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm font-medium text-lg-text">Listing Scan</span>
+                          <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">High Risk</span>
+                        </div>
+                        <div className="text-3xl font-bold text-red-500 mb-2">78</div>
+                        <div className="text-xs text-lg-text-muted">Risk Score</div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="bg-amber-50 rounded-lg p-3 text-xs">
+                          <span className="text-amber-600">⚠️ Suspicious pricing detected</span>
+                        </div>
+                        <div className="bg-amber-50 rounded-lg p-3 text-xs">
+                          <span className="text-amber-600">⚠️ New seller account</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Decorative Elements */}
+                <div className="absolute -top-4 -right-4 w-24 h-24 bg-lg-green/20 rounded-full blur-2xl"></div>
+                <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-lg-green/10 rounded-full blur-3xl"></div>
+              </div>
+            </div>
+
+            {/* Features List */}
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-lg-green/10 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+                  📸
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg-text mb-1">Scan from Screenshots</h3>
+                  <p className="text-lg-text-muted text-sm">Take a screenshot of any listing and our AI will analyze it instantly.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-lg-green/10 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+                  🔔
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg-text mb-1">Push Notifications</h3>
+                  <p className="text-lg-text-muted text-sm">Get real-time alerts when new scams are detected in your area.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-lg-green/10 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+                  🔄
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg-text mb-1">Sync with Extension</h3>
+                  <p className="text-lg-text-muted text-sm">Your scan history and settings sync across all your devices.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-lg-green/10 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+                  ⭐
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg-text mb-1">Pro Features Included</h3>
+                  <p className="text-lg-text-muted text-sm">Pro subscribers get full access to mobile app features at no extra cost.</p>
+                </div>
+              </div>
+
+              {/* Coming Soon Badge */}
+              <div className="pt-4">
+                <div className="inline-flex items-center gap-3 bg-lg-bg-alt border border-lg-border rounded-xl px-6 py-4">
+                  <div className="flex -space-x-1">
+                    <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
+                      <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                      </svg>
+                    </div>
+                    <div className="w-8 h-8 bg-lg-green rounded-lg flex items-center justify-center">
+                      <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.523 2H6.477C5.105 2 4 3.105 4 4.477v15.046C4 20.895 5.105 22 6.477 22h11.046C18.895 22 20 20.895 20 19.523V4.477C20 3.105 18.895 2 17.523 2zM12 20c-.828 0-1.5-.672-1.5-1.5S11.172 17 12 17s1.5.672 1.5 1.5S12.828 20 12 20zm5-4H7V5h10v11z"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-lg-text">iOS & Android</div>
+                    <div className="text-xs text-lg-text-muted">Coming Q2 2025</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
