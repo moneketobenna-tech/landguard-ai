@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LandGuard AI - Create Store Icon</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background: #1a1a2e;
+            color: white;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+        canvas {
+            border: 2px solid #0A5CFF;
+            border-radius: 12px;
+        }
+        .instructions {
+            background: #0B1220;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+        }
+        button {
+            background: #0A5CFF;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0848cc;
+        }
+        h1 {
+            color: #0A5CFF;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ LandGuard AI Store Icon Generator</h1>
+        
+        <div>
+            <h3>128x128 Store Icon Preview:</h3>
+            <canvas id="icon128" width="128" height="128"></canvas>
+        </div>
+        
+        <button onclick="downloadIcon()">📥 Download store-icon-128x128.png</button>
+        
+        <div class="instructions">
+            <h3>Instructions:</h3>
+            <ol style="text-align: left;">
+                <li>Click the download button above</li>
+                <li>Save the file to your Desktop</li>
+                <li>Upload it to Chrome Web Store as your Store Icon</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('icon128');
+        const ctx = canvas.getContext('2d');
+        
+        // Draw the icon
+        function drawIcon() {
+            const size = 128;
+            const padding = 8;
+            
+            // Background - dark with slight gradient
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#0B1220');
+            gradient.addColorStop(1, '#162033');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.roundRect(0, 0, size, size, 16);
+            ctx.fill();
+            
+            // Shield outline
+            const shieldCenterX = size / 2;
+            const shieldTop = padding + 5;
+            const shieldWidth = size - padding * 2 - 10;
+            const shieldHeight = size - padding * 2 - 15;
+            
+            // Draw shield shape
+            ctx.beginPath();
+            ctx.moveTo(shieldCenterX, shieldTop);
+            ctx.lineTo(shieldCenterX + shieldWidth/2, shieldTop + shieldHeight * 0.15);
+            ctx.lineTo(shieldCenterX + shieldWidth/2, shieldTop + shieldHeight * 0.6);
+            ctx.quadraticCurveTo(shieldCenterX + shieldWidth/2, shieldTop + shieldHeight * 0.85, shieldCenterX, shieldTop + shieldHeight);
+            ctx.quadraticCurveTo(shieldCenterX - shieldWidth/2, shieldTop + shieldHeight * 0.85, shieldCenterX - shieldWidth/2, shieldTop + shieldHeight * 0.6);
+            ctx.lineTo(shieldCenterX - shieldWidth/2, shieldTop + shieldHeight * 0.15);
+            ctx.closePath();
+            
+            // Shield gradient fill
+            const shieldGradient = ctx.createLinearGradient(0, shieldTop, 0, shieldTop + shieldHeight);
+            shieldGradient.addColorStop(0, '#0A5CFF');
+            shieldGradient.addColorStop(0.5, '#0848CC');
+            shieldGradient.addColorStop(1, '#063399');
+            ctx.fillStyle = shieldGradient;
+            ctx.fill();
+            
+            // Shield border
+            ctx.strokeStyle = '#4A9FFF';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Inner shield (land area)
+            const innerPadding = 8;
+            ctx.beginPath();
+            ctx.moveTo(shieldCenterX, shieldTop + innerPadding + 5);
+            ctx.lineTo(shieldCenterX + shieldWidth/2 - innerPadding, shieldTop + shieldHeight * 0.18);
+            ctx.lineTo(shieldCenterX + shieldWidth/2 - innerPadding, shieldTop + shieldHeight * 0.55);
+            ctx.quadraticCurveTo(shieldCenterX + shieldWidth/2 - innerPadding, shieldTop + shieldHeight * 0.75, shieldCenterX, shieldTop + shieldHeight - innerPadding);
+            ctx.quadraticCurveTo(shieldCenterX - shieldWidth/2 + innerPadding, shieldTop + shieldHeight * 0.75, shieldCenterX - shieldWidth/2 + innerPadding, shieldTop + shieldHeight * 0.55);
+            ctx.lineTo(shieldCenterX - shieldWidth/2 + innerPadding, shieldTop + shieldHeight * 0.18);
+            ctx.closePath();
+            
+            // Green land gradient
+            const landGradient = ctx.createLinearGradient(0, shieldTop + 20, 0, shieldTop + shieldHeight - 10);
+            landGradient.addColorStop(0, '#2ECC71');
+            landGradient.addColorStop(1, '#27AE60');
+            ctx.fillStyle = landGradient;
+            ctx.fill();
+            
+            // Grid lines on land
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.lineWidth = 1;
+            
+            // Horizontal lines
+            for (let i = 1; i < 4; i++) {
+                const y = shieldTop + shieldHeight * 0.25 + i * 15;
+                ctx.beginPath();
+                ctx.moveTo(shieldCenterX - 30, y);
+                ctx.lineTo(shieldCenterX + 30, y);
+                ctx.stroke();
+            }
+            
+            // Vertical lines
+            for (let i = -1; i <= 1; i++) {
+                const x = shieldCenterX + i * 20;
+                ctx.beginPath();
+                ctx.moveTo(x, shieldTop + shieldHeight * 0.3);
+                ctx.lineTo(x, shieldTop + shieldHeight * 0.75);
+                ctx.stroke();
+            }
+            
+            // Location pin
+            const pinX = shieldCenterX + 5;
+            const pinY = shieldTop + shieldHeight * 0.4;
+            const pinSize = 18;
+            
+            // Pin body (red)
+            ctx.beginPath();
+            ctx.arc(pinX, pinY, pinSize/2, Math.PI, 0);
+            ctx.lineTo(pinX, pinY + pinSize);
+            ctx.closePath();
+            ctx.fillStyle = '#E74C3C';
+            ctx.fill();
+            ctx.strokeStyle = '#C0392B';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            
+            // Pin dot (white)
+            ctx.beginPath();
+            ctx.arc(pinX, pinY, pinSize/4, 0, Math.PI * 2);
+            ctx.fillStyle = 'white';
+            ctx.fill();
+        }
+        
+        drawIcon();
+        
+        function downloadIcon() {
+            const link = document.createElement('a');
+            link.download = 'store-icon-128x128.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
+

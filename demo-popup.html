@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LandGuard AI - Demo</title>
+  <style>
+/**
+ * LandGuard AI - Popup Styles
+ * Enterprise-grade, clean design
+ */
+
+:root {
+  --primary-blue: #0A5CFF;
+  --secondary-green: #2ECC71;
+  --danger-red: #E74C3C;
+  --warning-amber: #F39C12;
+  --safe-green: #27AE60;
+  --dark-bg: #0B1220;
+  --darker-bg: #060d17;
+  --light-bg: #F5F7FA;
+  --silver-text: #C9D1D9;
+  --muted-text: #8b949e;
+  --border-color: rgba(255, 255, 255, 0.1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background: #1a1a2e;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px;
+  min-height: 100vh;
+}
+
+.demo-container {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.popup-wrapper {
+  text-align: center;
+}
+
+.popup-wrapper h3 {
+  color: white;
+  margin-bottom: 16px;
+  font-size: 18px;
+}
+
+.popup-frame {
+  background: var(--dark-bg);
+  width: 380px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, var(--dark-bg), #1a2332);
+  border-bottom: 2px solid var(--primary-blue);
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--primary-blue), var(--secondary-green));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--silver-text);
+  letter-spacing: 0.5px;
+}
+
+.brand-version {
+  font-size: 11px;
+  color: var(--muted-text);
+}
+
+.settings-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+/* Tagline */
+.tagline {
+  padding: 12px 20px;
+  background: rgba(10, 92, 255, 0.1);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--muted-text);
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* Sections */
+.section {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.section-icon {
+  font-size: 14px;
+}
+
+.section-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--primary-blue);
+  font-weight: 600;
+}
+
+/* URL Display */
+.url-display {
+  background: var(--darker-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--muted-text);
+  word-break: break-all;
+}
+
+/* Results Section */
+.results-section {
+  background: rgba(10, 92, 255, 0.05);
+}
+
+/* Score Container */
+.score-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 20px;
+  padding: 20px;
+  background: var(--darker-bg);
+  border-radius: 12px;
+}
+
+.score-ring {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid var(--border-color);
+}
+
+.score-ring.low { border-color: var(--safe-green); }
+.score-ring.medium { border-color: var(--warning-amber); }
+.score-ring.high { border-color: var(--danger-red); }
+
+.score-value {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.score-ring.low .score-value { color: var(--safe-green); }
+.score-ring.medium .score-value { color: var(--warning-amber); }
+.score-ring.high .score-value { color: var(--danger-red); }
+
+.score-label {
+  font-size: 10px;
+  color: var(--muted-text);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+.risk-pill {
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.risk-pill.low {
+  background: rgba(39, 174, 96, 0.2);
+  color: var(--safe-green);
+  border: 2px solid var(--safe-green);
+}
+
+.risk-pill.medium {
+  background: rgba(243, 156, 18, 0.2);
+  color: var(--warning-amber);
+  border: 2px solid var(--warning-amber);
+}
+
+.risk-pill.high {
+  background: rgba(231, 76, 60, 0.2);
+  color: var(--danger-red);
+  border: 2px solid var(--danger-red);
+}
+
+/* Flags */
+.flags-container,
+.recommendations-container,
+.explanation-container {
+  margin-bottom: 16px;
+}
+
+.flags-title,
+.recommendations-title,
+.explanation-title {
+  font-size: 12px;
+  color: var(--primary-blue);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.flags-list,
+.recommendations-list {
+  list-style: none;
+}
+
+.flags-list li {
+  background: rgba(231, 76, 60, 0.1);
+  border-left: 3px solid var(--danger-red);
+  padding: 10px 12px;
+  border-radius: 0 6px 6px 0;
+  margin-bottom: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--silver-text);
+}
+
+.recommendations-list li {
+  background: rgba(46, 204, 113, 0.1);
+  border-left: 3px solid var(--secondary-green);
+  padding: 10px 12px;
+  border-radius: 0 6px 6px 0;
+  margin-bottom: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--silver-text);
+}
+
+.explanation-text {
+  background: var(--darker-bg);
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted-text);
+}
+
+/* Save Button */
+.save-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: 2px solid var(--secondary-green);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--secondary-green);
+  cursor: pointer;
+}
+
+/* Disclaimer */
+.disclaimer {
+  padding: 12px 20px;
+  background: rgba(243, 156, 18, 0.1);
+  border-top: 1px solid var(--border-color);
+  font-size: 10px;
+  color: var(--warning-amber);
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* Input Groups */
+.input-group {
+  margin-bottom: 12px;
+}
+
+.input-group:last-child {
+  margin-bottom: 0;
+}
+
+.input-group label {
+  display: block;
+  font-size: 11px;
+  color: var(--muted-text);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.input-group input {
+  width: 100%;
+  background: var(--darker-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--silver-text);
+}
+
+/* Scan Button */
+.scan-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: calc(100% - 40px);
+  margin: 16px 20px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, var(--primary-blue), #0848cc);
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+}
+
+.scan-btn-icon {
+  font-size: 18px;
+}
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <!-- HIGH RISK Demo -->
+    <div class="popup-wrapper">
+      <h3>🔴 High Risk Scan</h3>
+      <div class="popup-frame">
+        <header class="header">
+          <div class="header-brand">
+            <div class="logo-icon">🛡️</div>
+            <div class="brand-text">
+              <h1 class="brand-name">LandGuard AI</h1>
+              <span class="brand-version">v1.0.0</span>
+            </div>
+          </div>
+          <button class="settings-btn">⚙️</button>
+        </header>
+
+        <div class="tagline">
+          Protects buyers from land and property scams before money changes hands.
+        </div>
+
+        <section class="section">
+          <div class="section-header">
+            <span class="section-icon">🔗</span>
+            <span class="section-title">Current Listing</span>
+          </div>
+          <div class="url-display">facebook.com/marketplace/item/983647251...</div>
+        </section>
+
+        <section class="section results-section">
+          <div class="section-header">
+            <span class="section-icon">📊</span>
+            <span class="section-title">Risk Analysis</span>
+          </div>
+          
+          <div class="score-container">
+            <div class="score-ring high">
+              <div class="score-value">78</div>
+              <div class="score-label">Risk Score</div>
+            </div>
+            <div class="risk-pill high">HIGH RISK</div>
+          </div>
+
+          <div class="flags-container">
+            <div class="flags-title">🚩 Risk Flags</div>
+            <ul class="flags-list">
+              <li>🚩 <strong>Urgency Language:</strong> 3 pressure tactics detected (urgent, wire transfer, etc.)</li>
+              <li>🚩 <strong>Risky Payment Method:</strong> Seller requests untraceable payment method</li>
+              <li>🚩 <strong>Remote Seller:</strong> Seller claims to be overseas or unable to meet</li>
+            </ul>
+          </div>
+
+          <div class="recommendations-container">
+            <div class="recommendations-title">💡 Recommendations</div>
+            <ul class="recommendations-list">
+              <li>⛔ Do NOT send any money or deposit to this seller</li>
+              <li>🚫 Do NOT share personal or financial information</li>
+              <li>🔍 Verify property ownership through official land registry</li>
+            </ul>
+          </div>
+
+          <button class="save-btn">
+            <span>💾</span> Save Scan to History
+          </button>
+        </section>
+
+        <footer class="disclaimer">
+          ⚠️ This is a risk analysis tool, not legal advice or ownership verification.
+        </footer>
+      </div>
+    </div>
+
+    <!-- LOW RISK Demo -->
+    <div class="popup-wrapper">
+      <h3>🟢 Low Risk Scan</h3>
+      <div class="popup-frame">
+        <header class="header">
+          <div class="header-brand">
+            <div class="logo-icon">🛡️</div>
+            <div class="brand-text">
+              <h1 class="brand-name">LandGuard AI</h1>
+              <span class="brand-version">v1.0.0</span>
+            </div>
+          </div>
+          <button class="settings-btn">⚙️</button>
+        </header>
+
+        <div class="tagline">
+          Protects buyers from land and property scams before money changes hands.
+        </div>
+
+        <section class="section">
+          <div class="section-header">
+            <span class="section-icon">🔗</span>
+            <span class="section-title">Current Listing</span>
+          </div>
+          <div class="url-display">kijiji.ca/v-house-for-sale/toronto/...</div>
+        </section>
+
+        <section class="section results-section">
+          <div class="section-header">
+            <span class="section-icon">📊</span>
+            <span class="section-title">Risk Analysis</span>
+          </div>
+          
+          <div class="score-container">
+            <div class="score-ring low">
+              <div class="score-value">12</div>
+              <div class="score-label">Risk Score</div>
+            </div>
+            <div class="risk-pill low">LOW RISK</div>
+          </div>
+
+          <div class="recommendations-container">
+            <div class="recommendations-title">💡 Recommendations</div>
+            <ul class="recommendations-list">
+              <li>✅ Listing appears legitimate, but always verify ownership independently</li>
+              <li>📋 Use a licensed real estate agent or attorney for the transaction</li>
+            </ul>
+          </div>
+
+          <div class="explanation-container">
+            <div class="explanation-title">📋 Summary</div>
+            <p class="explanation-text">This listing has a LOW risk score of 12/100. No major red flags were detected, but always verify property ownership and seller identity before any transaction.</p>
+          </div>
+
+          <button class="save-btn">
+            <span>💾</span> Save Scan to History
+          </button>
+        </section>
+
+        <footer class="disclaimer">
+          ⚠️ This is a risk analysis tool, not legal advice or ownership verification.
+        </footer>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

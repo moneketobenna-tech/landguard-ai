@@ -1,373 +1,461 @@
-/**
- * LandGuard AI - Content Script Styles
- * Security banner that appears on supported listing pages
- */
+/* LandGuard AI - Content Script Styles - Light Green & White Theme */
 
-/* Banner Container */
+/* ========== BANNER ========== */
 #landguard-banner {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 2147483647;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-  background: linear-gradient(135deg, #0B1220 0%, #1a2332 100%);
-  border-bottom: 3px solid #0A5CFF;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  padding: 0;
-  margin: 0;
-  animation: landguard-slideDown 0.3s ease-out;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 2147483647 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  background: linear-gradient(135deg, #F0FDF4 0%, #FFFFFF 50%, #DCFCE7 100%) !important;
+  border-bottom: 3px solid #22C55E !important;
+  box-shadow: 0 4px 20px rgba(34, 197, 94, 0.15), 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  border-radius: 0 0 20px 20px !important;
 }
 
-@keyframes landguard-slideDown {
-  from {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-/* Banner Content */
 .landguard-content {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 12px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 16px 28px !important;
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+  gap: 24px !important;
+  flex-wrap: wrap !important;
 }
 
-/* Logo Section */
+/* ========== LOGO SECTION ========== */
 .landguard-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  flex-shrink: 0 !important;
 }
 
 .landguard-logo-icon {
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, #0A5CFF, #2ECC71);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  border: 2px solid #22C55E !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2) !important;
+}
+
+.landguard-logo-icon img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
 }
 
 .landguard-logo-text {
-  color: #C9D1D9;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  color: #16A34A !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.3px !important;
 }
 
-/* Score Section */
+/* ========== SCORE SECTION ========== */
 .landguard-score-section {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+  display: flex !important;
+  align-items: center !important;
+  gap: 20px !important;
+  flex-shrink: 0 !important;
+  background: #FFFFFF !important;
+  padding: 12px 20px !important;
+  border-radius: 16px !important;
+  border: 1px solid #BBF7D0 !important;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.1) !important;
 }
 
 .landguard-score-display {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 6px !important;
 }
 
 .landguard-score-label {
-  color: #8b949e;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  font-size: 11px !important;
+  color: #6B7280 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  margin-right: 8px !important;
 }
 
 .landguard-score-value {
-  font-size: 24px;
-  font-weight: 700;
-  color: #C9D1D9;
+  font-size: 32px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
 }
 
 .landguard-score-max {
-  color: #8b949e;
-  font-size: 14px;
+  font-size: 14px !important;
+  color: #9CA3AF !important;
+  font-weight: 500 !important;
 }
 
-/* Risk Level Pill */
+/* ========== RISK PILL ========== */
 .landguard-risk-pill {
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  padding: 10px 20px !important;
+  border-radius: 25px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.8px !important;
 }
 
 .landguard-risk-low {
-  background: rgba(39, 174, 96, 0.2);
-  color: #27AE60;
-  border: 1px solid #27AE60;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(134, 239, 172, 0.15) 100%) !important;
+  color: #16A34A !important;
+  border: 1px solid rgba(34, 197, 94, 0.4) !important;
 }
 
 .landguard-risk-medium {
-  background: rgba(243, 156, 18, 0.2);
-  color: #F39C12;
-  border: 1px solid #F39C12;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(251, 191, 36, 0.15) 100%) !important;
+  color: #D97706 !important;
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
 }
 
 .landguard-risk-high {
-  background: rgba(231, 76, 60, 0.2);
-  color: #E74C3C;
-  border: 1px solid #E74C3C;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(248, 113, 113, 0.15) 100%) !important;
+  color: #DC2626 !important;
+  border: 1px solid rgba(239, 68, 68, 0.4) !important;
 }
 
-/* Flags Section */
+/* ========== FLAGS SECTION ========== */
 .landguard-flags {
-  flex: 1;
-  max-width: 500px;
+  flex: 1 !important;
+  min-width: 200px !important;
 }
 
 .landguard-flags-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .landguard-flag-item {
-  color: #C9D1D9;
-  font-size: 12px;
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background: #FFFFFF !important;
+  padding: 8px 14px !important;
+  border-radius: 10px !important;
+  font-size: 13px !important;
+  color: #374151 !important;
+  border: 1px solid #E5E7EB !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
 }
 
 .landguard-flag-icon {
-  color: #F39C12;
-  flex-shrink: 0;
+  font-size: 14px !important;
+  color: #F59E0B !important;
 }
 
 .landguard-flag-icon.high {
-  color: #E74C3C;
+  color: #EF4444 !important;
 }
 
-/* Actions Section */
+/* ========== ACTIONS ========== */
 .landguard-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex-shrink: 0 !important;
 }
 
 .landguard-btn {
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s ease;
+  padding: 12px 20px !important;
+  border-radius: 12px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
 }
 
 .landguard-btn-primary {
-  background: #0A5CFF;
-  color: white;
+  background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.35) !important;
 }
 
 .landguard-btn-primary:hover {
-  background: #0848cc;
-  transform: translateY(-1px);
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(34, 197, 94, 0.45) !important;
 }
 
 .landguard-btn-secondary {
-  background: rgba(255, 255, 255, 0.1);
-  color: #C9D1D9;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #FFFFFF !important;
+  color: #16A34A !important;
+  border: 2px solid #BBF7D0 !important;
 }
 
 .landguard-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: #F0FDF4 !important;
+  border-color: #22C55E !important;
 }
 
 .landguard-btn-close {
-  background: transparent;
-  color: #8b949e;
-  padding: 8px;
-  font-size: 18px;
-  line-height: 1;
+  width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  background: #FFFFFF !important;
+  color: #9CA3AF !important;
+  border: 1px solid #E5E7EB !important;
+  border-radius: 10px !important;
+  font-size: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .landguard-btn-close:hover {
-  color: #E74C3C;
+  background: #FEF2F2 !important;
+  color: #EF4444 !important;
+  border-color: #FECACA !important;
 }
 
-/* Loading State */
-.landguard-loading {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #C9D1D9;
-  font-size: 14px;
-}
-
-.landguard-spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(10, 92, 255, 0.3);
-  border-top-color: #0A5CFF;
-  border-radius: 50%;
-  animation: landguard-spin 0.8s linear infinite;
-}
-
-@keyframes landguard-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Disclaimer */
+/* ========== DISCLAIMER ========== */
 .landguard-disclaimer {
-  text-align: center;
-  padding: 4px 20px 8px;
-  background: rgba(0, 0, 0, 0.2);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: #FFFFFF !important;
+  border-top: 1px solid #E5E7EB !important;
+  padding: 10px 28px !important;
+  border-radius: 0 0 20px 20px !important;
 }
 
 .landguard-disclaimer-text {
-  color: #6e7681;
-  font-size: 10px;
-  margin: 0;
+  font-size: 11px !important;
+  color: #9CA3AF !important;
+  text-align: center !important;
+  margin: 0 !important;
 }
 
-/* Responsive */
-@media (max-width: 900px) {
-  .landguard-content {
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-  
-  .landguard-flags {
-    order: 4;
-    width: 100%;
-    max-width: none;
-  }
-  
-  .landguard-flags-list {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  
-  .landguard-flag-item {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 4px 8px;
-    border-radius: 4px;
-  }
+/* ========== LOADING STATE ========== */
+.landguard-loading {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  color: #374151 !important;
+  font-size: 14px !important;
+  background: #FFFFFF !important;
+  padding: 12px 20px !important;
+  border-radius: 12px !important;
+  border: 1px solid #BBF7D0 !important;
 }
 
-/* Detail Modal (injected when "View Details" clicked) */
+.landguard-spinner {
+  width: 20px !important;
+  height: 20px !important;
+  border: 2px solid #DCFCE7 !important;
+  border-top-color: #22C55E !important;
+  border-radius: 50% !important;
+  animation: landguard-spin 0.8s linear infinite !important;
+}
+
+@keyframes landguard-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ========== MODAL OVERLAY ========== */
 #landguard-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  z-index: 2147483648;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: landguard-fadeIn 0.2s ease;
-}
-
-@keyframes landguard-fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  z-index: 2147483647 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 20px !important;
+  backdrop-filter: blur(4px) !important;
 }
 
 #landguard-modal {
-  background: #0B1220;
-  border-radius: 12px;
-  border: 1px solid rgba(10, 92, 255, 0.3);
-  max-width: 600px;
-  width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  background: #FFFFFF !important;
+  border-radius: 24px !important;
+  max-width: 520px !important;
+  width: 100% !important;
+  max-height: 80vh !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid #BBF7D0 !important;
 }
 
 .landguard-modal-header {
-  padding: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 20px 24px !important;
+  background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%) !important;
+  border-radius: 24px 24px 0 0 !important;
 }
 
 .landguard-modal-title {
-  color: #C9D1D9;
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #FFFFFF !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin: 0 !important;
 }
 
 .landguard-modal-body {
-  padding: 20px;
+  padding: 24px !important;
+  overflow-y: auto !important;
+  color: #374151 !important;
+  background: linear-gradient(180deg, #F0FDF4 0%, #FFFFFF 100%) !important;
 }
 
-.landguard-detail-section {
-  margin-bottom: 20px;
+/* Modal Sections */
+.landguard-modal-section {
+  margin-bottom: 24px !important;
 }
 
-.landguard-detail-title {
-  color: #0A5CFF;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.landguard-modal-section:last-child {
+  margin-bottom: 0 !important;
 }
 
-.landguard-recommendations {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.landguard-modal-section-title {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #16A34A !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.8px !important;
+  margin-bottom: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
 }
 
-.landguard-recommendation-item {
-  color: #C9D1D9;
-  font-size: 13px;
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 6px;
-  margin-bottom: 8px;
-  border-left: 3px solid #2ECC71;
+/* Modal Score Display */
+.landguard-modal-score {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 20px !important;
+  background: #FFFFFF !important;
+  border-radius: 16px !important;
+  border: 1px solid #BBF7D0 !important;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.1) !important;
 }
 
-.landguard-flags-detail {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.landguard-modal-score-value {
+  font-size: 48px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
 }
 
-.landguard-flag-detail-item {
-  color: #C9D1D9;
-  font-size: 13px;
-  padding: 10px 12px;
-  background: rgba(231, 76, 60, 0.1);
-  border-radius: 6px;
-  margin-bottom: 8px;
-  border-left: 3px solid #E74C3C;
+/* Modal Flags List */
+.landguard-modal-flags {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.landguard-modal-flags li {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 12px !important;
+  padding: 14px !important;
+  background: #FFFFFF !important;
+  border-radius: 12px !important;
+  margin-bottom: 10px !important;
+  border: 1px solid #E5E7EB !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+.landguard-modal-flags li:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* Modal Recommendations */
+.landguard-modal-recommendations {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.landguard-modal-recommendations li {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 12px !important;
+  padding: 14px !important;
+  background: #F0FDF4 !important;
+  border-radius: 12px !important;
+  margin-bottom: 10px !important;
+  border-left: 4px solid #22C55E !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  color: #166534 !important;
+}
+
+.landguard-modal-recommendations li:last-child {
+  margin-bottom: 0 !important;
+}
+
+.landguard-modal-recommendations li::before {
+  content: "→" !important;
+  color: #22C55E !important;
+  font-weight: bold !important;
+  flex-shrink: 0 !important;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+  #landguard-banner {
+    border-radius: 0 0 16px 16px !important;
+  }
+
+  .landguard-content {
+    padding: 14px 20px !important;
+    gap: 16px !important;
+  }
+
+  .landguard-logo-text {
+    font-size: 14px !important;
+  }
+
+  .landguard-score-value {
+    font-size: 24px !important;
+  }
+
+  .landguard-score-section {
+    padding: 10px 14px !important;
+  }
+
+  .landguard-flags {
+    width: 100% !important;
+    order: 5 !important;
+  }
+
+  .landguard-btn {
+    padding: 10px 14px !important;
+    font-size: 12px !important;
+  }
+
+  .landguard-disclaimer {
+    padding: 8px 20px !important;
+    border-radius: 0 0 16px 16px !important;
+  }
 }

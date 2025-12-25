@@ -1,351 +1,392 @@
-/**
- * LandGuard AI - Popup Script
- * Handles manual scans and displays results
- */
+// LandGuard AI - Popup Script
+// Professional Property Scam Detection
 
+// Brand Constants
+const BRAND = {
+  name: 'LandGuard AI',
+  version: '1.0.0',
+  colors: {
+    primaryBlue: '#0A5CFF',
+    secondaryGreen: '#2ECC71',
+    dangerRed: '#E74C3C',
+    warningAmber: '#F39C12',
+    safeGreen: '#27AE60'
+  }
+};
+
+// Supported sites
+const SUPPORTED_SITES = [
+  { hostname: 'facebook.com', name: 'Facebook Marketplace', icon: '📘' },
+  { hostname: 'kijiji.ca', name: 'Kijiji', icon: '🟢' },
+  { hostname: 'craigslist.org', name: 'Craigslist', icon: '📋' }
+];
+
+// DOM Elements
+const elements = {
+  currentUrl: document.getElementById('currentUrl'),
+  siteBadge: document.getElementById('siteBadge'),
+  sellerPhone: document.getElementById('sellerPhone'),
+  sellerEmail: document.getElementById('sellerEmail'),
+  agentName: document.getElementById('agentName'),
+  scanBtn: document.getElementById('scanBtn'),
+  settingsBtn: document.getElementById('settingsBtn'),
+  resultsSection: document.getElementById('resultsSection'),
+  scoreValue: document.getElementById('scoreValue'),
+  scorePercent: document.getElementById('scorePercent'),
+  scoreBarFill: document.getElementById('scoreBarFill'),
+  riskPill: document.getElementById('riskPill'),
+  flagsList: document.getElementById('flagsList'),
+  recommendationsList: document.getElementById('recommendationsList'),
+  explanationText: document.getElementById('explanationText'),
+  saveBtn: document.getElementById('saveBtn')
+};
+
+// Initialize popup
 document.addEventListener('DOMContentLoaded', async () => {
-  // Elements
-  const currentUrlEl = document.getElementById('currentUrl');
-  const sellerPhoneEl = document.getElementById('sellerPhone');
-  const sellerEmailEl = document.getElementById('sellerEmail');
-  const agentNameEl = document.getElementById('agentName');
-  const scanBtn = document.getElementById('scanBtn');
-  const settingsBtn = document.getElementById('settingsBtn');
-  const resultsSection = document.getElementById('resultsSection');
-  const scoreRing = document.getElementById('scoreRing');
-  const scoreValue = document.getElementById('scoreValue');
-  const riskPill = document.getElementById('riskPill');
-  const flagsList = document.getElementById('flagsList');
-  const recommendationsList = document.getElementById('recommendationsList');
-  const explanationText = document.getElementById('explanationText');
-  const saveBtn = document.getElementById('saveBtn');
-  const flagsContainer = document.getElementById('flagsContainer');
-  
-  let currentTab = null;
-  let lastScanResult = null;
-  
-  // ========== RISK ENGINE (Inline for popup) ==========
-  
-  const URGENCY_PATTERNS = [
-    /urgent/i, /quick sale/i, /must sell/i, /deposit today/i, /wire transfer/i,
-    /gift card/i, /immediate/i, /act fast/i, /won't last/i, /first come/i,
-    /serious buyers only/i, /cash only/i, /no time wasters/i, /motivated seller/i,
-    /below market/i, /distress sale/i, /western union/i, /moneygram/i,
-    /bitcoin/i, /crypto/i, /zelle/i, /venmo/i, /paypal friends/i
-  ];
-  
-  const SUSPICIOUS_CONTACT_PATTERNS = [
-    /whatsapp only/i, /text only/i, /no calls/i, /telegram/i, /signal app/i,
-    /overseas/i, /out of (the )?country/i, /abroad/i, /traveling/i, /international/i
-  ];
-  
-  const GENERIC_PATTERNS = [
-    /beautiful property/i, /amazing opportunity/i, /once in a lifetime/i,
-    /dream home/i, /won't be disappointed/i, /perfect location/i,
-    /prime location/i, /investment opportunity/i, /guaranteed return/i
-  ];
-  
-  const SUSPICIOUS_CLAIMS = [
-    /owner financing/i, /rent to own/i, /lease option/i, /no credit check/i,
-    /bad credit ok/i, /no bank needed/i, /private sale/i, /off market/i,
-    /exclusive deal/i, /special price/i
-  ];
-  
-  function analyzeText(text) {
-    const flags = [];
-    const lowerText = text.toLowerCase();
-    
-    // Check urgency language
-    let urgencyCount = 0;
-    URGENCY_PATTERNS.forEach(pattern => {
-      if (pattern.test(lowerText)) urgencyCount++;
-    });
-    if (urgencyCount > 0) {
-      flags.push({
-        category: "Urgency Language",
-        description: `${urgencyCount} pressure tactic${urgencyCount > 1 ? 's' : ''} detected (urgent, wire transfer, etc.)`,
-        weight: Math.min(urgencyCount * 8, 30)
-      });
-    }
-    
-    // Check suspicious contact patterns
-    let contactFlags = 0;
-    SUSPICIOUS_CONTACT_PATTERNS.forEach(pattern => {
-      if (pattern.test(lowerText)) contactFlags++;
-    });
-    if (contactFlags > 0) {
-      flags.push({
-        category: "Suspicious Contact Method",
-        description: "Seller prefers unusual contact methods (WhatsApp only, overseas, etc.)",
-        weight: contactFlags * 10
-      });
-    }
-    
-    // Check generic language
-    let genericCount = 0;
-    GENERIC_PATTERNS.forEach(pattern => {
-      if (pattern.test(lowerText)) genericCount++;
-    });
-    if (genericCount >= 2) {
-      flags.push({
-        category: "Generic Template Language",
-        description: "Listing uses vague, templated phrases common in scam listings",
-        weight: 12
-      });
-    }
-    
-    // Check suspicious seller claims
-    let claimCount = 0;
-    SUSPICIOUS_CLAIMS.forEach(pattern => {
-      if (pattern.test(lowerText)) claimCount++;
-    });
-    if (claimCount > 0) {
-      flags.push({
-        category: "Suspicious Seller Claims",
-        description: "Unusual claims detected (owner financing, no credit check, etc.)",
-        weight: claimCount * 8
-      });
-    }
-    
-    // Payment method red flags
-    if (/wire|western union|moneygram|gift card|bitcoin|crypto|zelle|venmo/i.test(lowerText)) {
-      flags.push({
-        category: "Risky Payment Method",
-        description: "Seller requests untraceable payment method",
-        weight: 25
-      });
-    }
-    
-    // Overseas seller
-    if (/overseas|abroad|out of country|international|traveling|can't meet/i.test(lowerText)) {
-      flags.push({
-        category: "Remote Seller",
-        description: "Seller claims to be overseas or unable to meet",
-        weight: 18
-      });
-    }
-    
-    // Deposit requests
-    if (/deposit|advance|upfront|before viewing|to hold|secure it/i.test(lowerText)) {
-      flags.push({
-        category: "Advance Payment Request",
-        description: "Deposit or advance payment requested before viewing",
-        weight: 22
-      });
-    }
-    
-    return flags;
-  }
-  
-  function calculateScore(flags) {
-    const totalWeight = flags.reduce((sum, flag) => sum + flag.weight, 0);
-    return Math.min(totalWeight, 100);
-  }
-  
-  function getRiskLevel(score) {
-    if (score >= 60) return "high";
-    if (score >= 30) return "medium";
-    return "low";
-  }
-  
-  function generateRecommendations(flags, riskLevel) {
-    const recommendations = [];
-    
-    if (riskLevel === "high") {
-      recommendations.push("⛔ Do NOT send any money or deposit to this seller");
-      recommendations.push("🚫 Do NOT share personal or financial information");
-      recommendations.push("🔍 Verify property ownership through official land registry");
-    }
-    
-    if (riskLevel === "medium") {
-      recommendations.push("⚠️ Proceed with extreme caution");
-      recommendations.push("🔍 Verify seller identity and property ownership independently");
-    }
-    
-    const categories = flags.map(f => f.category);
-    
-    if (categories.includes("Risky Payment Method")) {
-      recommendations.push("💳 Only use traceable payment methods with buyer protection");
-    }
-    if (categories.includes("Remote Seller")) {
-      recommendations.push("🤝 Insist on meeting seller in person before any transaction");
-    }
-    if (categories.includes("Advance Payment Request")) {
-      recommendations.push("🚨 Never pay deposits before viewing property and verifying ownership");
-    }
-    
-    if (riskLevel === "low") {
-      recommendations.push("✅ Listing appears legitimate, but always verify ownership independently");
-      recommendations.push("📋 Use a licensed real estate agent or attorney for the transaction");
-    }
-    
-    return [...new Set(recommendations)];
-  }
-  
-  function generateExplanation(score, riskLevel, flags) {
-    if (riskLevel === "high") {
-      return `This listing has a HIGH risk score of ${score}/100. Multiple red flags were detected including ${flags.slice(0, 2).map(f => f.category.toLowerCase()).join(' and ')}. We strongly recommend NOT proceeding with this listing without thorough verification.`;
-    }
-    if (riskLevel === "medium") {
-      return `This listing has a MEDIUM risk score of ${score}/100. Some concerning patterns were detected. Proceed with caution and verify all claims independently before making any payments.`;
-    }
-    return `This listing has a LOW risk score of ${score}/100. No major red flags were detected, but always verify property ownership and seller identity before any transaction.`;
-  }
-  
-  // ========== UI FUNCTIONS ==========
-  
-  // Get current tab
-  async function getCurrentTab() {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    return tab;
-  }
-  
-  // Initialize
-  async function init() {
-    currentTab = await getCurrentTab();
-    if (currentTab?.url) {
-      currentUrlEl.textContent = currentTab.url;
-    } else {
-      currentUrlEl.textContent = 'Unable to get current page URL';
-    }
-  }
-  
-  // Run scan
-  async function runScan() {
-    scanBtn.disabled = true;
-    scanBtn.innerHTML = '<div class="spinner"></div> Scanning...';
-    
-    try {
-      // Try to get page content from content script
-      let pageText = '';
-      
-      try {
-        const response = await chrome.tabs.sendMessage(currentTab.id, { action: 'getPageText' });
-        if (response?.text) {
-          pageText = response.text;
-        }
-      } catch (e) {
-        // Content script not available, use URL analysis only
-        console.log('Content script not available, using URL analysis');
-      }
-      
-      // Add seller info to analysis
-      const sellerInfo = [
-        sellerPhoneEl.value,
-        sellerEmailEl.value,
-        agentNameEl.value
-      ].filter(Boolean).join(' ');
-      
-      const fullText = `${currentTab.url} ${pageText} ${sellerInfo}`;
-      
-      // Analyze
-      const flags = analyzeText(fullText);
-      const score = calculateScore(flags);
-      const riskLevel = getRiskLevel(score);
-      const recommendations = generateRecommendations(flags, riskLevel);
-      const explanation = generateExplanation(score, riskLevel, flags);
-      
-      lastScanResult = {
-        url: currentTab.url,
-        timestamp: Date.now(),
-        score,
-        riskLevel,
-        flags: flags.map(f => `${f.category}: ${f.description}`),
-        recommendations,
-        sellerInfo: {
-          phone: sellerPhoneEl.value || undefined,
-          email: sellerEmailEl.value || undefined,
-          agent: agentNameEl.value || undefined
-        }
-      };
-      
-      // Display results
-      displayResults(score, riskLevel, flags, recommendations, explanation);
-      
-    } catch (error) {
-      console.error('Scan error:', error);
-      alert('Error scanning page. Please try again.');
-    } finally {
-      scanBtn.disabled = false;
-      scanBtn.innerHTML = '<span class="scan-btn-icon">🔍</span><span class="scan-btn-text">Scan Listing</span>';
-    }
-  }
-  
-  // Display results
-  function displayResults(score, riskLevel, flags, recommendations, explanation) {
-    resultsSection.style.display = 'block';
-    
-    // Update score
-    scoreRing.className = `score-ring ${riskLevel}`;
-    scoreValue.textContent = score;
-    
-    // Update risk pill
-    riskPill.className = `risk-pill ${riskLevel}`;
-    const riskLabels = { low: 'LOW RISK', medium: 'MEDIUM RISK', high: 'HIGH RISK' };
-    riskPill.textContent = riskLabels[riskLevel];
-    
-    // Update flags
-    if (flags.length > 0) {
-      flagsContainer.style.display = 'block';
-      flagsList.innerHTML = flags.map(flag => 
-        `<li>🚩 <strong>${flag.category}:</strong> ${flag.description}</li>`
-      ).join('');
-    } else {
-      flagsContainer.style.display = 'none';
-      flagsList.innerHTML = '<li class="no-flags">✅ No major red flags detected</li>';
-    }
-    
-    // Update recommendations
-    recommendationsList.innerHTML = recommendations.map(rec => 
-      `<li>${rec}</li>`
-    ).join('');
-    
-    // Update explanation
-    explanationText.textContent = explanation;
-    
-    // Scroll to results
-    resultsSection.scrollIntoView({ behavior: 'smooth' });
-  }
-  
-  // Save scan
-  async function saveScan() {
-    if (!lastScanResult) return;
-    
-    saveBtn.disabled = true;
-    saveBtn.innerHTML = '💾 Saving...';
-    
-    try {
-      const result = await chrome.storage.local.get(['lg_scan_history']);
-      const history = result.lg_scan_history || [];
-      
-      history.unshift(lastScanResult);
-      const trimmed = history.slice(0, 50);
-      
-      await chrome.storage.local.set({ lg_scan_history: trimmed });
-      
-      saveBtn.innerHTML = '✅ Saved!';
-      setTimeout(() => {
-        saveBtn.innerHTML = '<span>💾</span> Save Scan to History';
-        saveBtn.disabled = false;
-      }, 2000);
-      
-    } catch (error) {
-      console.error('Save error:', error);
-      saveBtn.innerHTML = '❌ Error';
-      setTimeout(() => {
-        saveBtn.innerHTML = '<span>💾</span> Save Scan to History';
-        saveBtn.disabled = false;
-      }, 2000);
-    }
-  }
-  
-  // Event listeners
-  scanBtn.addEventListener('click', runScan);
-  saveBtn.addEventListener('click', saveScan);
-  settingsBtn.addEventListener('click', () => {
-    chrome.runtime.openOptionsPage();
-  });
-  
-  // Initialize
-  init();
+  await loadCurrentTab();
+  setupEventListeners();
 });
+
+// Load current tab URL
+async function loadCurrentTab() {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab && tab.url) {
+      const url = new URL(tab.url);
+      elements.currentUrl.textContent = tab.url;
+      elements.currentUrl.classList.remove('no-url');
+      
+      // Check if supported site
+      const supportedSite = SUPPORTED_SITES.find(site => 
+        url.hostname.includes(site.hostname)
+      );
+      
+      if (supportedSite) {
+        elements.siteBadge.innerHTML = `
+          <span class="site-badge">
+            ${supportedSite.icon} ${supportedSite.name} • Supported
+          </span>
+        `;
+      } else {
+        elements.siteBadge.innerHTML = `
+          <span class="site-badge unsupported">
+            ⚠️ Site not in auto-scan list
+          </span>
+        `;
+      }
+    } else {
+      elements.currentUrl.textContent = 'No URL detected';
+      elements.currentUrl.classList.add('no-url');
+    }
+  } catch (error) {
+    console.error('Error loading tab:', error);
+    elements.currentUrl.textContent = 'Unable to load URL';
+    elements.currentUrl.classList.add('no-url');
+  }
+}
+
+// Setup event listeners
+function setupEventListeners() {
+  elements.scanBtn.addEventListener('click', performScan);
+  elements.saveBtn.addEventListener('click', saveScan);
+  elements.settingsBtn.addEventListener('click', openSettings);
+}
+
+// Open settings page
+function openSettings() {
+  chrome.runtime.openOptionsPage();
+}
+
+// Perform scan
+async function performScan() {
+  // Update button state
+  elements.scanBtn.disabled = true;
+  elements.scanBtn.innerHTML = `
+    <span class="loading-spinner"></span>
+    <span class="scan-btn-text">Analyzing...</span>
+  `;
+
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    
+    // Get page content via content script
+    let pageData = {};
+    try {
+      const response = await chrome.tabs.sendMessage(tab.id, { action: 'getPageData' });
+      if (response) {
+        pageData = response;
+      }
+    } catch (e) {
+      console.log('Content script not available, using basic scan');
+    }
+
+    // Prepare scan input
+    const scanInput = {
+      url: tab.url || '',
+      sellerPhone: elements.sellerPhone.value.trim(),
+      sellerEmail: elements.sellerEmail.value.trim(),
+      agentName: elements.agentName.value.trim(),
+      listingTitle: pageData.title || '',
+      listingDescription: pageData.description || '',
+      listingPrice: pageData.price || '',
+      listingImagesCount: pageData.imageCount || 0
+    };
+
+    // Perform local risk analysis
+    const result = scanListing(scanInput);
+    
+    // Display results
+    displayResults(result);
+
+  } catch (error) {
+    console.error('Scan error:', error);
+    alert('Error performing scan. Please try again.');
+  } finally {
+    // Reset button
+    elements.scanBtn.disabled = false;
+    elements.scanBtn.innerHTML = `
+      <span class="scan-btn-icon">🔍</span>
+      <span class="scan-btn-text">Scan This Listing</span>
+    `;
+  }
+}
+
+// Local Risk Engine
+function scanListing(input) {
+  let score = 0;
+  const flags = [];
+  const recommendations = [];
+
+  // --- Price Analysis ---
+  if (input.listingPrice) {
+    const priceMatch = input.listingPrice.match(/(\d[\d,\.]*)/);
+    if (priceMatch) {
+      const price = parseFloat(priceMatch[1].replace(/,/g, ''));
+      if (price < 5000) {
+        score += 25;
+        flags.push({ text: 'Unrealistically low price detected', severity: 'high' });
+        recommendations.push('Verify property value independently. Prices this low are often scam indicators.');
+      } else if (price < 20000) {
+        score += 12;
+        flags.push({ text: 'Potentially suspicious pricing', severity: 'medium' });
+        recommendations.push('Research comparable properties in the area to verify pricing.');
+      }
+    }
+  } else {
+    score += 8;
+    flags.push({ text: 'No price information found', severity: 'low' });
+  }
+
+  // --- Urgency Language Detection ---
+  const description = (input.listingTitle || '') + ' ' + (input.listingDescription || '');
+  const urgencyPatterns = [
+    { pattern: /urgent|urgently/i, weight: 15, text: 'Urgency language detected' },
+    { pattern: /quick sale|fast sale/i, weight: 15, text: 'Pressure to sell quickly' },
+    { pattern: /deposit today|immediate deposit/i, weight: 20, text: 'Immediate deposit requested' },
+    { pattern: /wire transfer/i, weight: 25, text: 'Wire transfer mentioned' },
+    { pattern: /gift card/i, weight: 30, text: 'Gift card payment requested' },
+    { pattern: /act fast|act now|limited time/i, weight: 12, text: 'Time pressure tactics' },
+    { pattern: /overseas|abroad|out of country/i, weight: 18, text: 'Seller claims to be overseas' },
+    { pattern: /cannot meet|can\'t meet|unable to meet/i, weight: 15, text: 'Seller refuses in-person meeting' }
+  ];
+
+  urgencyPatterns.forEach(({ pattern, weight, text }) => {
+    if (pattern.test(description)) {
+      score += weight;
+      flags.push({ text, severity: weight >= 20 ? 'high' : 'medium' });
+    }
+  });
+
+  if (flags.some(f => f.text.includes('Wire transfer') || f.text.includes('Gift card'))) {
+    recommendations.push('NEVER send money via wire transfer or gift cards. These payments are irreversible.');
+  }
+
+  if (flags.some(f => f.text.includes('overseas') || f.text.includes('meeting'))) {
+    recommendations.push('Always meet sellers in person and visit the property before any payment.');
+  }
+
+  // --- Contact Pattern Analysis ---
+  if (input.sellerPhone) {
+    const phoneClean = input.sellerPhone.replace(/[\s\-\.\(\)]/g, '');
+    if (!/^\+?\d{7,15}$/.test(phoneClean)) {
+      score += 10;
+      flags.push({ text: 'Suspicious phone number format', severity: 'medium' });
+    }
+  }
+
+  if (input.sellerEmail) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.sellerEmail)) {
+      score += 10;
+      flags.push({ text: 'Invalid email format', severity: 'medium' });
+    }
+    if (/temp|fake|trash|guerrilla/i.test(input.sellerEmail)) {
+      score += 15;
+      flags.push({ text: 'Temporary/disposable email detected', severity: 'high' });
+    }
+  }
+
+  if (/whatsapp only|text only|sms only/i.test(description)) {
+    score += 15;
+    flags.push({ text: 'Communication restricted to messaging apps', severity: 'medium' });
+    recommendations.push('Be cautious of sellers who avoid phone calls or official channels.');
+  }
+
+  // --- Image Analysis ---
+  if (input.listingImagesCount !== undefined) {
+    if (input.listingImagesCount === 0) {
+      score += 20;
+      flags.push({ text: 'No images provided', severity: 'high' });
+      recommendations.push('Request multiple photos of the property from different angles.');
+    } else if (input.listingImagesCount < 3) {
+      score += 12;
+      flags.push({ text: `Very few images (${input.listingImagesCount})`, severity: 'medium' });
+    }
+  }
+
+  // --- Generic Phrasing Detection ---
+  const genericPhrases = [
+    /great opportunity/i,
+    /investment property/i,
+    /must see/i,
+    /prime location/i,
+    /won\'t last/i,
+    /dream home/i
+  ];
+  
+  const genericCount = genericPhrases.filter(p => p.test(description)).length;
+  if (genericCount >= 3) {
+    score += 8;
+    flags.push({ text: 'Excessive generic marketing language', severity: 'low' });
+  }
+
+  // --- Cap score ---
+  score = Math.min(100, Math.max(0, score));
+
+  // --- Determine risk level ---
+  let riskLevel;
+  if (score >= 60) {
+    riskLevel = 'HIGH';
+  } else if (score >= 30) {
+    riskLevel = 'MEDIUM';
+  } else {
+    riskLevel = 'LOW';
+  }
+
+  // --- Default recommendations ---
+  if (recommendations.length === 0) {
+    if (riskLevel === 'LOW') {
+      recommendations.push('This listing shows minimal red flags, but always verify independently.');
+    }
+    recommendations.push('Never send money without seeing the property in person.');
+    recommendations.push('Verify ownership through official land registry records.');
+  }
+
+  return {
+    score,
+    riskLevel,
+    flags,
+    recommendations,
+    scannedAt: Date.now(),
+    url: input.url
+  };
+}
+
+// Display results
+function displayResults(result) {
+  const { score, riskLevel, flags, recommendations } = result;
+
+  // Show results section
+  elements.resultsSection.style.display = 'block';
+
+  // Update score
+  const levelClass = riskLevel.toLowerCase();
+  elements.scoreValue.textContent = score;
+  elements.scoreValue.className = `score-value ${levelClass}`;
+
+  // Update score bar
+  elements.scorePercent.textContent = `${score}%`;
+  elements.scoreBarFill.style.width = `${score}%`;
+  elements.scoreBarFill.className = `score-bar-fill ${levelClass}`;
+
+  // Update risk pill
+  const riskLabels = {
+    'LOW': '✓ Low Risk',
+    'MEDIUM': '⚠️ Medium Risk',
+    'HIGH': '🚨 High Risk'
+  };
+  elements.riskPill.textContent = riskLabels[riskLevel];
+  elements.riskPill.className = `risk-pill ${levelClass}`;
+
+  // Update flags
+  elements.flagsList.innerHTML = '';
+  if (flags.length > 0) {
+    flags.forEach(flag => {
+      const li = document.createElement('li');
+      const iconClass = flag.severity === 'high' ? 'danger' : flag.severity === 'medium' ? 'warning' : 'safe';
+      const icon = flag.severity === 'high' ? '🚨' : flag.severity === 'medium' ? '⚠️' : 'ℹ️';
+      li.innerHTML = `<span class="flag-icon ${iconClass}">${icon}</span><span>${flag.text}</span>`;
+      elements.flagsList.appendChild(li);
+    });
+  } else {
+    const li = document.createElement('li');
+    li.innerHTML = '<span class="flag-icon safe">✅</span><span>No significant red flags detected</span>';
+    elements.flagsList.appendChild(li);
+  }
+
+  // Update recommendations
+  elements.recommendationsList.innerHTML = '';
+  recommendations.forEach(rec => {
+    const li = document.createElement('li');
+    li.textContent = rec;
+    elements.recommendationsList.appendChild(li);
+  });
+
+  // Update explanation
+  const explanations = {
+    'LOW': 'This listing shows minimal suspicious patterns. However, always verify property ownership through official channels before making any payments.',
+    'MEDIUM': 'This listing has some concerning elements that warrant caution. Thoroughly investigate before proceeding and never send money without proper verification.',
+    'HIGH': 'This listing displays multiple high-risk indicators commonly associated with property scams. Exercise extreme caution and consider avoiding this listing entirely.'
+  };
+  elements.explanationText.textContent = explanations[riskLevel];
+
+  // Store result for saving
+  elements.saveBtn.dataset.result = JSON.stringify(result);
+
+  // Scroll to results
+  elements.resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Save scan to history
+async function saveScan() {
+  try {
+    const result = JSON.parse(elements.saveBtn.dataset.result);
+    
+    // Get existing history
+    const storage = await chrome.storage.local.get('landguard_scan_history');
+    let history = storage.landguard_scan_history || [];
+
+    // Add new scan at the beginning
+    history.unshift(result);
+
+    // Keep max 50 scans
+    if (history.length > 50) {
+      history = history.slice(0, 50);
+    }
+
+    // Save
+    await chrome.storage.local.set({ landguard_scan_history: history });
+
+    // Update button
+    elements.saveBtn.classList.add('saved');
+    elements.saveBtn.innerHTML = '<span>✓</span> Saved to History';
+    
+    setTimeout(() => {
+      elements.saveBtn.classList.remove('saved');
+      elements.saveBtn.innerHTML = '<span>💾</span> Save Scan to History';
+    }, 2000);
+
+  } catch (error) {
+    console.error('Error saving scan:', error);
+    alert('Error saving scan. Please try again.');
+  }
+}

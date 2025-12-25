@@ -34,19 +34,19 @@ export default function HomePage() {
       <nav className="fixed top-0 left-0 right-0 z-50 glass">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl overflow-hidden border border-lg-blue/50 shadow-md shadow-lg-blue/30">
+            <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-lg-green shadow-md">
               <img 
                 src="/logo.png" 
                 alt="LandGuard AI" 
                 className="w-full h-full object-cover object-top scale-150"
               />
             </div>
-            <span className="text-xl font-bold text-lg-silver">LandGuard AI</span>
+            <span className="text-xl font-bold text-lg-text">LandGuard AI</span>
           </div>
           <div className="flex items-center gap-6">
-            <Link href="#features" className="text-lg-muted hover:text-lg-silver transition">Features</Link>
-            <Link href="#pricing" className="text-lg-muted hover:text-lg-silver transition">Pricing</Link>
-            <Link href="/login" className="text-lg-muted hover:text-lg-silver transition">Login</Link>
+            <Link href="#features" className="text-lg-text-muted hover:text-lg-green transition">Features</Link>
+            <Link href="#pricing" className="text-lg-text-muted hover:text-lg-green transition">Pricing</Link>
+            <Link href="/login" className="text-lg-text-muted hover:text-lg-green transition">Login</Link>
             <Link href="/download" className="btn-primary text-sm">Get Extension</Link>
           </div>
         </div>
@@ -55,17 +55,17 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-6">
         <div className="max-w-6xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-lg-blue/10 border border-lg-blue/30 rounded-full px-4 py-2 mb-8">
-            <span className="text-lg-blue text-sm font-medium">🛡️ AI-Powered Protection</span>
+          <div className="inline-flex items-center gap-2 bg-lg-bg-alt border border-lg-green/30 rounded-full px-4 py-2 mb-8">
+            <span className="text-lg-green text-sm font-medium">🛡️ AI-Powered Protection</span>
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight text-lg-text">
             Stop Property Scams
             <br />
             <span className="gradient-text">Before They Start</span>
           </h1>
           
-          <p className="text-xl text-lg-muted max-w-3xl mx-auto mb-12">
+          <p className="text-xl text-lg-text-muted max-w-3xl mx-auto mb-12">
             LandGuard AI protects buyers from land and property scams before money changes hands. 
             Our AI analyzes listings on Facebook Marketplace, Kijiji, and Craigslist to detect fraud.
           </p>
@@ -79,7 +79,7 @@ export default function HomePage() {
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   placeholder="Paste listing URL to scan..."
-                  className="flex-1 bg-lg-dark border border-white/10 rounded-lg px-4 py-3 text-lg-silver placeholder-lg-muted focus:outline-none focus:border-lg-blue transition"
+                  className="flex-1 bg-white border border-lg-border rounded-lg px-4 py-3 text-lg-text placeholder-lg-text-muted focus:outline-none focus:border-lg-green transition"
                 />
                 <button
                   onClick={handleScan}
@@ -99,7 +99,7 @@ export default function HomePage() {
                   )}
                 </button>
               </div>
-              <p className="text-xs text-lg-muted mt-3">
+              <p className="text-xs text-lg-text-muted mt-3">
                 ⚠️ This is a risk analysis tool, not legal advice or ownership verification.
               </p>
             </div>
@@ -110,7 +110,7 @@ export default function HomePage() {
             <div className="max-w-2xl mx-auto mb-16 animate-fade-in">
               <div className="card p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold">Scan Result</h3>
+                  <h3 className="text-xl font-semibold text-lg-text">Scan Result</h3>
                   <span className={`risk-pill risk-pill-${result.riskLevel}`}>
                     {result.riskLevel?.toUpperCase()} RISK
                   </span>
@@ -124,13 +124,13 @@ export default function HomePage() {
                     }`}>
                       {result.score}
                     </div>
-                    <div className="text-sm text-lg-muted">Risk Score</div>
+                    <div className="text-sm text-lg-text-muted">Risk Score</div>
                   </div>
                   <div className="flex-1 text-left">
                     {result.flags?.length > 0 ? (
                       <ul className="space-y-2">
                         {result.flags.slice(0, 3).map((flag: string, i: number) => (
-                          <li key={i} className="text-sm text-lg-silver flex items-start gap-2">
+                          <li key={i} className="text-sm text-lg-text flex items-start gap-2">
                             <span className="text-lg-amber">⚠️</span>
                             {flag}
                           </li>
@@ -143,11 +143,11 @@ export default function HomePage() {
                 </div>
 
                 {result.recommendations?.length > 0 && (
-                  <div className="border-t border-white/10 pt-4">
-                    <h4 className="text-sm text-lg-blue font-semibold mb-2">Recommendations:</h4>
+                  <div className="border-t border-lg-border pt-4">
+                    <h4 className="text-sm text-lg-green font-semibold mb-2">Recommendations:</h4>
                     <ul className="space-y-1">
                       {result.recommendations.slice(0, 3).map((rec: string, i: number) => (
-                        <li key={i} className="text-sm text-lg-muted">{rec}</li>
+                        <li key={i} className="text-sm text-lg-text-muted">{rec}</li>
                       ))}
                     </ul>
                   </div>
@@ -157,7 +157,7 @@ export default function HomePage() {
           )}
 
           {/* Trust Badges */}
-          <div className="flex flex-wrap justify-center gap-8 text-lg-muted">
+          <div className="flex flex-wrap justify-center gap-8 text-lg-text-muted">
             <div className="flex items-center gap-2">
               <span className="text-2xl">✅</span>
               <span>100% Local Analysis</span>
@@ -175,11 +175,11 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 px-6 bg-lg-darker">
+      <section id="features" className="py-20 px-6 bg-section-alt">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Detect Scams Before They Happen</h2>
-            <p className="text-lg-muted text-lg">Our AI analyzes dozens of signals to protect you</p>
+            <h2 className="text-4xl font-bold mb-4 text-lg-text">Detect Scams Before They Happen</h2>
+            <p className="text-lg-text-muted text-lg">Our AI analyzes dozens of signals to protect you</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -217,8 +217,8 @@ export default function HomePage() {
             ].map((feature, i) => (
               <div key={i} className="card text-center">
                 <div className="text-4xl mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p className="text-lg-muted">{feature.description}</p>
+                <h3 className="text-xl font-semibold mb-2 text-lg-text">{feature.title}</h3>
+                <p className="text-lg-text-muted">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -228,8 +228,8 @@ export default function HomePage() {
       {/* Supported Sites */}
       <section className="py-20 px-6">
         <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-4">Works Where You Shop</h2>
-          <p className="text-lg-muted text-lg mb-12">Automatic protection on popular listing sites</p>
+          <h2 className="text-4xl font-bold mb-4 text-lg-text">Works Where You Shop</h2>
+          <p className="text-lg-text-muted text-lg mb-12">Automatic protection on popular listing sites</p>
           
           <div className="flex flex-wrap justify-center gap-8">
             {[
@@ -239,7 +239,7 @@ export default function HomePage() {
             ].map((site, i) => (
               <div key={i} className="card px-8 py-6 flex items-center gap-4">
                 <span className="text-3xl">{site.icon}</span>
-                <span className="text-lg font-medium">{site.name}</span>
+                <span className="text-lg font-medium text-lg-text">{site.name}</span>
                 <span className="text-lg-safe">✓</span>
               </div>
             ))}
@@ -248,18 +248,18 @@ export default function HomePage() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-20 px-6 bg-lg-darker">
+      <section id="pricing" className="py-20 px-6 bg-section-alt">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Simple Pricing</h2>
-            <p className="text-lg-muted text-lg">Start free, upgrade when you need more</p>
+            <h2 className="text-4xl font-bold mb-4 text-lg-text">Simple Pricing</h2>
+            <p className="text-lg-text-muted text-lg">Start free, upgrade when you need more</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Free Plan */}
             <div className="card">
-              <div className="text-lg-muted text-sm font-semibold mb-2">FREE</div>
-              <div className="text-4xl font-bold mb-4">$0<span className="text-lg text-lg-muted">/month</span></div>
+              <div className="text-lg-text-muted text-sm font-semibold mb-2">FREE</div>
+              <div className="text-4xl font-bold mb-4 text-lg-text">$0<span className="text-lg text-lg-text-muted">/month</span></div>
               <ul className="space-y-3 mb-8">
                 {[
                   '3 scans per month',
@@ -267,7 +267,7 @@ export default function HomePage() {
                   'Chrome extension',
                   'Manual scanning'
                 ].map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2 text-lg-silver">
+                  <li key={i} className="flex items-center gap-2 text-lg-text">
                     <span className="text-lg-safe">✓</span> {feature}
                   </li>
                 ))}
@@ -278,12 +278,12 @@ export default function HomePage() {
             </div>
 
             {/* Pro Plan */}
-            <div className="card border-lg-blue relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-lg-blue text-white text-xs font-bold px-3 py-1 rounded-full">
+            <div className="card border-2 border-lg-green relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-lg-green text-white text-xs font-bold px-3 py-1 rounded-full">
                 POPULAR
               </div>
-              <div className="text-lg-blue text-sm font-semibold mb-2">PRO</div>
-              <div className="text-4xl font-bold mb-4">$9.99<span className="text-lg text-lg-muted">/month</span></div>
+              <div className="text-lg-green text-sm font-semibold mb-2">PRO</div>
+              <div className="text-4xl font-bold mb-4 text-lg-text">$9.99<span className="text-lg text-lg-text-muted">/month</span></div>
               <ul className="space-y-3 mb-8">
                 {[
                   'Unlimited scans',
@@ -293,7 +293,7 @@ export default function HomePage() {
                   'Detailed reports',
                   'API access'
                 ].map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2 text-lg-silver">
+                  <li key={i} className="flex items-center gap-2 text-lg-text">
                     <span className="text-lg-safe">✓</span> {feature}
                   </li>
                 ))}
@@ -309,10 +309,10 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-6">
+          <h2 className="text-4xl font-bold mb-6 text-lg-text">
             Don't Become a Victim
           </h2>
-          <p className="text-xl text-lg-muted mb-8">
+          <p className="text-xl text-lg-text-muted mb-8">
             Property scams cost victims thousands of dollars. Protect yourself with LandGuard AI.
           </p>
           <Link href="/download" className="btn-primary text-lg px-10 py-4 inline-block">
@@ -322,29 +322,29 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-6 border-t border-white/10">
+      <footer className="py-12 px-6 border-t border-lg-border bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg overflow-hidden border border-lg-blue/50 shadow-sm shadow-lg-blue/30">
+              <div className="w-8 h-8 rounded-lg overflow-hidden border-2 border-lg-green">
                 <img 
                   src="/logo.png" 
                   alt="LandGuard AI" 
                   className="w-full h-full object-cover object-top scale-150"
                 />
               </div>
-              <span className="font-semibold text-lg-silver">LandGuard AI</span>
+              <span className="font-semibold text-lg-text">LandGuard AI</span>
             </div>
-            <div className="flex gap-8 text-lg-muted text-sm">
-              <Link href="/privacy" className="hover:text-lg-silver transition">Privacy</Link>
-              <Link href="/terms" className="hover:text-lg-silver transition">Terms</Link>
-              <Link href="/contact" className="hover:text-lg-silver transition">Contact</Link>
+            <div className="flex gap-8 text-lg-text-muted text-sm">
+              <Link href="/privacy" className="hover:text-lg-green transition">Privacy</Link>
+              <Link href="/terms" className="hover:text-lg-green transition">Terms</Link>
+              <Link href="/contact" className="hover:text-lg-green transition">Contact</Link>
             </div>
-            <div className="text-lg-muted text-sm">
+            <div className="text-lg-text-muted text-sm">
               © 2024 LandGuard AI. All rights reserved.
             </div>
           </div>
-          <div className="mt-6 text-center text-xs text-lg-muted">
+          <div className="mt-6 text-center text-xs text-lg-text-muted">
             ⚠️ Disclaimer: This is a risk analysis tool, not legal advice or ownership verification.
           </div>
         </div>
@@ -352,4 +352,3 @@ export default function HomePage() {
     </main>
   )
 }
-

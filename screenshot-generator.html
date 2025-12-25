@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1280, height=800">
+  <title>LandGuard AI - Chrome Web Store Screenshots</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1e1e2e;
+      overflow: hidden;
+    }
+    
+    .screenshot {
+      width: 1280px;
+      height: 800px;
+      position: relative;
+      overflow: hidden;
+      margin: 20px auto;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    
+    /* Chrome browser mockup */
+    .browser-frame {
+      width: 100%;
+      height: 100%;
+      background: #f0f2f5;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .browser-toolbar {
+      height: 72px;
+      background: linear-gradient(180deg, #dee1e6 0%, #d0d3d8 100%);
+      border-bottom: 1px solid #b8bbc1;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 12px;
+    }
+    
+    .toolbar-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .toolbar-btn {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    
+    .btn-close { background: #ff5f57; }
+    .btn-minimize { background: #febc2e; }
+    .btn-maximize { background: #28c840; }
+    
+    .nav-buttons {
+      display: flex;
+      gap: 6px;
+      margin-left: 12px;
+    }
+    
+    .nav-btn {
+      width: 32px;
+      height: 32px;
+      background: #e8eaed;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #5f6368;
+      font-size: 18px;
+    }
+    
+    .url-bar {
+      flex: 1;
+      height: 36px;
+      background: white;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      font-size: 14px;
+      color: #202124;
+      margin: 0 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .url-bar .lock {
+      color: #188038;
+      margin-right: 8px;
+    }
+    
+    .extensions-area {
+      display: flex;
+      gap: 8px;
+      margin-right: 12px;
+    }
+    
+    .extension-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      background: linear-gradient(135deg, #0A5CFF, #2ECC71);
+      cursor: pointer;
+      position: relative;
+    }
+    
+    .extension-icon.active {
+      box-shadow: 0 0 0 2px #0A5CFF;
+    }
+    
+    /* Page content */
+    .page-content {
+      flex: 1;
+      background: #f0f2f5;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* Facebook Marketplace mockup */
+    .fb-header {
+      height: 56px;
+      background: white;
+      border-bottom: 1px solid #dddfe2;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 12px;
+    }
+    
+    .fb-logo {
+      width: 40px;
+      height: 40px;
+      background: #1877f2;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 24px;
+    }
+    
+    .fb-search {
+      flex: 1;
+      max-width: 680px;
+      height: 40px;
+      background: #f0f2f5;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      color: #65676b;
+    }
+    
+    .fb-content {
+      display: flex;
+      height: calc(100% - 56px);
+    }
+    
+    .fb-sidebar {
+      width: 360px;
+      background: white;
+      padding: 16px;
+      border-right: 1px solid #dddfe2;
+    }
+    
+    .fb-sidebar h2 {
+      font-size: 24px;
+      margin-bottom: 16px;
+      color: #050505;
+    }
+    
+    .fb-main {
+      flex: 1;
+      padding: 24px;
+      overflow: hidden;
+    }
+    
+    .listing-card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .listing-images {
+      height: 280px;
+      background: linear-gradient(135deg, #e4e6eb 0%, #d8dadf 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+    
+    .listing-price {
+      font-size: 28px;
+      font-weight: 700;
+      color: #050505;
+      margin-bottom: 8px;
+    }
+    
+    .listing-price.suspicious {
+      color: #E74C3C;
+    }
+    
+    .listing-title {
+      font-size: 20px;
+      color: #050505;
+      margin-bottom: 8px;
+    }
+    
+    .listing-location {
+      color: #65676b;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+    
+    .listing-description {
+      color: #050505;
+      line-height: 1.5;
+      padding: 16px;
+      background: #f0f2f5;
+      border-radius: 8px;
+    }
+    
+    .listing-description.scam {
+      border-left: 4px solid #E74C3C;
+    }
+    
+    /* LandGuard Banner */
+    .landguard-banner {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 80px;
+      background: #0B1220;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 20px;
+      z-index: 100;
+      border-bottom: 3px solid #0A5CFF;
+    }
+    
+    .banner-logo {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #0A5CFF, #2ECC71);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+    
+    .banner-score {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .banner-score-label {
+      color: white;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .banner-score-value {
+      font-size: 32px;
+      font-weight: 700;
+    }
+    
+    .banner-score-value.high { color: #E74C3C; }
+    .banner-score-value.medium { color: #F39C12; }
+    .banner-score-value.low { color: #27AE60; }
+    
+    .banner-pill {
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    
+    .banner-pill.high {
+      background: rgba(231, 76, 60, 0.2);
+      color: #E74C3C;
+      border: 2px solid #E74C3C;
+    }
+    
+    .banner-pill.low {
+      background: rgba(39, 174, 96, 0.2);
+      color: #27AE60;
+      border: 2px solid #27AE60;
+    }
+    
+    .banner-flags {
+      flex: 1;
+      color: #C9D1D9;
+      font-size: 14px;
+    }
+    
+    .banner-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .banner-btn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+    
+    .banner-btn-primary {
+      background: #0A5CFF;
+      color: white;
+    }
+    
+    .banner-btn-secondary {
+      background: #1a2535;
+      color: #C9D1D9;
+    }
+    
+    /* Extension Popup */
+    .popup-overlay {
+      position: absolute;
+      top: 72px;
+      right: 80px;
+      width: 380px;
+      background: #0B1220;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      z-index: 200;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .popup-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: linear-gradient(135deg, #0B1220, #1a2332);
+      border-bottom: 2px solid #0A5CFF;
+    }
+    
+    .popup-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .popup-logo {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #0A5CFF, #2ECC71);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+    
+    .popup-title {
+      color: #C9D1D9;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    
+    .popup-version {
+      color: #8b949e;
+      font-size: 11px;
+    }
+    
+    .popup-tagline {
+      padding: 12px 20px;
+      background: rgba(10, 92, 255, 0.1);
+      font-size: 12px;
+      color: #8b949e;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .popup-section {
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .popup-section-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #0A5CFF;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    
+    .popup-url {
+      background: #060d17;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: #8b949e;
+    }
+    
+    .popup-results {
+      background: rgba(10, 92, 255, 0.05);
+    }
+    
+    .popup-score-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      padding: 20px;
+      background: #060d17;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .popup-score-ring {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 4px solid;
+    }
+    
+    .popup-score-ring.high { border-color: #E74C3C; }
+    .popup-score-ring.low { border-color: #27AE60; }
+    
+    .popup-score-value {
+      font-size: 32px;
+      font-weight: 700;
+    }
+    
+    .popup-score-ring.high .popup-score-value { color: #E74C3C; }
+    .popup-score-ring.low .popup-score-value { color: #27AE60; }
+    
+    .popup-score-label {
+      font-size: 10px;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+    
+    .popup-risk-pill {
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    
+    .popup-risk-pill.high {
+      background: rgba(231, 76, 60, 0.2);
+      color: #E74C3C;
+      border: 2px solid #E74C3C;
+    }
+    
+    .popup-risk-pill.low {
+      background: rgba(39, 174, 96, 0.2);
+      color: #27AE60;
+      border: 2px solid #27AE60;
+    }
+    
+    .popup-flags-title {
+      font-size: 12px;
+      color: #0A5CFF;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    
+    .popup-flag {
+      background: rgba(231, 76, 60, 0.1);
+      border-left: 3px solid #E74C3C;
+      padding: 10px 12px;
+      border-radius: 0 6px 6px 0;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #C9D1D9;
+      line-height: 1.4;
+    }
+    
+    .popup-rec {
+      background: rgba(46, 204, 113, 0.1);
+      border-left: 3px solid #2ECC71;
+      padding: 10px 12px;
+      border-radius: 0 6px 6px 0;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #C9D1D9;
+      line-height: 1.4;
+    }
+    
+    .popup-save-btn {
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      border: 2px solid #2ECC71;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #2ECC71;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    
+    .popup-disclaimer {
+      padding: 12px 20px;
+      background: rgba(243, 156, 18, 0.1);
+      font-size: 10px;
+      color: #F39C12;
+      text-align: center;
+    }
+    
+    /* Title overlay */
+    .title-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(11, 18, 32, 0.95));
+      padding: 40px 40px 30px;
+      text-align: center;
+    }
+    
+    .title-bar h1 {
+      color: white;
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    
+    .title-bar p {
+      color: #C9D1D9;
+      font-size: 18px;
+    }
+    
+    .divider {
+      height: 60px;
+      background: #1e1e2e;
+    }
+    
+    h2.section-title {
+      color: white;
+      text-align: center;
+      padding: 20px;
+      font-size: 24px;
+    }
+  </style>
+</head>
+<body>
+  <h2 class="section-title">Screenshot 1: High Risk Detection with Popup</h2>
+  
+  <!-- Screenshot 1: High Risk Popup -->
+  <div class="screenshot" id="screenshot1">
+    <div class="browser-frame">
+      <div class="browser-toolbar">
+        <div class="toolbar-buttons">
+          <div class="toolbar-btn btn-close"></div>
+          <div class="toolbar-btn btn-minimize"></div>
+          <div class="toolbar-btn btn-maximize"></div>
+        </div>
+        <div class="nav-buttons">
+          <div class="nav-btn">←</div>
+          <div class="nav-btn">→</div>
+          <div class="nav-btn">↻</div>
+        </div>
+        <div class="url-bar">
+          <span class="lock">🔒</span>
+          facebook.com/marketplace/item/983647251839/amazing-land-for-sale-5-acres
+        </div>
+        <div class="extensions-area">
+          <div class="extension-icon active">🛡️</div>
+        </div>
+      </div>
+      
+      <div class="page-content">
+        <!-- Facebook Header -->
+        <div class="fb-header">
+          <div class="fb-logo">f</div>
+          <div class="fb-search">🔍 Search Marketplace</div>
+        </div>
+        
+        <!-- Facebook Content -->
+        <div class="fb-content">
+          <div class="fb-sidebar">
+            <h2>Marketplace</h2>
+          </div>
+          <div class="fb-main">
+            <div class="listing-card">
+              <div class="listing-images">🏠</div>
+              <div class="listing-price suspicious">$2,500</div>
+              <div class="listing-title">URGENT: Beautiful Land for Sale - 5 Acres - Must Go Today!</div>
+              <div class="listing-location">📍 Toronto, ON • Listed 2 hours ago</div>
+              <div class="listing-description scam">
+                🚨 URGENT SALE! Owner relocated overseas. Must sell immediately!<br><br>
+                Wire transfer only for quick processing. Contact WhatsApp only: +234...<br>
+                No agents. Send deposit today to secure this amazing deal!
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Extension Popup -->
+        <div class="popup-overlay">
+          <div class="popup-header">
+            <div class="popup-brand">
+              <div class="popup-logo">🛡️</div>
+              <div>
+                <div class="popup-title">LandGuard AI</div>
+                <div class="popup-version">v1.0.0</div>
+              </div>
+            </div>
+            <span style="color: #8b949e;">⚙️</span>
+          </div>
+          
+          <div class="popup-tagline">
+            Protects buyers from land and property scams before money changes hands.
+          </div>
+          
+          <div class="popup-section">
+            <div class="popup-section-title">🔗 Current Listing</div>
+            <div class="popup-url">facebook.com/marketplace/item/983647251839...</div>
+          </div>
+          
+          <div class="popup-section popup-results">
+            <div class="popup-section-title">📊 Risk Analysis</div>
+            
+            <div class="popup-score-container">
+              <div class="popup-score-ring high">
+                <div class="popup-score-value">78</div>
+                <div class="popup-score-label">Risk Score</div>
+              </div>
+              <div class="popup-risk-pill high">HIGH RISK</div>
+            </div>
+            
+            <div class="popup-flags-title">🚩 Risk Flags</div>
+            <div class="popup-flag">🚩 <strong>Urgency Language:</strong> 3 pressure tactics detected</div>
+            <div class="popup-flag">🚩 <strong>Risky Payment:</strong> Wire transfer requested</div>
+            <div class="popup-flag">🚩 <strong>Remote Seller:</strong> Seller claims overseas</div>
+            
+            <div class="popup-flags-title" style="margin-top: 16px;">💡 Recommendations</div>
+            <div class="popup-rec">⛔ Do NOT send any money to this seller</div>
+            <div class="popup-rec">🔍 Verify ownership through land registry</div>
+            
+            <button class="popup-save-btn">💾 Save Scan to History</button>
+          </div>
+          
+          <div class="popup-disclaimer">
+            ⚠️ This is a risk analysis tool, not legal advice or ownership verification.
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="title-bar">
+      <h1>🛡️ Instant Scam Detection</h1>
+      <p>AI-powered protection on Facebook Marketplace, Kijiji & Craigslist</p>
+    </div>
+  </div>
+  
+  <div class="divider"></div>
+  <h2 class="section-title">Screenshot 2: Security Banner on Listing Page</h2>
+  
+  <!-- Screenshot 2: Banner on page -->
+  <div class="screenshot" id="screenshot2">
+    <div class="browser-frame">
+      <div class="browser-toolbar">
+        <div class="toolbar-buttons">
+          <div class="toolbar-btn btn-close"></div>
+          <div class="toolbar-btn btn-minimize"></div>
+          <div class="toolbar-btn btn-maximize"></div>
+        </div>
+        <div class="nav-buttons">
+          <div class="nav-btn">←</div>
+          <div class="nav-btn">→</div>
+          <div class="nav-btn">↻</div>
+        </div>
+        <div class="url-bar">
+          <span class="lock">🔒</span>
+          kijiji.ca/v-house-for-sale/toronto/beautiful-family-home-4br/1234567
+        </div>
+        <div class="extensions-area">
+          <div class="extension-icon">🛡️</div>
+        </div>
+      </div>
+      
+      <div class="page-content">
+        <!-- LandGuard Banner -->
+        <div class="landguard-banner">
+          <div class="banner-logo">🛡️</div>
+          <div class="banner-score">
+            <span class="banner-score-label">LandGuard AI Risk Score:</span>
+            <span class="banner-score-value low">18</span>
+            <span style="color: #8b949e;">/100</span>
+          </div>
+          <div class="banner-pill low">LOW RISK</div>
+          <div class="banner-flags">
+            ✅ No major red flags detected • Verified contact info • Reasonable pricing
+          </div>
+          <div class="banner-buttons">
+            <button class="banner-btn banner-btn-primary">Re-scan</button>
+            <button class="banner-btn banner-btn-secondary">View Details</button>
+          </div>
+        </div>
+        
+        <!-- Page Content (shifted down) -->
+        <div style="padding-top: 80px;">
+          <div class="fb-header" style="background: #373373; border: none;">
+            <div style="color: white; font-size: 24px; font-weight: bold;">kijiji</div>
+            <div class="fb-search" style="background: white;">🔍 Search Kijiji</div>
+          </div>
+          
+          <div class="fb-content" style="height: calc(100% - 136px);">
+            <div class="fb-main" style="background: white;">
+              <div class="listing-card" style="box-shadow: none;">
+                <div class="listing-images" style="height: 240px;">🏡</div>
+                <div class="listing-price">$549,900</div>
+                <div class="listing-title">Beautiful Family Home - 4 Bedrooms, 2.5 Bath</div>
+                <div class="listing-location">📍 North York, Toronto • Listed 3 days ago</div>
+                <div class="listing-description">
+                  Stunning family home in quiet neighbourhood. Features include updated kitchen, 
+                  hardwood floors, finished basement, and large backyard. Close to schools and transit.
+                  Contact licensed agent Sarah at RE/MAX for showings.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="title-bar">
+      <h1>🔒 Automatic Protection</h1>
+      <p>Security banner appears automatically on supported listing sites</p>
+    </div>
+  </div>
+  
+  <div class="divider"></div>
+  <h2 class="section-title">Screenshot 3: Features Overview</h2>
+  
+  <!-- Screenshot 3: Features -->
+  <div class="screenshot" id="screenshot3" style="background: linear-gradient(135deg, #0B1220 0%, #050a12 100%);">
+    <div style="padding: 60px 80px; height: 100%; display: flex; flex-direction: column;">
+      <div style="text-align: center; margin-bottom: 50px;">
+        <div style="display: inline-flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+          <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #0A5CFF, #2ECC71); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 32px;">🛡️</div>
+          <span style="font-size: 36px; font-weight: 700; color: white;">LandGuard AI</span>
+        </div>
+        <h1 style="font-size: 42px; color: white; margin-bottom: 12px;">Detect Property Scams Before They Happen</h1>
+        <p style="font-size: 20px; color: #C9D1D9;">AI-powered analysis catches red flags humans miss</p>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; flex: 1;">
+        <div style="background: #162033; border-radius: 16px; padding: 28px; border: 1px solid rgba(10, 92, 255, 0.3);">
+          <div style="font-size: 40px; margin-bottom: 16px;">🚨</div>
+          <h3 style="color: white; font-size: 20px; margin-bottom: 12px;">Urgency Detection</h3>
+          <p style="color: #8b949e; font-size: 15px; line-height: 1.5;">Flags pressure tactics like "urgent sale", "wire transfer only", and "deposit today"</p>
+        </div>
+        
+        <div style="background: #162033; border-radius: 16px; padding: 28px; border: 1px solid rgba(10, 92, 255, 0.3);">
+          <div style="font-size: 40px; margin-bottom: 16px;">💰</div>
+          <h3 style="color: white; font-size: 20px; margin-bottom: 12px;">Price Analysis</h3>
+          <p style="color: #8b949e; font-size: 15px; line-height: 1.5;">Warns about unrealistically low prices that are too good to be true</p>
+        </div>
+        
+        <div style="background: #162033; border-radius: 16px; padding: 28px; border: 1px solid rgba(10, 92, 255, 0.3);">
+          <div style="font-size: 40px; margin-bottom: 16px;">📸</div>
+          <h3 style="color: white; font-size: 20px; margin-bottom: 12px;">Image Analysis</h3>
+          <p style="color: #8b949e; font-size: 15px; line-height: 1.5;">Detects listings with suspiciously few photos or stock images</p>
+        </div>
+        
+        <div style="background: #162033; border-radius: 16px; padding: 28px; border: 1px solid rgba(10, 92, 255, 0.3);">
+          <div style="font-size: 40px; margin-bottom: 16px;">🌍</div>
+          <h3 style="color: white; font-size: 20px; margin-bottom: 12px;">Remote Seller Alerts</h3>
+          <p style="color: #8b949e; font-size: 15px; line-height: 1.5;">Identifies sellers claiming to be overseas or unable to meet in person</p>
+        </div>
+        
+        <div style="background: #162033; border-radius: 16px; padding: 28px; border: 1px solid rgba(10, 92, 255, 0.3);">
+          <div style="font-size: 40px; margin-bottom: 16px;">💳</div>
+          <h3 style="color: white; font-size: 20px; margin-bottom: 12px;">Payment Red Flags</h3>
+          <p style="color: #8b949e; font-size: 15px; line-height: 1.5;">Warns about untraceable payment requests like gift cards or crypto</p>
+        </div>
+        
+        <div style="background: #162033; border-radius: 16px; padding: 28px; border: 1px solid rgba(10, 92, 255, 0.3);">
+          <div style="font-size: 40px; margin-bottom: 16px;">📝</div>
+          <h3 style="color: white; font-size: 20px; margin-bottom: 12px;">Template Detection</h3>
+          <p style="color: #8b949e; font-size: 15px; line-height: 1.5;">Spots generic, copy-paste language common in scam listings</p>
+        </div>
+      </div>
+      
+      <div style="display: flex; justify-content: center; gap: 60px; margin-top: 40px; padding: 24px; background: #162033; border-radius: 12px;">
+        <div style="text-align: center;">
+          <div style="font-size: 28px; margin-bottom: 8px;">✅</div>
+          <div style="color: white; font-size: 16px;">100% Local Analysis</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 28px; margin-bottom: 8px;">🔒</div>
+          <div style="color: white; font-size: 16px;">Privacy First</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 28px; margin-bottom: 8px;">⚡</div>
+          <div style="color: white; font-size: 16px;">Instant Results</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 28px; margin-bottom: 8px;">🆓</div>
+          <div style="color: white; font-size: 16px;">Free to Use</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="padding: 40px; text-align: center;">
+    <p style="color: #C9D1D9; margin-bottom: 20px;">Right-click on each screenshot → "Save image as" to download</p>
+    <p style="color: #8b949e;">Or use Windows Snipping Tool (Win + Shift + S) to capture each screenshot</p>
+  </div>
+</body>
+</html>
+

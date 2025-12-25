@@ -3,16 +3,18 @@
 @tailwind utilities;
 
 :root {
-  --lg-blue: #0A5CFF;
-  --lg-green: #2ECC71;
-  --lg-red: #E74C3C;
-  --lg-amber: #F39C12;
-  --lg-safe: #27AE60;
-  --lg-dark: #0B1220;
-  --lg-darker: #060d17;
-  --lg-light: #F5F7FA;
-  --lg-silver: #C9D1D9;
-  --lg-muted: #8b949e;
+  --lg-green: #22C55E;
+  --lg-green-dark: #16A34A;
+  --lg-green-light: #86EFAC;
+  --lg-red: #EF4444;
+  --lg-amber: #F59E0B;
+  --lg-safe: #22C55E;
+  --lg-bg: #FFFFFF;
+  --lg-bg-alt: #F0FDF4;
+  --lg-card: #FFFFFF;
+  --lg-text: #1F2937;
+  --lg-text-muted: #6B7280;
+  --lg-border: #E5E7EB;
 }
 
 * {
@@ -27,8 +29,8 @@ html {
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-  background: var(--lg-dark);
-  color: var(--lg-silver);
+  background: linear-gradient(135deg, #F0FDF4 0%, #FFFFFF 50%, #DCFCE7 100%);
+  color: var(--lg-text);
   min-height: 100vh;
 }
 
@@ -38,16 +40,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--lg-darker);
+  background: #F0FDF4;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(34, 197, 94, 0.3);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(34, 197, 94, 0.5);
 }
 
 /* Animation classes */
@@ -76,22 +78,22 @@ body {
 
 /* Gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, var(--lg-blue), var(--lg-green));
+  background: linear-gradient(135deg, var(--lg-green), var(--lg-green-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Glass effect */
+/* Glass effect - Light theme */
 .glass {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(34, 197, 94, 0.1);
 }
 
 /* Button styles */
 .btn-primary {
-  background: linear-gradient(135deg, var(--lg-blue), #0848cc);
+  background: linear-gradient(135deg, var(--lg-green), var(--lg-green-dark));
   color: white;
   padding: 12px 28px;
   border-radius: 10px;
@@ -99,41 +101,48 @@ body {
   transition: all 0.3s ease;
   border: none;
   cursor: pointer;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.25);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(10, 92, 255, 0.3);
+  box-shadow: 0 10px 30px rgba(34, 197, 94, 0.35);
 }
 
 .btn-secondary {
-  background: transparent;
-  color: var(--lg-silver);
+  background: white;
+  color: var(--lg-green);
   padding: 12px 28px;
   border-radius: 10px;
   font-weight: 600;
   transition: all 0.3s ease;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid var(--lg-green);
   cursor: pointer;
 }
 
 .btn-secondary:hover {
-  border-color: var(--lg-blue);
-  color: var(--lg-blue);
+  background: #F0FDF4;
 }
 
 /* Card styles */
 .card {
-  background: var(--lg-darker);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: white;
+  border: 1px solid #E5E7EB;
   border-radius: 16px;
   padding: 24px;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
 .card:hover {
-  border-color: rgba(10, 92, 255, 0.3);
+  border-color: rgba(34, 197, 94, 0.3);
+  box-shadow: 0 8px 30px rgba(34, 197, 94, 0.15);
   transform: translateY(-4px);
+}
+
+/* Section backgrounds */
+.bg-section-alt {
+  background: #F0FDF4;
 }
 
 /* Risk level colors */
@@ -151,20 +160,29 @@ body {
 }
 
 .risk-pill-low {
-  background: rgba(39, 174, 96, 0.2);
+  background: rgba(34, 197, 94, 0.1);
   color: var(--lg-safe);
   border: 1px solid var(--lg-safe);
 }
 
 .risk-pill-medium {
-  background: rgba(243, 156, 18, 0.2);
+  background: rgba(245, 158, 11, 0.1);
   color: var(--lg-amber);
   border: 1px solid var(--lg-amber);
 }
 
 .risk-pill-high {
-  background: rgba(231, 76, 60, 0.2);
+  background: rgba(239, 68, 68, 0.1);
   color: var(--lg-red);
   border: 1px solid var(--lg-red);
 }
 
+/* Input fields */
+input {
+  background: white !important;
+  color: var(--lg-text) !important;
+}
+
+input::placeholder {
+  color: var(--lg-text-muted) !important;
+}
