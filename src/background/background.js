@@ -1,63 +1,239 @@
 /**
- * LandGuard AI - Background Service Worker
- * Handles extension events and messaging
+ * LandGuard AI v2.0 - Background Service Worker
+ * Handles extension events, messaging, and API communication
  */
+
+const VERSION = '2.0.0';
+const API_BASE = 'https://landguardai.co/api/v1';
 
 // Extension installed/updated
 chrome.runtime.onInstalled.addListener((details) => {
-  console.log('LandGuard AI installed/updated:', details.reason);
+  console.log(`LandGuard AI v${VERSION}: ${details.reason}`);
   
-  // Set default settings on first install
   if (details.reason === 'install') {
+    // Set default settings
     chrome.storage.local.set({
       lg_settings: {
         autoScan: true,
-        showBannerOnAllPages: false
+        showBanner: true,
+        darkMode: false,
+        tier: 'free'
       },
-      lg_scan_history: []
+      lg_scan_history: [],
+      lg_api_key: ''
     });
     
-    // Open welcome/options page on first install
+    // Open options/welcome page
     chrome.tabs.create({
       url: chrome.runtime.getURL('src/options/options.html')
     });
+  } else if (details.reason === 'update') {
+    // Show update notification
+    console.log(`Updated from ${details.previousVersion} to ${VERSION}`);
+    
+    // Migrate settings if needed
+    migrateSettings();
   }
 });
 
-// Handle messages from content scripts and popup
+// Migrate settings from v1.x
+async function migrateSettings() {
+  try {
+    const storage = await chrome.storage.local.get([
+      'lg_settings', 
+      'landguard_settings',
+      'landguard_scan_history'
+    ]);
+    
+    // Migrate old keys
+    if (storage.landguard_settings && !storage.lg_settings) {
+      await chrome.storage.local.set({ lg_settings: storage.landguard_settings });
+    }
+    if (storage.landguard_scan_history && !storage.lg_scan_history) {
+      await chrome.storage.local.set({ lg_scan_history: storage.landguard_scan_history });
+    }
+    
+    // Clean up old keys
+    await chrome.storage.local.remove(['landguard_settings', 'landguard_scan_history']);
+    
+  } catch (e) {
+    console.error('Migration error:', e);
+  }
+}
+
+// Handle messages from popup and content scripts
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === 'getSettings') {
-    chrome.storage.local.get(['lg_settings'], (result) => {
-      sendResponse(result.lg_settings || { autoScan: true, showBannerOnAllPages: false });
-    });
-    return true; // Keep channel open for async response
-  }
-  
-  if (message.action === 'saveScan') {
-    chrome.storage.local.get(['lg_scan_history'], (result) => {
-      const history = result.lg_scan_history || [];
-      history.unshift(message.scan);
-      const trimmed = history.slice(0, 50);
-      chrome.storage.local.set({ lg_scan_history: trimmed }, () => {
-        sendResponse({ success: true });
+  handleMessage(message, sender, sendResponse);
+  return true; // Keep channel open for async
+});
+
+async function handleMessage(message, sender, sendResponse) {
+  switch (message.action) {
+    case 'getSettings':
+      const settingsResult = await chrome.storage.local.get(['lg_settings', 'lg_api_key']);
+      sendResponse({
+        settings: settingsResult.lg_settings || { autoScan: true, tier: 'free' },
+        apiKey: settingsResult.lg_api_key || ''
       });
+      break;
+      
+    case 'saveSettings':
+      await chrome.storage.local.set({ lg_settings: message.settings });
+      sendResponse({ success: true });
+      break;
+      
+    case 'saveApiKey':
+      await chrome.storage.local.set({ lg_api_key: message.apiKey });
+      // Validate key
+      if (message.apiKey) {
+        const validation = await validateApiKey(message.apiKey);
+        sendResponse(validation);
+      } else {
+        sendResponse({ success: true, tier: 'free' });
+      }
+      break;
+      
+    case 'saveScan':
+      const historyResult = await chrome.storage.local.get('lg_scan_history');
+      let history = historyResult.lg_scan_history || [];
+      history.unshift(message.scan);
+      if (history.length > 50) history = history.slice(0, 50);
+      await chrome.storage.local.set({ lg_scan_history: history });
+      sendResponse({ success: true });
+      break;
+      
+    case 'getHistory':
+      const histResult = await chrome.storage.local.get('lg_scan_history');
+      sendResponse(histResult.lg_scan_history || []);
+      break;
+      
+    case 'clearHistory':
+      await chrome.storage.local.set({ lg_scan_history: [] });
+      sendResponse({ success: true });
+      break;
+      
+    case 'scanListingAPI':
+      try {
+        const apiKey = (await chrome.storage.local.get('lg_api_key')).lg_api_key;
+        const result = await scanListingAPI(message.data, apiKey);
+        sendResponse(result);
+      } catch (e) {
+        sendResponse({ error: e.message });
+      }
+      break;
+      
+    case 'scanSellerAPI':
+      try {
+        const apiKey = (await chrome.storage.local.get('lg_api_key')).lg_api_key;
+        const result = await scanSellerAPI(message.data, apiKey);
+        sendResponse(result);
+      } catch (e) {
+        sendResponse({ error: e.message });
+      }
+      break;
+      
+    case 'getUsage':
+      try {
+        const apiKey = (await chrome.storage.local.get('lg_api_key')).lg_api_key;
+        if (apiKey) {
+          const usage = await getApiUsage(apiKey);
+          sendResponse(usage);
+        } else {
+          sendResponse({ error: 'No API key' });
+        }
+      } catch (e) {
+        sendResponse({ error: e.message });
+      }
+      break;
+      
+    default:
+      sendResponse({ error: 'Unknown action' });
+  }
+}
+
+// Validate API key
+async function validateApiKey(apiKey) {
+  try {
+    const response = await fetch(`${API_BASE}/usage`, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`
+      }
     });
-    return true;
+    
+    const json = await response.json();
+    
+    if (json.success) {
+      return {
+        success: true,
+        tier: json.data?.tier?.name?.toLowerCase() || 'free',
+        usage: json.data?.usage
+      };
+    } else {
+      return { success: false, error: json.error?.message || 'Invalid API key' };
+    }
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+}
+
+// Scan listing via API
+async function scanListingAPI(data, apiKey) {
+  if (!apiKey) {
+    throw new Error('API key required');
   }
   
-  if (message.action === 'getHistory') {
-    chrome.storage.local.get(['lg_scan_history'], (result) => {
-      sendResponse(result.lg_scan_history || []);
-    });
-    return true;
+  const response = await fetch(`${API_BASE}/scan-listing`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`
+    },
+    body: JSON.stringify(data)
+  });
+  
+  const json = await response.json();
+  
+  if (!json.success) {
+    throw new Error(json.error?.message || 'API error');
   }
-});
+  
+  return json;
+}
 
-// Handle extension icon click when popup is not available
-chrome.action.onClicked.addListener((tab) => {
-  // This won't fire if popup is defined, but keeping for safety
-  console.log('Extension icon clicked on tab:', tab.url);
-});
+// Scan seller via API
+async function scanSellerAPI(data, apiKey) {
+  if (!apiKey) {
+    throw new Error('API key required');
+  }
+  
+  const response = await fetch(`${API_BASE}/scan-seller`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`
+    },
+    body: JSON.stringify(data)
+  });
+  
+  const json = await response.json();
+  
+  if (!json.success) {
+    throw new Error(json.error?.message || 'API error');
+  }
+  
+  return json;
+}
 
-// Log when service worker starts
-console.log('LandGuard AI v1.0: Background service worker started');
+// Get API usage
+async function getApiUsage(apiKey) {
+  const response = await fetch(`${API_BASE}/usage`, {
+    headers: {
+      'Authorization': `Bearer ${apiKey}`
+    }
+  });
+  
+  return response.json();
+}
+
+// Log startup
+console.log(`LandGuard AI v${VERSION}: Background service worker started`);

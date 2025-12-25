@@ -3,132 +3,252 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LandGuard AI - Settings</title>
+  <title>LandGuard AI v2.0 - Settings</title>
   <link rel="stylesheet" href="options.css">
 </head>
 <body>
-  <div class="options-container">
+  <div class="container">
     <!-- Header -->
     <header class="header">
-      <div class="header-brand">
-        <div class="logo-icon">
-          <img src="../../icons/icon48.png" alt="LandGuard AI">
-        </div>
-        <div class="brand-text">
-          <h1 class="brand-name">LandGuard AI</h1>
-          <span class="brand-tagline">Settings & Scan History</span>
+      <div class="logo">
+        <img src="../../icons/icon48.png" alt="LandGuard AI" class="logo-icon">
+        <div class="logo-text">
+          <h1>LandGuard AI</h1>
+          <span class="version">v2.0.0</span>
         </div>
       </div>
-      <span class="version">v1.0.0</span>
+      <div class="header-actions">
+        <a href="https://landguardai.co" target="_blank" class="btn btn-secondary">
+          <span>🌐</span> Website
+        </a>
+        <a href="https://landguardai.co/app" target="_blank" class="btn btn-primary">
+          <span>🚀</span> Dashboard
+        </a>
+      </div>
     </header>
 
-    <!-- Settings Card -->
-    <div class="card">
-      <div class="card-header">
-        <h2 class="card-title">
-          <span class="card-title-icon">⚙️</span>
-          Settings
-        </h2>
-      </div>
-
-      <div class="settings-row">
-        <div class="settings-label">
-          <span class="settings-title">🔍 Auto-scan on Supported Sites</span>
-          <span class="settings-subtitle">Automatically analyze listings when you visit Facebook Marketplace, Kijiji, or Craigslist</span>
+    <!-- Main Content -->
+    <main class="main">
+      <!-- API Key Section -->
+      <section class="card">
+        <div class="card-header">
+          <h2>🔑 API Configuration</h2>
+          <span class="tier-badge" id="currentTier">FREE</span>
         </div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="autoScanToggle" checked>
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-
-      <div class="settings-row">
-        <div class="settings-label">
-          <span class="settings-title">📌 Show Banner on All Pages</span>
-          <span class="settings-subtitle">Display the LandGuard AI banner on every website, not just supported listing sites</span>
-        </div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="showBannerToggle">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-
-      <div class="settings-row">
-        <div class="settings-label">
-          <span class="settings-title">🔔 Risk Alert Notifications</span>
-          <span class="settings-subtitle">Show browser notifications when high-risk listings are detected</span>
-        </div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="notificationsToggle" checked>
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-    </div>
-
-    <!-- Scan History Card -->
-    <div class="card">
-      <div class="card-header">
-        <h2 class="card-title">
-          <span class="card-title-icon">📊</span>
-          Scan History
-        </h2>
-      </div>
-
-      <div class="history-header">
-        <span class="history-count" id="historyCount">0 scans saved</span>
-        <button class="clear-history-btn" id="clearHistoryBtn">🗑️ Clear All</button>
-      </div>
-
-      <div id="historyContainer">
-        <div class="history-empty" id="historyEmpty">
-          <div class="history-empty-icon">📋</div>
-          <p>No scans saved yet.</p>
-          <p>Visit a property listing and click "Scan" to analyze it.</p>
-        </div>
-        <div class="history-list" id="historyList" style="display: none;"></div>
-      </div>
-    </div>
-
-    <!-- About Card -->
-    <div class="card">
-      <div class="card-header">
-        <h2 class="card-title">
-          <span class="card-title-icon">🛡️</span>
-          About LandGuard AI
-        </h2>
-      </div>
-
-      <div class="about-content">
-        <p>LandGuard AI protects buyers from land and property scams before money changes hands. Our intelligent risk engine analyzes listings for common scam patterns.</p>
-        <p>Currently supported sites:</p>
-        <div class="supported-sites">
-          <div class="supported-site">
-            <span class="supported-site-icon">📘</span>
-            Facebook Marketplace
-            <span class="supported-site-check">✓</span>
+        <div class="card-body">
+          <p class="description">
+            Connect your LandGuard AI API key for enhanced scanning with advanced AI analysis.
+            <a href="https://landguardai.co/app/api-keys" target="_blank">Get API Key →</a>
+          </p>
+          
+          <div class="input-group">
+            <label>API Key</label>
+            <div class="input-with-btn">
+              <input type="password" id="apiKeyInput" placeholder="lgai_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+              <button class="btn btn-icon" id="toggleApiKey" title="Show/Hide">👁️</button>
+            </div>
           </div>
-          <div class="supported-site">
-            <span class="supported-site-icon">🟢</span>
-            Kijiji
-            <span class="supported-site-check">✓</span>
+          
+          <div class="api-status" id="apiStatus" style="display: none;">
+            <div class="status-icon" id="apiStatusIcon">✓</div>
+            <div class="status-text">
+              <span id="apiStatusTitle">Connected</span>
+              <span id="apiStatusDesc">API key validated successfully</span>
+            </div>
           </div>
-          <div class="supported-site">
-            <span class="supported-site-icon">📋</span>
-            Craigslist
-            <span class="supported-site-check">✓</span>
+          
+          <div class="usage-stats" id="usageStats" style="display: none;">
+            <div class="stat">
+              <span class="stat-value" id="creditsUsed">0</span>
+              <span class="stat-label">Credits Used</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value" id="creditsRemaining">-</span>
+              <span class="stat-label">Remaining</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value" id="resetDate">-</span>
+              <span class="stat-label">Resets</span>
+            </div>
+          </div>
+          
+          <button class="btn btn-primary" id="saveApiKey">
+            <span>💾</span> Save API Key
+          </button>
+        </div>
+      </section>
+
+      <!-- Scanning Settings -->
+      <section class="card">
+        <div class="card-header">
+          <h2>⚙️ Scanning Preferences</h2>
+        </div>
+        <div class="card-body">
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Auto-Scan Listings</span>
+              <span class="setting-desc">Automatically analyze property listings when you visit supported sites</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="autoScan" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Show Security Banner</span>
+              <span class="setting-desc">Display risk assessment banner on property listing pages</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="showBanner" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          
+          <div class="setting-row">
+            <div class="setting-info">
+              <span class="setting-title">Use API for Scans</span>
+              <span class="setting-desc">Use AI-powered API analysis (requires API key)</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="useApiScans" checked>
+              <span class="slider"></span>
+            </label>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
 
-    <!-- Disclaimer -->
-    <div class="disclaimer">
-      ⚠️ <strong>Disclaimer:</strong> LandGuard AI is a risk analysis tool, not legal advice or ownership verification. Always verify property details independently through official land registry records and consult with qualified professionals.
-    </div>
+      <!-- Supported Sites -->
+      <section class="card">
+        <div class="card-header">
+          <h2>🌐 Supported Platforms</h2>
+        </div>
+        <div class="card-body">
+          <p class="description">LandGuard AI automatically monitors these property listing platforms:</p>
+          <div class="sites-grid">
+            <div class="site-item">
+              <span class="site-icon">📘</span>
+              <span class="site-name">Facebook Marketplace</span>
+            </div>
+            <div class="site-item">
+              <span class="site-icon">🟢</span>
+              <span class="site-name">Kijiji</span>
+            </div>
+            <div class="site-item">
+              <span class="site-icon">📋</span>
+              <span class="site-name">Craigslist</span>
+            </div>
+            <div class="site-item">
+              <span class="site-icon">🏠</span>
+              <span class="site-name">Zillow</span>
+            </div>
+            <div class="site-item">
+              <span class="site-icon">🏡</span>
+              <span class="site-name">Realtor.com</span>
+            </div>
+            <div class="site-item">
+              <span class="site-icon">🔑</span>
+              <span class="site-name">Trulia</span>
+            </div>
+            <div class="site-item">
+              <span class="site-icon">🔴</span>
+              <span class="site-name">Redfin</span>
+            </div>
+            <div class="site-item">
+              <span class="site-icon">🇬🇧</span>
+              <span class="site-name">Rightmove</span>
+            </div>
+            <div class="site-item">
+              <span class="site-icon">🏘️</span>
+              <span class="site-name">Zoopla</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Scan History -->
+      <section class="card">
+        <div class="card-header">
+          <h2>📋 Scan History</h2>
+          <button class="btn btn-text btn-danger" id="clearHistory">Clear All</button>
+        </div>
+        <div class="card-body">
+          <div class="history-list" id="historyList">
+            <div class="empty-state">
+              <span class="empty-icon">📋</span>
+              <span class="empty-text">No scan history yet</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- API Pricing -->
+      <section class="card">
+        <div class="card-header">
+          <h2>💰 API Pricing Tiers</h2>
+        </div>
+        <div class="card-body">
+          <div class="pricing-grid">
+            <div class="pricing-item">
+              <div class="pricing-name">Starter</div>
+              <div class="pricing-price">$199<span>/mo</span></div>
+              <div class="pricing-credits">5,000 credits</div>
+              <ul class="pricing-features">
+                <li>✓ Scan Listings</li>
+                <li>✓ Scan Sellers</li>
+                <li>✓ Email Support</li>
+              </ul>
+            </div>
+            <div class="pricing-item featured">
+              <div class="pricing-badge">Popular</div>
+              <div class="pricing-name">Growth</div>
+              <div class="pricing-price">$799<span>/mo</span></div>
+              <div class="pricing-credits">25,000 credits</div>
+              <ul class="pricing-features">
+                <li>✓ All Starter features</li>
+                <li>✓ Document Scanning</li>
+                <li>✓ Priority Support</li>
+              </ul>
+            </div>
+            <div class="pricing-item">
+              <div class="pricing-name">Business</div>
+              <div class="pricing-price">$2,499<span>/mo</span></div>
+              <div class="pricing-credits">100,000 credits</div>
+              <ul class="pricing-features">
+                <li>✓ All Growth features</li>
+                <li>✓ Bulk Scanning</li>
+                <li>✓ Webhooks</li>
+              </ul>
+            </div>
+            <div class="pricing-item">
+              <div class="pricing-name">Enterprise</div>
+              <div class="pricing-price">Custom</div>
+              <div class="pricing-credits">Unlimited</div>
+              <ul class="pricing-features">
+                <li>✓ All Business features</li>
+                <li>✓ Custom Connectors</li>
+                <li>✓ SLA & 24/7 Support</li>
+              </ul>
+            </div>
+          </div>
+          <a href="https://landguardai.co/pricing" target="_blank" class="btn btn-primary btn-full" style="margin-top: 20px;">
+            View Full Pricing →
+          </a>
+        </div>
+      </section>
+    </main>
 
     <!-- Footer -->
     <footer class="footer">
-      <p>LandGuard AI © 2024 • <a href="https://landguardai.co" target="_blank">landguardai.co</a></p>
+      <div class="footer-links">
+        <a href="https://landguardai.co" target="_blank">Website</a>
+        <a href="https://landguardai.co/api-docs" target="_blank">API Docs</a>
+        <a href="https://landguardai.co/privacy" target="_blank">Privacy</a>
+        <a href="https://landguardai.co/terms" target="_blank">Terms</a>
+        <a href="mailto:support@landguardai.co">Support</a>
+      </div>
+      <p class="footer-copy">© 2025 LandGuard AI. All rights reserved.</p>
     </footer>
   </div>
 

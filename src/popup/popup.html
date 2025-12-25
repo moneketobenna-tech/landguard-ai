@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LandGuard AI</title>
+  <title>LandGuard AI v2.0</title>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
@@ -11,79 +11,211 @@
   <div class="header">
     <div class="header-content">
       <div class="logo">
-        <div class="logo-icon">
-          <img src="../../icons/icon48.png" alt="LandGuard AI">
-        </div>
+        <img src="../../icons/icon32.png" alt="LandGuard AI" class="logo-icon">
         <span class="logo-text">LandGuard AI</span>
       </div>
-      <span class="version-badge">v1.0.0</span>
+      <div class="header-right">
+        <span class="tier-badge" id="tierBadge">FREE</span>
+        <span class="version-badge">v2.0</span>
+      </div>
     </div>
   </div>
 
   <!-- Status Bar -->
   <div class="status-bar">
-    <div class="status-dot"></div>
-    <span class="status-text">Property Scam Detection • <strong>Active</strong></span>
+    <div class="status-indicator">
+      <div class="status-dot active"></div>
+      <span>Property Scam Detection • <strong>Active</strong></span>
+    </div>
+    <div class="api-status" id="apiStatus">
+      <span class="api-dot"></span>
+      <span id="apiStatusText">API Ready</span>
+    </div>
   </div>
 
-  <!-- Main Content -->
-  <div class="main-content">
-    <!-- Current Listing -->
+  <!-- Tab Navigation -->
+  <div class="tabs">
+    <button class="tab active" data-tab="listing">
+      <span class="tab-icon">🏠</span>
+      <span>Listing</span>
+    </button>
+    <button class="tab" data-tab="seller">
+      <span class="tab-icon">👤</span>
+      <span>Seller</span>
+    </button>
+    <button class="tab" data-tab="history">
+      <span class="tab-icon">📋</span>
+      <span>History</span>
+    </button>
+  </div>
+
+  <!-- Tab Content: Listing -->
+  <div class="tab-content active" id="tab-listing">
+    <!-- Current URL -->
     <div class="section">
-      <div class="section-label">Current Listing</div>
-      <div class="listing-card">
-        <div class="listing-url" id="currentUrl">No property listing detected</div>
-        <div class="listing-site" id="siteBadge" style="display: none;">
-          <span>✓</span>
-          <span id="siteName">Supported Site</span>
-        </div>
+      <div class="section-header">
+        <span class="section-label">Current Page</span>
+        <span class="site-badge" id="siteBadge">Detecting...</span>
       </div>
+      <div class="url-display" id="currentUrl">Loading...</div>
     </div>
 
-    <!-- Seller Information (Optional) -->
-    <div class="section">
-      <div class="section-label">Seller Information (Optional)</div>
-      <div class="input-group">
-        <label class="input-label">Phone Number</label>
-        <input type="tel" class="input-field" id="phoneInput" placeholder="e.g., +1 555-123-4567">
-      </div>
-      <div class="input-group">
-        <label class="input-label">Email Address</label>
-        <input type="email" class="input-field" id="emailInput" placeholder="e.g., seller@example.com">
-      </div>
-      <div class="input-group">
-        <label class="input-label">Agent / Company Name</label>
-        <input type="text" class="input-field" id="agentInput" placeholder="e.g., ABC Realty">
+    <!-- Listing Details (Optional) -->
+    <div class="section collapsible">
+      <button class="section-toggle" id="toggleDetails">
+        <span>➕ Add Listing Details (Optional)</span>
+      </button>
+      <div class="section-collapse" id="detailsSection">
+        <div class="input-group">
+          <label>Title</label>
+          <input type="text" id="listingTitle" placeholder="Property listing title">
+        </div>
+        <div class="input-group">
+          <label>Description</label>
+          <textarea id="listingDesc" placeholder="Paste listing description here" rows="3"></textarea>
+        </div>
+        <div class="input-row">
+          <div class="input-group half">
+            <label>Price</label>
+            <input type="text" id="listingPrice" placeholder="$">
+          </div>
+          <div class="input-group half">
+            <label>Location</label>
+            <input type="text" id="listingLocation" placeholder="City, State">
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Scan Button -->
     <div class="section">
-      <button class="btn btn-primary" id="scanBtn">
-        <span>🔍</span>
-        <span>Scan This Listing</span>
+      <button class="btn btn-primary btn-full" id="scanListingBtn">
+        <span class="btn-icon">🔍</span>
+        <span class="btn-text">Scan Listing</span>
+      </button>
+      <div class="scan-options">
+        <label class="checkbox-label">
+          <input type="checkbox" id="useApi" checked>
+          <span>Use AI API (more accurate)</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="section results-section" id="listingResults" style="display: none;">
+      <div class="results-card">
+        <div class="results-header">
+          <div class="score-circle" id="scoreCircle">
+            <span class="score-value" id="scoreValue">0</span>
+          </div>
+          <div class="results-meta">
+            <span class="risk-badge" id="riskBadge">Analyzing...</span>
+            <span class="scan-time" id="scanTime"></span>
+          </div>
+        </div>
+        
+        <div class="flags-section">
+          <div class="flags-header">
+            <span class="flags-title">🚩 Risk Flags</span>
+            <span class="flags-count" id="flagsCount">0</span>
+          </div>
+          <ul class="flags-list" id="flagsList"></ul>
+        </div>
+
+        <div class="recommendations-section">
+          <div class="recommendations-title">💡 Recommendations</div>
+          <ul class="recommendations-list" id="recommendationsList"></ul>
+        </div>
+
+        <div class="results-actions">
+          <button class="btn btn-secondary btn-sm" id="saveToHistory">
+            <span>💾</span> Save
+          </button>
+          <button class="btn btn-secondary btn-sm" id="shareResult">
+            <span>📤</span> Share
+          </button>
+          <button class="btn btn-secondary btn-sm" id="reportListing">
+            <span>🚨</span> Report
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Content: Seller -->
+  <div class="tab-content" id="tab-seller">
+    <div class="section">
+      <div class="section-header">
+        <span class="section-label">Seller Verification</span>
+        <span class="pro-badge" id="sellerProBadge">All Tiers</span>
+      </div>
+      <p class="section-desc">Analyze seller information for potential red flags.</p>
+    </div>
+
+    <div class="section">
+      <div class="input-group">
+        <label>Seller Name</label>
+        <input type="text" id="sellerName" placeholder="John Doe">
+      </div>
+      <div class="input-group">
+        <label>Email Address</label>
+        <input type="email" id="sellerEmail" placeholder="seller@example.com">
+      </div>
+      <div class="input-group">
+        <label>Phone Number</label>
+        <input type="tel" id="sellerPhone" placeholder="+1 555-123-4567">
+      </div>
+      <div class="input-group">
+        <label>Profile URL</label>
+        <input type="url" id="sellerProfile" placeholder="https://...">
+      </div>
+    </div>
+
+    <div class="section">
+      <button class="btn btn-primary btn-full" id="scanSellerBtn">
+        <span class="btn-icon">👤</span>
+        <span class="btn-text">Verify Seller</span>
       </button>
     </div>
 
-    <!-- Results (Hidden by default) -->
-    <div class="section" id="resultsSection" style="display: none;">
+    <!-- Seller Results -->
+    <div class="section results-section" id="sellerResults" style="display: none;">
       <div class="results-card">
         <div class="results-header">
-          <div class="score-display">
-            <span class="score-value" id="scoreValue">0</span>
-            <span class="score-max">/100</span>
+          <div class="score-circle" id="sellerScoreCircle">
+            <span class="score-value" id="sellerScoreValue">0</span>
           </div>
-          <span class="risk-badge" id="riskBadge">Low Risk</span>
+          <div class="results-meta">
+            <span class="risk-badge" id="sellerRiskBadge">Analyzing...</span>
+          </div>
         </div>
         <div class="flags-section">
-          <div class="flags-title">Risk Flags Detected</div>
-          <ul class="flags-list" id="flagsList">
-            <li class="flag-item">
-              <span class="flag-icon">✓</span>
-              <span>No major red flags detected</span>
-            </li>
-          </ul>
+          <div class="flags-header">
+            <span class="flags-title">🚩 Seller Flags</span>
+          </div>
+          <ul class="flags-list" id="sellerFlagsList"></ul>
         </div>
+        <div class="recommendations-section">
+          <div class="recommendations-title">💡 Recommendations</div>
+          <ul class="recommendations-list" id="sellerRecommendationsList"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Content: History -->
+  <div class="tab-content" id="tab-history">
+    <div class="section">
+      <div class="section-header">
+        <span class="section-label">Scan History</span>
+        <button class="btn btn-text" id="clearHistory">Clear All</button>
+      </div>
+    </div>
+    
+    <div class="history-list" id="historyList">
+      <div class="empty-state">
+        <span class="empty-icon">📋</span>
+        <span class="empty-text">No scans yet</span>
       </div>
     </div>
   </div>
@@ -91,13 +223,12 @@
   <!-- Footer -->
   <div class="footer">
     <div class="footer-links">
-      <a href="#" class="footer-link" id="optionsLink">Settings</a>
-      <a href="https://landguardai.co" class="footer-link" target="_blank">Website</a>
-      <a href="#" class="footer-link" id="historyLink">History</a>
+      <a href="#" id="settingsLink">⚙️ Settings</a>
+      <a href="https://landguardai.co" target="_blank">🌐 Website</a>
+      <a href="https://landguardai.co/api-docs" target="_blank">📚 API Docs</a>
     </div>
-    <div class="footer-disclaimer">
-      ⚠️ This is a risk analysis tool, not legal advice or ownership verification.<br>
-      Always verify property details independently.
+    <div class="footer-credits">
+      <span id="creditsDisplay">-</span>
     </div>
   </div>
 

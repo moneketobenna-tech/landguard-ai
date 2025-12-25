@@ -1,60 +1,82 @@
-// LandGuard AI - Popup Script
-// Professional Property Scam Detection
+/**
+ * LandGuard AI v2.0 - Popup Script
+ * Enhanced Property Scam Detection with API Integration
+ */
 
-// Brand Constants
-const BRAND = {
-  name: 'LandGuard AI',
-  version: '1.0.0',
-  colors: {
-    primaryBlue: '#0A5CFF',
-    secondaryGreen: '#2ECC71',
-    dangerRed: '#E74C3C',
-    warningAmber: '#F39C12',
-    safeGreen: '#27AE60'
-  }
-};
+// Constants
+const API_BASE = 'https://landguardai.co/api/v1';
+const VERSION = '2.0.0';
 
-// Supported sites
+// Supported sites with their icons
 const SUPPORTED_SITES = [
   { hostname: 'facebook.com', name: 'Facebook Marketplace', icon: '📘' },
   { hostname: 'kijiji.ca', name: 'Kijiji', icon: '🟢' },
-  { hostname: 'craigslist.org', name: 'Craigslist', icon: '📋' }
+  { hostname: 'craigslist.org', name: 'Craigslist', icon: '📋' },
+  { hostname: 'zillow.com', name: 'Zillow', icon: '🏠' },
+  { hostname: 'realtor.com', name: 'Realtor.com', icon: '🏡' },
+  { hostname: 'trulia.com', name: 'Trulia', icon: '🔑' },
+  { hostname: 'redfin.com', name: 'Redfin', icon: '🔴' },
+  { hostname: 'rightmove.co.uk', name: 'Rightmove', icon: '🇬🇧' },
+  { hostname: 'zoopla.co.uk', name: 'Zoopla', icon: '🏘️' }
 ];
 
-// DOM Elements
-const elements = {
-  currentUrl: document.getElementById('currentUrl'),
-  siteBadge: document.getElementById('siteBadge'),
-  sellerPhone: document.getElementById('sellerPhone'),
-  sellerEmail: document.getElementById('sellerEmail'),
-  agentName: document.getElementById('agentName'),
-  scanBtn: document.getElementById('scanBtn'),
-  settingsBtn: document.getElementById('settingsBtn'),
-  resultsSection: document.getElementById('resultsSection'),
-  scoreValue: document.getElementById('scoreValue'),
-  scorePercent: document.getElementById('scorePercent'),
-  scoreBarFill: document.getElementById('scoreBarFill'),
-  riskPill: document.getElementById('riskPill'),
-  flagsList: document.getElementById('flagsList'),
-  recommendationsList: document.getElementById('recommendationsList'),
-  explanationText: document.getElementById('explanationText'),
-  saveBtn: document.getElementById('saveBtn')
+// State
+let currentTab = null;
+let settings = {
+  apiKey: '',
+  tier: 'free',
+  autoScan: true
 };
 
-// Initialize popup
+// Initialize
 document.addEventListener('DOMContentLoaded', async () => {
+  await loadSettings();
   await loadCurrentTab();
   setupEventListeners();
+  setupTabs();
+  loadHistory();
+  updateCreditsDisplay();
 });
+
+// Load settings from storage
+async function loadSettings() {
+  try {
+    const result = await chrome.storage.local.get(['lg_settings', 'lg_api_key']);
+    if (result.lg_settings) {
+      settings = { ...settings, ...result.lg_settings };
+    }
+    if (result.lg_api_key) {
+      settings.apiKey = result.lg_api_key;
+    }
+    
+    // Update tier badge
+    const tierBadge = document.getElementById('tierBadge');
+    if (settings.tier === 'pro') {
+      tierBadge.textContent = 'PRO';
+      tierBadge.classList.add('pro');
+    } else {
+      tierBadge.textContent = 'FREE';
+    }
+  } catch (e) {
+    console.error('Error loading settings:', e);
+  }
+}
 
 // Load current tab URL
 async function loadCurrentTab() {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    currentTab = tab;
+    
     if (tab && tab.url) {
       const url = new URL(tab.url);
-      elements.currentUrl.textContent = tab.url;
-      elements.currentUrl.classList.remove('no-url');
+      const urlDisplay = document.getElementById('currentUrl');
+      const siteBadge = document.getElementById('siteBadge');
+      
+      // Truncate URL for display
+      urlDisplay.textContent = tab.url.length > 80 
+        ? tab.url.substring(0, 80) + '...' 
+        : tab.url;
       
       // Check if supported site
       const supportedSite = SUPPORTED_SITES.find(site => 
@@ -62,331 +84,532 @@ async function loadCurrentTab() {
       );
       
       if (supportedSite) {
-        elements.siteBadge.innerHTML = `
-          <span class="site-badge">
-            ${supportedSite.icon} ${supportedSite.name} • Supported
-          </span>
-        `;
+        siteBadge.innerHTML = `${supportedSite.icon} ${supportedSite.name}`;
+        siteBadge.classList.remove('unsupported');
       } else {
-        elements.siteBadge.innerHTML = `
-          <span class="site-badge unsupported">
-            ⚠️ Site not in auto-scan list
-          </span>
-        `;
+        siteBadge.innerHTML = '⚠️ Unknown Site';
+        siteBadge.classList.add('unsupported');
       }
-    } else {
-      elements.currentUrl.textContent = 'No URL detected';
-      elements.currentUrl.classList.add('no-url');
     }
-  } catch (error) {
-    console.error('Error loading tab:', error);
-    elements.currentUrl.textContent = 'Unable to load URL';
-    elements.currentUrl.classList.add('no-url');
+  } catch (e) {
+    console.error('Error loading tab:', e);
+    document.getElementById('currentUrl').textContent = 'Unable to detect URL';
   }
 }
 
 // Setup event listeners
 function setupEventListeners() {
-  elements.scanBtn.addEventListener('click', performScan);
-  elements.saveBtn.addEventListener('click', saveScan);
-  elements.settingsBtn.addEventListener('click', openSettings);
+  // Scan buttons
+  document.getElementById('scanListingBtn').addEventListener('click', scanListing);
+  document.getElementById('scanSellerBtn').addEventListener('click', scanSeller);
+  
+  // Toggle details
+  document.getElementById('toggleDetails').addEventListener('click', () => {
+    const section = document.getElementById('detailsSection');
+    const toggle = document.getElementById('toggleDetails');
+    section.classList.toggle('open');
+    toggle.querySelector('span').textContent = section.classList.contains('open') 
+      ? '➖ Hide Listing Details' 
+      : '➕ Add Listing Details (Optional)';
+  });
+  
+  // Settings link
+  document.getElementById('settingsLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    chrome.runtime.openOptionsPage();
+  });
+  
+  // Result actions
+  document.getElementById('saveToHistory')?.addEventListener('click', saveCurrentScan);
+  document.getElementById('clearHistory')?.addEventListener('click', clearHistory);
 }
 
-// Open settings page
-function openSettings() {
-  chrome.runtime.openOptionsPage();
+// Setup tab navigation
+function setupTabs() {
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      // Remove active from all tabs
+      tabs.forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      
+      // Activate clicked tab
+      tab.classList.add('active');
+      const tabId = tab.dataset.tab;
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+    });
+  });
 }
 
-// Perform scan
-async function performScan() {
+// Scan Listing
+async function scanListing() {
+  const btn = document.getElementById('scanListingBtn');
+  const resultsSection = document.getElementById('listingResults');
+  const useApi = document.getElementById('useApi').checked;
+  
   // Update button state
-  elements.scanBtn.disabled = true;
-  elements.scanBtn.innerHTML = `
-    <span class="loading-spinner"></span>
-    <span class="scan-btn-text">Analyzing...</span>
-  `;
-
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div><span>Analyzing...</span>';
+  
   try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    // Gather listing data
+    const listingData = {
+      url: currentTab?.url || '',
+      title: document.getElementById('listingTitle').value.trim(),
+      description: document.getElementById('listingDesc').value.trim(),
+      price: parsePrice(document.getElementById('listingPrice').value),
+      location: document.getElementById('listingLocation').value.trim()
+    };
     
-    // Get page content via content script
-    let pageData = {};
+    // Try to get page data from content script
     try {
-      const response = await chrome.tabs.sendMessage(tab.id, { action: 'getPageData' });
-      if (response) {
-        pageData = response;
+      const pageData = await chrome.tabs.sendMessage(currentTab.id, { action: 'getPageData' });
+      if (pageData) {
+        listingData.title = listingData.title || pageData.title;
+        listingData.description = listingData.description || pageData.description;
+        listingData.price = listingData.price || parsePrice(pageData.price);
       }
     } catch (e) {
-      console.log('Content script not available, using basic scan');
+      console.log('Content script not available');
     }
-
-    // Prepare scan input
-    const scanInput = {
-      url: tab.url || '',
-      sellerPhone: elements.sellerPhone.value.trim(),
-      sellerEmail: elements.sellerEmail.value.trim(),
-      agentName: elements.agentName.value.trim(),
-      listingTitle: pageData.title || '',
-      listingDescription: pageData.description || '',
-      listingPrice: pageData.price || '',
-      listingImagesCount: pageData.imageCount || 0
-    };
-
-    // Perform local risk analysis
-    const result = scanListing(scanInput);
+    
+    let result;
+    
+    if (useApi && settings.apiKey) {
+      // Use API for scanning
+      result = await scanListingAPI(listingData);
+    } else {
+      // Use local scanning
+      result = scanListingLocal(listingData);
+    }
     
     // Display results
-    displayResults(result);
-
+    displayListingResults(result);
+    resultsSection.style.display = 'block';
+    
+    // Store for saving
+    resultsSection.dataset.result = JSON.stringify({
+      ...result,
+      url: listingData.url,
+      timestamp: Date.now()
+    });
+    
   } catch (error) {
     console.error('Scan error:', error);
-    alert('Error performing scan. Please try again.');
+    alert('Error scanning listing. Please try again.');
   } finally {
-    // Reset button
-    elements.scanBtn.disabled = false;
-    elements.scanBtn.innerHTML = `
-      <span class="scan-btn-icon">🔍</span>
-      <span class="scan-btn-text">Scan This Listing</span>
-    `;
+    btn.disabled = false;
+    btn.innerHTML = '<span class="btn-icon">🔍</span><span class="btn-text">Scan Listing</span>';
   }
 }
 
-// Local Risk Engine
-function scanListing(input) {
+// Scan Listing via API
+async function scanListingAPI(data) {
+  const response = await fetch(`${API_BASE}/scan-listing`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${settings.apiKey}`
+    },
+    body: JSON.stringify(data)
+  });
+  
+  const json = await response.json();
+  
+  if (!json.success) {
+    throw new Error(json.error?.message || 'API error');
+  }
+  
+  // Update credits display
+  if (json.meta?.creditsRemaining !== undefined) {
+    updateCreditsDisplay(json.meta.creditsRemaining);
+  }
+  
+  return json.data;
+}
+
+// Local Listing Scan (Fallback)
+function scanListingLocal(data) {
   let score = 0;
   const flags = [];
   const recommendations = [];
-
-  // --- Price Analysis ---
-  if (input.listingPrice) {
-    const priceMatch = input.listingPrice.match(/(\d[\d,\.]*)/);
-    if (priceMatch) {
-      const price = parseFloat(priceMatch[1].replace(/,/g, ''));
-      if (price < 5000) {
-        score += 25;
-        flags.push({ text: 'Unrealistically low price detected', severity: 'high' });
-        recommendations.push('Verify property value independently. Prices this low are often scam indicators.');
-      } else if (price < 20000) {
-        score += 12;
-        flags.push({ text: 'Potentially suspicious pricing', severity: 'medium' });
-        recommendations.push('Research comparable properties in the area to verify pricing.');
-      }
+  
+  const text = `${data.title} ${data.description} ${data.location}`.toLowerCase();
+  
+  // Price analysis
+  if (data.price) {
+    if (data.price < 5000) {
+      score += 25;
+      flags.push({ severity: 'high', description: 'Unrealistically low price detected' });
+    } else if (data.price < 20000) {
+      score += 12;
+      flags.push({ severity: 'medium', description: 'Suspiciously low pricing' });
     }
-  } else {
-    score += 8;
-    flags.push({ text: 'No price information found', severity: 'low' });
   }
-
-  // --- Urgency Language Detection ---
-  const description = (input.listingTitle || '') + ' ' + (input.listingDescription || '');
+  
+  // Urgency patterns
   const urgencyPatterns = [
     { pattern: /urgent|urgently/i, weight: 15, text: 'Urgency language detected' },
     { pattern: /quick sale|fast sale/i, weight: 15, text: 'Pressure to sell quickly' },
-    { pattern: /deposit today|immediate deposit/i, weight: 20, text: 'Immediate deposit requested' },
-    { pattern: /wire transfer/i, weight: 25, text: 'Wire transfer mentioned' },
+    { pattern: /wire transfer/i, weight: 25, text: 'Wire transfer requested' },
     { pattern: /gift card/i, weight: 30, text: 'Gift card payment requested' },
-    { pattern: /act fast|act now|limited time/i, weight: 12, text: 'Time pressure tactics' },
-    { pattern: /overseas|abroad|out of country/i, weight: 18, text: 'Seller claims to be overseas' },
-    { pattern: /cannot meet|can\'t meet|unable to meet/i, weight: 15, text: 'Seller refuses in-person meeting' }
-  ];
-
-  urgencyPatterns.forEach(({ pattern, weight, text }) => {
-    if (pattern.test(description)) {
-      score += weight;
-      flags.push({ text, severity: weight >= 20 ? 'high' : 'medium' });
-    }
-  });
-
-  if (flags.some(f => f.text.includes('Wire transfer') || f.text.includes('Gift card'))) {
-    recommendations.push('NEVER send money via wire transfer or gift cards. These payments are irreversible.');
-  }
-
-  if (flags.some(f => f.text.includes('overseas') || f.text.includes('meeting'))) {
-    recommendations.push('Always meet sellers in person and visit the property before any payment.');
-  }
-
-  // --- Contact Pattern Analysis ---
-  if (input.sellerPhone) {
-    const phoneClean = input.sellerPhone.replace(/[\s\-\.\(\)]/g, '');
-    if (!/^\+?\d{7,15}$/.test(phoneClean)) {
-      score += 10;
-      flags.push({ text: 'Suspicious phone number format', severity: 'medium' });
-    }
-  }
-
-  if (input.sellerEmail) {
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.sellerEmail)) {
-      score += 10;
-      flags.push({ text: 'Invalid email format', severity: 'medium' });
-    }
-    if (/temp|fake|trash|guerrilla/i.test(input.sellerEmail)) {
-      score += 15;
-      flags.push({ text: 'Temporary/disposable email detected', severity: 'high' });
-    }
-  }
-
-  if (/whatsapp only|text only|sms only/i.test(description)) {
-    score += 15;
-    flags.push({ text: 'Communication restricted to messaging apps', severity: 'medium' });
-    recommendations.push('Be cautious of sellers who avoid phone calls or official channels.');
-  }
-
-  // --- Image Analysis ---
-  if (input.listingImagesCount !== undefined) {
-    if (input.listingImagesCount === 0) {
-      score += 20;
-      flags.push({ text: 'No images provided', severity: 'high' });
-      recommendations.push('Request multiple photos of the property from different angles.');
-    } else if (input.listingImagesCount < 3) {
-      score += 12;
-      flags.push({ text: `Very few images (${input.listingImagesCount})`, severity: 'medium' });
-    }
-  }
-
-  // --- Generic Phrasing Detection ---
-  const genericPhrases = [
-    /great opportunity/i,
-    /investment property/i,
-    /must see/i,
-    /prime location/i,
-    /won\'t last/i,
-    /dream home/i
+    { pattern: /bitcoin|crypto/i, weight: 20, text: 'Cryptocurrency payment' },
+    { pattern: /deposit today|immediate deposit/i, weight: 22, text: 'Immediate deposit requested' },
+    { pattern: /overseas|abroad|out of country/i, weight: 18, text: 'Seller claims overseas' },
+    { pattern: /cannot meet|can't meet/i, weight: 15, text: 'Refuses in-person meeting' },
+    { pattern: /whatsapp only|text only/i, weight: 12, text: 'Unusual contact method' }
   ];
   
-  const genericCount = genericPhrases.filter(p => p.test(description)).length;
-  if (genericCount >= 3) {
-    score += 8;
-    flags.push({ text: 'Excessive generic marketing language', severity: 'low' });
-  }
-
-  // --- Cap score ---
-  score = Math.min(100, Math.max(0, score));
-
-  // --- Determine risk level ---
-  let riskLevel;
-  if (score >= 60) {
-    riskLevel = 'HIGH';
-  } else if (score >= 30) {
-    riskLevel = 'MEDIUM';
-  } else {
-    riskLevel = 'LOW';
-  }
-
-  // --- Default recommendations ---
-  if (recommendations.length === 0) {
-    if (riskLevel === 'LOW') {
-      recommendations.push('This listing shows minimal red flags, but always verify independently.');
+  urgencyPatterns.forEach(({ pattern, weight, text }) => {
+    if (pattern.test(text)) {
+      score += weight;
+      flags.push({ 
+        severity: weight >= 20 ? 'high' : 'medium', 
+        description: text 
+      });
     }
-    recommendations.push('Never send money without seeing the property in person.');
-    recommendations.push('Verify ownership through official land registry records.');
+  });
+  
+  // Cap score
+  score = Math.min(100, Math.max(0, score));
+  
+  // Determine risk level
+  let riskLevel;
+  if (score >= 70) riskLevel = 'critical';
+  else if (score >= 50) riskLevel = 'high';
+  else if (score >= 30) riskLevel = 'medium';
+  else if (score >= 10) riskLevel = 'low';
+  else riskLevel = 'safe';
+  
+  // Generate recommendations
+  if (riskLevel === 'critical' || riskLevel === 'high') {
+    recommendations.push('⛔ Do NOT send any money or deposit');
+    recommendations.push('🔍 Verify property ownership independently');
+    recommendations.push('📞 Report this listing to the platform');
+  } else if (riskLevel === 'medium') {
+    recommendations.push('⚠️ Proceed with extreme caution');
+    recommendations.push('🔍 Verify seller identity');
+    recommendations.push('🏛️ Check county property records');
+  } else {
+    recommendations.push('✅ Listing appears legitimate');
+    recommendations.push('📋 Standard due diligence recommended');
   }
-
+  
   return {
+    scanId: `local_${Date.now()}`,
     score,
     riskLevel,
     flags,
     recommendations,
-    scannedAt: Date.now(),
-    url: input.url
-  };
-}
-
-// Display results
-function displayResults(result) {
-  const { score, riskLevel, flags, recommendations } = result;
-
-  // Show results section
-  elements.resultsSection.style.display = 'block';
-
-  // Update score
-  const levelClass = riskLevel.toLowerCase();
-  elements.scoreValue.textContent = score;
-  elements.scoreValue.className = `score-value ${levelClass}`;
-
-  // Update score bar
-  elements.scorePercent.textContent = `${score}%`;
-  elements.scoreBarFill.style.width = `${score}%`;
-  elements.scoreBarFill.className = `score-bar-fill ${levelClass}`;
-
-  // Update risk pill
-  const riskLabels = {
-    'LOW': '✓ Low Risk',
-    'MEDIUM': '⚠️ Medium Risk',
-    'HIGH': '🚨 High Risk'
-  };
-  elements.riskPill.textContent = riskLabels[riskLevel];
-  elements.riskPill.className = `risk-pill ${levelClass}`;
-
-  // Update flags
-  elements.flagsList.innerHTML = '';
-  if (flags.length > 0) {
-    flags.forEach(flag => {
-      const li = document.createElement('li');
-      const iconClass = flag.severity === 'high' ? 'danger' : flag.severity === 'medium' ? 'warning' : 'safe';
-      const icon = flag.severity === 'high' ? '🚨' : flag.severity === 'medium' ? '⚠️' : 'ℹ️';
-      li.innerHTML = `<span class="flag-icon ${iconClass}">${icon}</span><span>${flag.text}</span>`;
-      elements.flagsList.appendChild(li);
-    });
-  } else {
-    const li = document.createElement('li');
-    li.innerHTML = '<span class="flag-icon safe">✅</span><span>No significant red flags detected</span>';
-    elements.flagsList.appendChild(li);
-  }
-
-  // Update recommendations
-  elements.recommendationsList.innerHTML = '';
-  recommendations.forEach(rec => {
-    const li = document.createElement('li');
-    li.textContent = rec;
-    elements.recommendationsList.appendChild(li);
-  });
-
-  // Update explanation
-  const explanations = {
-    'LOW': 'This listing shows minimal suspicious patterns. However, always verify property ownership through official channels before making any payments.',
-    'MEDIUM': 'This listing has some concerning elements that warrant caution. Thoroughly investigate before proceeding and never send money without proper verification.',
-    'HIGH': 'This listing displays multiple high-risk indicators commonly associated with property scams. Exercise extreme caution and consider avoiding this listing entirely.'
-  };
-  elements.explanationText.textContent = explanations[riskLevel];
-
-  // Store result for saving
-  elements.saveBtn.dataset.result = JSON.stringify(result);
-
-  // Scroll to results
-  elements.resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-// Save scan to history
-async function saveScan() {
-  try {
-    const result = JSON.parse(elements.saveBtn.dataset.result);
-    
-    // Get existing history
-    const storage = await chrome.storage.local.get('landguard_scan_history');
-    let history = storage.landguard_scan_history || [];
-
-    // Add new scan at the beginning
-    history.unshift(result);
-
-    // Keep max 50 scans
-    if (history.length > 50) {
-      history = history.slice(0, 50);
+    metadata: {
+      scannedAt: new Date().toISOString(),
+      apiVersion: 'local'
     }
+  };
+}
 
-    // Save
-    await chrome.storage.local.set({ landguard_scan_history: history });
+// Display Listing Results
+function displayListingResults(result) {
+  const { score, riskLevel, flags, recommendations } = result;
+  
+  // Score circle
+  const scoreCircle = document.getElementById('scoreCircle');
+  const scoreValue = document.getElementById('scoreValue');
+  scoreCircle.className = `score-circle ${riskLevel}`;
+  scoreValue.textContent = score;
+  
+  // Risk badge
+  const riskBadge = document.getElementById('riskBadge');
+  const riskLabels = {
+    safe: '✅ Safe',
+    low: '✓ Low Risk',
+    medium: '⚠️ Medium Risk',
+    high: '🚨 High Risk',
+    critical: '⛔ Critical Risk'
+  };
+  riskBadge.textContent = riskLabels[riskLevel] || riskLevel;
+  riskBadge.className = `risk-badge ${riskLevel}`;
+  
+  // Scan time
+  document.getElementById('scanTime').textContent = 
+    `Scanned ${new Date().toLocaleTimeString()}`;
+  
+  // Flags
+  const flagsList = document.getElementById('flagsList');
+  const flagsCount = document.getElementById('flagsCount');
+  flagsCount.textContent = flags.length;
+  
+  flagsList.innerHTML = flags.length > 0 
+    ? flags.map(flag => `
+        <li class="${flag.severity || 'medium'}">
+          <span class="flag-icon">${flag.severity === 'high' ? '🚨' : '⚠️'}</span>
+          <span>${flag.description}</span>
+        </li>
+      `).join('')
+    : '<li class="low"><span class="flag-icon">✅</span><span>No significant red flags detected</span></li>';
+  
+  // Recommendations
+  const recList = document.getElementById('recommendationsList');
+  recList.innerHTML = recommendations.map(rec => `<li>${rec}</li>`).join('');
+}
 
+// Scan Seller
+async function scanSeller() {
+  const btn = document.getElementById('scanSellerBtn');
+  const resultsSection = document.getElementById('sellerResults');
+  
+  // Gather seller data
+  const sellerData = {
+    name: document.getElementById('sellerName').value.trim(),
+    email: document.getElementById('sellerEmail').value.trim(),
+    phone: document.getElementById('sellerPhone').value.trim(),
+    profileUrl: document.getElementById('sellerProfile').value.trim()
+  };
+  
+  // Validate at least one field
+  if (!sellerData.name && !sellerData.email && !sellerData.phone && !sellerData.profileUrl) {
+    alert('Please enter at least one seller detail');
+    return;
+  }
+  
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div><span>Verifying...</span>';
+  
+  try {
+    let result;
+    
+    if (settings.apiKey) {
+      // Use API
+      const response = await fetch(`${API_BASE}/scan-seller`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${settings.apiKey}`
+        },
+        body: JSON.stringify(sellerData)
+      });
+      
+      const json = await response.json();
+      if (json.success) {
+        result = json.data;
+        if (json.meta?.creditsRemaining !== undefined) {
+          updateCreditsDisplay(json.meta.creditsRemaining);
+        }
+      } else {
+        throw new Error(json.error?.message || 'API error');
+      }
+    } else {
+      // Local scan
+      result = scanSellerLocal(sellerData);
+    }
+    
+    displaySellerResults(result);
+    resultsSection.style.display = 'block';
+    
+  } catch (error) {
+    console.error('Seller scan error:', error);
+    alert('Error verifying seller. Please try again.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span class="btn-icon">👤</span><span class="btn-text">Verify Seller</span>';
+  }
+}
+
+// Local Seller Scan
+function scanSellerLocal(data) {
+  let score = 0;
+  const flags = [];
+  const recommendations = [];
+  
+  // Email analysis
+  if (data.email) {
+    if (/temp|fake|trash|guerrilla/i.test(data.email)) {
+      score += 20;
+      flags.push({ severity: 'high', description: 'Disposable email detected' });
+    }
+    if (/\d{4,}/.test(data.email)) {
+      score += 8;
+      flags.push({ severity: 'medium', description: 'Email contains many numbers' });
+    }
+  }
+  
+  // Phone analysis
+  if (data.phone) {
+    const cleaned = data.phone.replace(/\D/g, '');
+    if (cleaned.length < 7 || cleaned.length > 15) {
+      score += 10;
+      flags.push({ severity: 'medium', description: 'Invalid phone format' });
+    }
+  }
+  
+  score = Math.min(100, score);
+  
+  let riskLevel;
+  if (score >= 50) riskLevel = 'high';
+  else if (score >= 25) riskLevel = 'medium';
+  else if (score >= 10) riskLevel = 'low';
+  else riskLevel = 'safe';
+  
+  recommendations.push('🔍 Search seller name online');
+  recommendations.push('📞 Verify phone number is active');
+  if (riskLevel !== 'safe') {
+    recommendations.push('⚠️ Request video call verification');
+  }
+  
+  return {
+    scanId: `seller_${Date.now()}`,
+    score,
+    riskLevel,
+    flags,
+    recommendations
+  };
+}
+
+// Display Seller Results
+function displaySellerResults(result) {
+  const { score, riskLevel, flags, recommendations } = result;
+  
+  const scoreCircle = document.getElementById('sellerScoreCircle');
+  const scoreValue = document.getElementById('sellerScoreValue');
+  scoreCircle.className = `score-circle ${riskLevel}`;
+  scoreValue.textContent = score;
+  
+  const riskBadge = document.getElementById('sellerRiskBadge');
+  const riskLabels = {
+    safe: '✅ Verified',
+    low: '✓ Low Risk',
+    medium: '⚠️ Caution',
+    high: '🚨 High Risk'
+  };
+  riskBadge.textContent = riskLabels[riskLevel] || riskLevel;
+  riskBadge.className = `risk-badge ${riskLevel}`;
+  
+  const flagsList = document.getElementById('sellerFlagsList');
+  flagsList.innerHTML = flags.length > 0
+    ? flags.map(f => `
+        <li class="${f.severity}">
+          <span class="flag-icon">${f.severity === 'high' ? '🚨' : '⚠️'}</span>
+          <span>${f.description}</span>
+        </li>
+      `).join('')
+    : '<li class="low"><span class="flag-icon">✅</span><span>No red flags found</span></li>';
+  
+  const recList = document.getElementById('sellerRecommendationsList');
+  recList.innerHTML = recommendations.map(r => `<li>${r}</li>`).join('');
+}
+
+// Parse price string to number
+function parsePrice(priceStr) {
+  if (!priceStr) return null;
+  const match = priceStr.toString().match(/[\d,]+\.?\d*/);
+  if (match) {
+    return parseFloat(match[0].replace(/,/g, ''));
+  }
+  return null;
+}
+
+// Save current scan to history
+async function saveCurrentScan() {
+  const resultsSection = document.getElementById('listingResults');
+  if (!resultsSection.dataset.result) return;
+  
+  try {
+    const result = JSON.parse(resultsSection.dataset.result);
+    const storage = await chrome.storage.local.get('lg_scan_history');
+    let history = storage.lg_scan_history || [];
+    
+    history.unshift(result);
+    if (history.length > 50) history = history.slice(0, 50);
+    
+    await chrome.storage.local.set({ lg_scan_history: history });
+    
     // Update button
-    elements.saveBtn.classList.add('saved');
-    elements.saveBtn.innerHTML = '<span>✓</span> Saved to History';
+    const btn = document.getElementById('saveToHistory');
+    btn.innerHTML = '<span>✓</span> Saved!';
+    btn.disabled = true;
     
     setTimeout(() => {
-      elements.saveBtn.classList.remove('saved');
-      elements.saveBtn.innerHTML = '<span>💾</span> Save Scan to History';
+      btn.innerHTML = '<span>💾</span> Save';
+      btn.disabled = false;
     }, 2000);
+    
+    loadHistory();
+  } catch (e) {
+    console.error('Error saving:', e);
+  }
+}
 
-  } catch (error) {
-    console.error('Error saving scan:', error);
-    alert('Error saving scan. Please try again.');
+// Load history
+async function loadHistory() {
+  try {
+    const storage = await chrome.storage.local.get('lg_scan_history');
+    const history = storage.lg_scan_history || [];
+    const historyList = document.getElementById('historyList');
+    
+    if (history.length === 0) {
+      historyList.innerHTML = `
+        <div class="empty-state">
+          <span class="empty-icon">📋</span>
+          <span class="empty-text">No scans yet</span>
+        </div>
+      `;
+      return;
+    }
+    
+    historyList.innerHTML = history.slice(0, 20).map(item => {
+      const date = new Date(item.timestamp);
+      const riskClass = item.riskLevel || (item.score >= 60 ? 'high' : item.score >= 30 ? 'medium' : 'low');
+      const url = item.url || 'Unknown URL';
+      
+      return `
+        <div class="history-item" data-url="${url}">
+          <div class="history-info">
+            <div class="history-url">${url.length > 40 ? url.substring(0, 40) + '...' : url}</div>
+            <div class="history-date">${date.toLocaleDateString()} ${date.toLocaleTimeString()}</div>
+          </div>
+          <div class="history-score">
+            <span class="history-score-value ${riskClass}">${item.score}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+  } catch (e) {
+    console.error('Error loading history:', e);
+  }
+}
+
+// Clear history
+async function clearHistory() {
+  if (confirm('Clear all scan history?')) {
+    await chrome.storage.local.set({ lg_scan_history: [] });
+    loadHistory();
+  }
+}
+
+// Update credits display
+async function updateCreditsDisplay(credits) {
+  const display = document.getElementById('creditsDisplay');
+  
+  if (credits !== undefined) {
+    display.textContent = credits === -1 ? '∞ Unlimited' : `${credits} credits`;
+    return;
+  }
+  
+  if (settings.apiKey) {
+    try {
+      const response = await fetch(`${API_BASE}/usage`, {
+        headers: { 'Authorization': `Bearer ${settings.apiKey}` }
+      });
+      const json = await response.json();
+      if (json.success && json.data?.usage) {
+        const remaining = json.data.usage.remaining;
+        display.textContent = remaining === 'Unlimited' ? '∞ Unlimited' : `${remaining} credits`;
+      }
+    } catch (e) {
+      display.textContent = 'Credits: -';
+    }
+  } else {
+    display.textContent = 'Free mode (limited)';
   }
 }

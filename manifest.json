@@ -1,12 +1,12 @@
 {
   "name": "LandGuard AI - Property Scam Detector",
-  "description": "Protect yourself from land and property scams. AI-powered risk analysis for real estate listings.",
-  "version": "1.0.0",
+  "description": "Protect yourself from land and property scams. AI-powered risk analysis for real estate listings with seller verification and document scanning.",
+  "version": "2.0.0",
   "manifest_version": 3,
 
   "action": {
     "default_popup": "src/popup/popup.html",
-    "default_title": "LandGuard AI v1.0",
+    "default_title": "LandGuard AI v2.0",
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",
@@ -31,7 +31,15 @@
   "host_permissions": [
     "*://*.facebook.com/*",
     "*://*.kijiji.ca/*",
-    "*://*.craigslist.org/*"
+    "*://*.craigslist.org/*",
+    "*://*.zillow.com/*",
+    "*://*.realtor.com/*",
+    "*://*.trulia.com/*",
+    "*://*.redfin.com/*",
+    "*://*.rightmove.co.uk/*",
+    "*://*.zoopla.co.uk/*",
+    "https://landguardai.co/*",
+    "https://www.landguardai.co/*"
   ],
 
   "background": {
@@ -43,7 +51,13 @@
       "matches": [
         "*://*.facebook.com/marketplace/*",
         "*://*.kijiji.ca/*",
-        "*://*.craigslist.org/*"
+        "*://*.craigslist.org/*",
+        "*://*.zillow.com/*",
+        "*://*.realtor.com/*",
+        "*://*.trulia.com/*",
+        "*://*.redfin.com/*",
+        "*://*.rightmove.co.uk/*",
+        "*://*.zoopla.co.uk/*"
       ],
       "js": ["src/content/content.js"],
       "css": ["src/content/content.css"],

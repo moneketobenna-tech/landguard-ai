@@ -1,8 +1,8 @@
 'use client'
 
 /**
- * Dashboard Home - LandGuard AI
- * Property listing scanner with scan history
+ * Dashboard Home - LandGuard AI v2.0
+ * Enhanced property scanner with seller verification and API integration
  */
 
 import { useEffect, useState } from 'react'
@@ -11,36 +11,63 @@ import Link from 'next/link'
 import { useAuth } from '@/lib/auth/context'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 
+interface RiskFlag {
+  id?: string
+  category?: string
+  severity: 'low' | 'medium' | 'high' | 'critical'
+  description: string
+  weight?: number
+}
+
 interface ScanResult {
-  riskScore: number
-  riskLevel: 'low' | 'medium' | 'high'
-  flags: string[]
+  scanId?: string
+  score: number
+  riskLevel: 'safe' | 'low' | 'medium' | 'high' | 'critical'
+  flags: RiskFlag[]
   recommendations: string[]
-  listingDetails?: {
-    price?: string
-    location?: string
-    type?: string
+  metadata?: {
+    scannedAt: string
+    processingTime?: number
+    apiVersion?: string
   }
 }
 
 interface ScanHistoryItem {
   id: string
   url: string
+  type: 'listing' | 'seller'
   platform: string
-  riskScore: number
-  riskLevel: 'low' | 'medium' | 'high'
+  score: number
+  riskLevel: string
   scannedAt: string
 }
+
+type ScanTab = 'listing' | 'seller'
 
 export default function DashboardHome() {
   const router = useRouter()
   const { user, isLoading, isAuthenticated, isPro } = useAuth()
-  const [url, setUrl] = useState('')
+  
+  // Scanner state
+  const [activeTab, setActiveTab] = useState<ScanTab>('listing')
   const [scanning, setScanning] = useState(false)
   const [scanResult, setScanResult] = useState<ScanResult | null>(null)
   const [error, setError] = useState('')
   const [recentScans, setRecentScans] = useState<ScanHistoryItem[]>([])
   const [scansRemaining, setScansRemaining] = useState(3)
+  
+  // Listing inputs
+  const [url, setUrl] = useState('')
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [price, setPrice] = useState('')
+  const [location, setLocation] = useState('')
+  
+  // Seller inputs
+  const [sellerName, setSellerName] = useState('')
+  const [sellerEmail, setSellerEmail] = useState('')
+  const [sellerPhone, setSellerPhone] = useState('')
+  const [sellerProfile, setSellerProfile] = useState('')
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -49,7 +76,16 @@ export default function DashboardHome() {
     }
   }, [isLoading, isAuthenticated, router])
 
-  // Show loading state
+  // Load scan history
+  useEffect(() => {
+    const saved = localStorage.getItem('lg_scan_history')
+    if (saved) {
+      try {
+        setRecentScans(JSON.parse(saved).slice(0, 10))
+      } catch (e) {}
+    }
+  }, [])
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)' }}>
@@ -58,12 +94,12 @@ export default function DashboardHome() {
     )
   }
 
-  // Don't render if not authenticated (will redirect)
   if (!isAuthenticated) {
     return null
   }
 
-  const handleScan = async () => {
+  // Scan listing
+  const handleScanListing = async () => {
     if (!url.trim()) {
       setError('Please enter a listing URL')
       return
@@ -74,32 +110,99 @@ export default function DashboardHome() {
     setScanResult(null)
 
     try {
-      const res = await fetch('/api/v1/scan', {
+      const res = await fetch('/api/v1/scan-listing', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ url })
+        body: JSON.stringify({
+          url,
+          title: title || undefined,
+          description: description || undefined,
+          price: price ? parseFloat(price.replace(/[^0-9.]/g, '')) : undefined,
+          location: location || undefined
+        })
       })
 
       const data = await res.json()
 
-      if (data.success) {
-        setScanResult(data.analysis)
-        // Add to recent scans
-        setRecentScans(prev => [{
+      if (data.success || data.scanId || data.score !== undefined) {
+        const result = data.data || data
+        setScanResult(result)
+        
+        // Save to history
+        const newScan: ScanHistoryItem = {
           id: Date.now().toString(),
           url,
+          type: 'listing',
           platform: detectPlatform(url),
-          riskScore: data.analysis.riskScore,
-          riskLevel: data.analysis.riskLevel,
+          score: result.score,
+          riskLevel: result.riskLevel,
           scannedAt: new Date().toISOString()
-        }, ...prev].slice(0, 5))
+        }
+        const updatedHistory = [newScan, ...recentScans].slice(0, 20)
+        setRecentScans(updatedHistory)
+        localStorage.setItem('lg_scan_history', JSON.stringify(updatedHistory))
         
         if (!isPro) {
           setScansRemaining(prev => Math.max(0, prev - 1))
         }
       } else {
-        setError(data.error || 'Scan failed')
+        setError(data.error?.message || data.error || 'Scan failed')
+      }
+    } catch (err) {
+      setError('Network error. Please try again.')
+    } finally {
+      setScanning(false)
+    }
+  }
+
+  // Scan seller
+  const handleScanSeller = async () => {
+    if (!sellerName && !sellerEmail && !sellerPhone && !sellerProfile) {
+      setError('Please enter at least one seller detail')
+      return
+    }
+
+    setScanning(true)
+    setError('')
+    setScanResult(null)
+
+    try {
+      const res = await fetch('/api/v1/scan-seller', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: sellerName || undefined,
+          email: sellerEmail || undefined,
+          phone: sellerPhone || undefined,
+          profileUrl: sellerProfile || undefined
+        })
+      })
+
+      const data = await res.json()
+
+      if (data.success || data.scanId || data.score !== undefined) {
+        const result = data.data || data
+        setScanResult(result)
+        
+        // Save to history
+        const newScan: ScanHistoryItem = {
+          id: Date.now().toString(),
+          url: sellerEmail || sellerName || 'Seller',
+          type: 'seller',
+          platform: 'Seller Verification',
+          score: result.score,
+          riskLevel: result.riskLevel,
+          scannedAt: new Date().toISOString()
+        }
+        const updatedHistory = [newScan, ...recentScans].slice(0, 20)
+        setRecentScans(updatedHistory)
+        localStorage.setItem('lg_scan_history', JSON.stringify(updatedHistory))
+        
+        if (!isPro) {
+          setScansRemaining(prev => Math.max(0, prev - 1))
+        }
+      } else {
+        setError(data.error?.message || data.error || 'Scan failed')
       }
     } catch (err) {
       setError('Network error. Please try again.')
@@ -114,15 +217,28 @@ export default function DashboardHome() {
     if (url.includes('craigslist')) return 'Craigslist'
     if (url.includes('zillow')) return 'Zillow'
     if (url.includes('realtor')) return 'Realtor'
+    if (url.includes('trulia')) return 'Trulia'
+    if (url.includes('redfin')) return 'Redfin'
     return 'Other'
   }
 
   const getRiskColor = (level: string) => {
     switch (level) {
+      case 'critical': return 'text-red-800 bg-red-100'
       case 'high': return 'text-red-600 bg-red-100'
       case 'medium': return 'text-amber-600 bg-amber-100'
       case 'low': return 'text-green-600 bg-green-100'
+      case 'safe': return 'text-green-700 bg-green-100'
       default: return 'text-gray-600 bg-gray-100'
+    }
+  }
+
+  const getScoreColor = (level: string) => {
+    switch (level) {
+      case 'critical': return 'text-red-800'
+      case 'high': return 'text-red-600'
+      case 'medium': return 'text-amber-600'
+      default: return 'text-green-600'
     }
   }
 
@@ -151,14 +267,17 @@ export default function DashboardHome() {
             Welcome back{user?.email ? `, ${user.email.split('@')[0]}` : ''}! 🏠
           </h1>
           <p className="text-white/80 mb-4">
-            Protect yourself from property scams. Scan any listing before making contact.
+            Protect yourself from property scams. Scan listings and verify sellers before making contact.
           </p>
-          <div className="text-sm text-white/60">
-            LandGuard AI v1.0 • Moneke Industries
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-white/60">LandGuard AI v2.0</span>
+            <span className="bg-white/20 px-2 py-0.5 rounded text-xs">
+              {isPro ? '⚡ PRO' : `${scansRemaining} scans left`}
+            </span>
           </div>
         </div>
 
-        {/* Pro Banner for Free Users */}
+        {/* Pro Banner */}
         {!isPro && (
           <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -168,7 +287,7 @@ export default function DashboardHome() {
                   <span className="font-semibold text-gray-800">Upgrade to PRO</span>
                 </div>
                 <p className="text-gray-600 text-sm">
-                  Unlimited scans • Auto-scan on all sites • Detailed reports • Priority support
+                  Unlimited scans • Seller verification • Document scanning • Auto-scan • Priority support
                 </p>
                 <p className="text-green-600 text-sm mt-1">
                   <strong>{scansRemaining} scans remaining</strong> this month
@@ -184,32 +303,84 @@ export default function DashboardHome() {
           </div>
         )}
 
-        {/* Scanner */}
+        {/* Scanner Card */}
         <div className="bg-white rounded-xl border border-green-200 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-green-100">
-            <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-              <span className="text-2xl">🔍</span>
-              Scan Property Listing
-            </h2>
-            <p className="text-gray-500 text-sm mt-1">
-              Paste any listing URL from Facebook Marketplace, Kijiji, Craigslist, or other sites
-            </p>
+          {/* Tabs */}
+          <div className="flex border-b border-green-100">
+            <button
+              onClick={() => { setActiveTab('listing'); setScanResult(null); setError(''); }}
+              className={`flex-1 py-4 px-6 text-center font-medium transition-colors ${
+                activeTab === 'listing' 
+                  ? 'bg-green-50 text-green-700 border-b-2 border-green-500' 
+                  : 'text-gray-500 hover:bg-gray-50'
+              }`}
+            >
+              <span className="mr-2">🏠</span> Scan Listing
+            </button>
+            <button
+              onClick={() => { setActiveTab('seller'); setScanResult(null); setError(''); }}
+              className={`flex-1 py-4 px-6 text-center font-medium transition-colors ${
+                activeTab === 'seller' 
+                  ? 'bg-green-50 text-green-700 border-b-2 border-green-500' 
+                  : 'text-gray-500 hover:bg-gray-50'
+              }`}
+            >
+              <span className="mr-2">👤</span> Verify Seller
+            </button>
           </div>
-          
-          <div className="p-6">
-            <div className="flex gap-3">
-              <input
-                type="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="Paste listing URL here (e.g., facebook.com/marketplace/...)"
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-800"
-                onKeyDown={(e) => e.key === 'Enter' && handleScan()}
-              />
+
+          {/* Listing Tab Content */}
+          {activeTab === 'listing' && (
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Listing URL *</label>
+                <input
+                  type="url"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://facebook.com/marketplace/..."
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800"
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Title (Optional)</label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Property listing title"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Price (Optional)</label>
+                  <input
+                    type="text"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    placeholder="$25,000"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Paste listing description here for better analysis..."
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800"
+                />
+              </div>
+
               <button
-                onClick={handleScan}
+                onClick={handleScanListing}
                 disabled={scanning || (!isPro && scansRemaining <= 0)}
-                className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2"
+                className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
               >
                 {scanning ? (
                   <>
@@ -217,79 +388,164 @@ export default function DashboardHome() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                     </svg>
-                    Scanning...
+                    Analyzing Listing...
                   </>
                 ) : (
-                  <>🔍 Scan</>
+                  <>🔍 Scan Listing</>
                 )}
               </button>
             </div>
+          )}
 
-            {error && (
-              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-                {error}
+          {/* Seller Tab Content */}
+          {activeTab === 'seller' && (
+            <div className="p-6 space-y-4">
+              <p className="text-gray-500 text-sm mb-4">
+                Enter seller details to check for suspicious patterns and verify legitimacy.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Seller Name</label>
+                  <input
+                    type="text"
+                    value={sellerName}
+                    onChange={(e) => setSellerName(e.target.value)}
+                    placeholder="John Smith"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                  <input
+                    type="email"
+                    value={sellerEmail}
+                    onChange={(e) => setSellerEmail(e.target.value)}
+                    placeholder="seller@example.com"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800"
+                  />
+                </div>
               </div>
-            )}
 
-            {/* Scan Result */}
-            {scanResult && (
-              <div className="mt-6 space-y-4">
-                {/* Risk Score */}
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div>
-                    <div className="text-sm text-gray-500">Risk Score</div>
-                    <div className={`text-4xl font-bold ${
-                      scanResult.riskLevel === 'high' ? 'text-red-600' :
-                      scanResult.riskLevel === 'medium' ? 'text-amber-600' :
-                      'text-green-600'
-                    }`}>
-                      {scanResult.riskScore}/100
-                    </div>
-                  </div>
-                  <div className={`px-4 py-2 rounded-full text-sm font-semibold ${getRiskColor(scanResult.riskLevel)}`}>
-                    {scanResult.riskLevel.toUpperCase()} RISK
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                  <input
+                    type="tel"
+                    value={sellerPhone}
+                    onChange={(e) => setSellerPhone(e.target.value)}
+                    placeholder="+1 555-123-4567"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Profile URL</label>
+                  <input
+                    type="url"
+                    value={sellerProfile}
+                    onChange={(e) => setSellerProfile(e.target.value)}
+                    placeholder="https://..."
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={handleScanSeller}
+                disabled={scanning || (!isPro && scansRemaining <= 0)}
+                className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+              >
+                {scanning ? (
+                  <>
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                    </svg>
+                    Verifying Seller...
+                  </>
+                ) : (
+                  <>👤 Verify Seller</>
+                )}
+              </button>
+            </div>
+          )}
+
+          {/* Error */}
+          {error && (
+            <div className="mx-6 mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+              {error}
+            </div>
+          )}
+
+          {/* Scan Results */}
+          {scanResult && (
+            <div className="mx-6 mb-6 space-y-4 p-5 bg-gray-50 rounded-xl">
+              {/* Score Header */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-gray-500">Risk Score</div>
+                  <div className={`text-4xl font-bold ${getScoreColor(scanResult.riskLevel)}`}>
+                    {scanResult.score}/100
                   </div>
                 </div>
-
-                {/* Flags */}
-                {scanResult.flags.length > 0 && (
-                  <div>
-                    <h3 className="font-semibold text-gray-800 mb-2">⚠️ Risk Flags</h3>
-                    <ul className="space-y-2">
-                      {scanResult.flags.map((flag, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                          <span className="text-amber-500 mt-0.5">•</span>
-                          {flag}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Recommendations */}
-                {scanResult.recommendations.length > 0 && (
-                  <div>
-                    <h3 className="font-semibold text-gray-800 mb-2">💡 Recommendations</h3>
-                    <ul className="space-y-2">
-                      {scanResult.recommendations.map((rec, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                          <span className="text-green-500 mt-0.5">✓</span>
-                          {rec}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                <div className={`px-4 py-2 rounded-full text-sm font-semibold ${getRiskColor(scanResult.riskLevel)}`}>
+                  {scanResult.riskLevel.toUpperCase()} RISK
+                </div>
               </div>
-            )}
-          </div>
+
+              {/* Flags */}
+              {scanResult.flags && scanResult.flags.length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-gray-800 mb-2">🚩 Risk Flags ({scanResult.flags.length})</h3>
+                  <ul className="space-y-2">
+                    {scanResult.flags.map((flag, i) => (
+                      <li key={i} className={`flex items-start gap-2 text-sm p-2 rounded ${
+                        flag.severity === 'high' || flag.severity === 'critical' 
+                          ? 'bg-red-50 text-red-700' 
+                          : flag.severity === 'medium' 
+                            ? 'bg-amber-50 text-amber-700' 
+                            : 'bg-green-50 text-green-700'
+                      }`}>
+                        <span>{flag.severity === 'high' || flag.severity === 'critical' ? '🚨' : '⚠️'}</span>
+                        {flag.description}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Recommendations */}
+              {scanResult.recommendations && scanResult.recommendations.length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-gray-800 mb-2">💡 Recommendations</h3>
+                  <ul className="space-y-2">
+                    {scanResult.recommendations.map((rec, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                        <span className="text-green-500 mt-0.5">✓</span>
+                        {rec}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Metadata */}
+              {scanResult.metadata && (
+                <div className="text-xs text-gray-400 pt-2 border-t border-gray-200">
+                  Scanned {new Date(scanResult.metadata.scannedAt).toLocaleString()}
+                  {scanResult.metadata.processingTime && ` • ${scanResult.metadata.processingTime}ms`}
+                  {scanResult.metadata.apiVersion && ` • API ${scanResult.metadata.apiVersion}`}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Supported Platforms */}
         <div className="bg-white rounded-xl border border-green-200 shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Supported Platforms</h2>
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">🌐 Supported Platforms</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {['Facebook Marketplace', 'Kijiji', 'Craigslist', 'Zillow', 'Realtor.ca', 'Redfin', 'Property.ca', 'Other Sites'].map((platform) => (
+            {['Facebook Marketplace', 'Kijiji', 'Craigslist', 'Zillow', 'Realtor.com', 'Trulia', 'Redfin', 'Zoopla'].map((platform) => (
               <div key={platform} className="flex items-center gap-2 px-4 py-3 bg-green-50 rounded-lg text-sm text-green-700 font-medium">
                 <span className="text-green-500">✓</span>
                 {platform}
@@ -302,7 +558,7 @@ export default function DashboardHome() {
         {recentScans.length > 0 && (
           <div className="bg-white rounded-xl border border-green-200 shadow-sm overflow-hidden">
             <div className="p-5 border-b border-green-100 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-800">Recent Scans</h2>
+              <h2 className="text-lg font-semibold text-gray-800">📋 Recent Scans</h2>
               <Link 
                 href="/app/history" 
                 className="text-sm text-green-600 hover:text-green-700 font-medium"
@@ -312,18 +568,23 @@ export default function DashboardHome() {
             </div>
 
             <div className="divide-y divide-gray-100">
-              {recentScans.map((scan) => (
+              {recentScans.slice(0, 5).map((scan) => (
                 <div key={scan.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    scan.riskLevel === 'high' ? 'bg-red-100 text-red-600' :
+                    scan.riskLevel === 'critical' || scan.riskLevel === 'high' ? 'bg-red-100 text-red-600' :
                     scan.riskLevel === 'medium' ? 'bg-amber-100 text-amber-600' :
                     'bg-green-100 text-green-600'
-                  } font-bold`}>
-                    {scan.riskScore}
+                  } font-bold text-sm`}>
+                    {scan.score}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-gray-800 truncate text-sm">
-                      {scan.url}
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-600">
+                        {scan.type === 'seller' ? '👤' : '🏠'}
+                      </span>
+                      <span className="font-medium text-gray-800 truncate text-sm">
+                        {scan.url}
+                      </span>
                     </div>
                     <div className="text-xs text-gray-500">
                       {scan.platform} • {new Date(scan.scannedAt).toLocaleString()}
@@ -338,30 +599,30 @@ export default function DashboardHome() {
           </div>
         )}
 
-        {/* Quick Tips */}
+        {/* API Info */}
         <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-6">
-          <h3 className="font-semibold text-gray-800 mb-3">🛡️ Quick Tips to Avoid Property Scams</h3>
-          <ul className="space-y-2 text-sm text-gray-700">
-            <li className="flex items-start gap-2">
-              <span className="text-green-500 mt-0.5">•</span>
-              Never send money without physically viewing the property
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-green-500 mt-0.5">•</span>
-              Verify property ownership through land registry
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-green-500 mt-0.5">•</span>
-              Be cautious of prices significantly below market value
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-green-500 mt-0.5">•</span>
-              Watch for pressure tactics or urgency in communications
-            </li>
-          </ul>
+          <h3 className="font-semibold text-gray-800 mb-3">🔌 API Access</h3>
+          <p className="text-gray-600 text-sm mb-4">
+            Integrate LandGuard AI into your app or website with our powerful API.
+          </p>
+          <div className="flex gap-3">
+            <a
+              href="https://landguardai.co/api/v1"
+              target="_blank"
+              rel="noopener"
+              className="text-green-600 hover:text-green-700 text-sm font-medium"
+            >
+              📚 API Documentation →
+            </a>
+            <Link
+              href="/pricing"
+              className="text-green-600 hover:text-green-700 text-sm font-medium"
+            >
+              💰 API Pricing →
+            </Link>
+          </div>
         </div>
       </div>
     </DashboardLayout>
   )
 }
-
