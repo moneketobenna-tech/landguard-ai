@@ -48,12 +48,14 @@ function generateId(): string {
 
 function generateLicenseKey(isPro: boolean = false): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-  const prefix = isPro ? 'LGPRO' : ''
-  const segments = isPro ? [] : []
+  const segments: string[] = []
   
-  if (isPro) segments.push(prefix)
+  if (isPro) {
+    segments.push('LGPRO')
+  }
   
-  for (let s = 0; s < (isPro ? 3 : 4); s++) {
+  const numSegments = isPro ? 3 : 4
+  for (let s = 0; s < numSegments; s++) {
     let segment = ''
     for (let i = 0; i < 4; i++) {
       segment += chars[Math.floor(Math.random() * chars.length)]
