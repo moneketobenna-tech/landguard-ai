@@ -2,10 +2,14 @@
  * LandGuard AI - API Usage Stats
  * GET /api/v1/usage
  * 
- * Returns current API usage statistics for the authenticated key
+ * Returns current usage statistics for:
+ * - Authenticated users (web app) - scan usage
+ * - API keys (developers) - API credits
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { verifyToken, extractBearerToken, extractCookieToken } from '@/lib/auth/jwt'
+import { getUserById, getUserScanUsage, FREE_SCAN_LIMIT } from '@/lib/db/users'
 import { extractApiKey, errorResponse, generateRequestId } from '@/lib/api/middleware'
 import { getApiKey, getApiKeyStats } from '@/lib/api/keys'
 import { API_TIERS } from '@/lib/api/types'
@@ -15,16 +19,50 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: NextRequest) {
   const requestId = generateRequestId()
   
-  // Extract API key
+  // First, try to authenticate as a web app user
+  const authHeader = request.headers.get('authorization')
+  const cookieHeader = request.headers.get('cookie')
+  const userToken = extractBearerToken(authHeader) || extractCookieToken(cookieHeader)
+  
+  if (userToken) {
+    const payload = await verifyToken(userToken)
+    if (payload) {
+      const user = await getUserById(payload.userId)
+      if (user) {
+        const scanUsage = await getUserScanUsage(payload.userId)
+        
+        return NextResponse.json({
+          success: true,
+          scanUsage,
+          user: {
+            email: user.email,
+            planType: user.planType,
+            isPro: user.planType === 'pro'
+          },
+          meta: {
+            requestId,
+            timestamp: new Date().toISOString()
+          }
+        })
+      }
+    }
+  }
+  
+  // Fall back to API key authentication
   const apiKeyStr = extractApiKey(request)
   
   if (!apiKeyStr) {
-    return errorResponse(
-      'MISSING_API_KEY',
-      'API key is required',
-      401,
-      requestId
-    )
+    return NextResponse.json({
+      success: false,
+      error: 'NOT_AUTHENTICATED',
+      message: 'Please log in or provide an API key',
+      scanUsage: {
+        used: 0,
+        remaining: FREE_SCAN_LIMIT,
+        limit: FREE_SCAN_LIMIT,
+        isPro: false
+      }
+    }, { status: 401 })
   }
   
   // Get API key details
@@ -85,4 +123,3 @@ export async function GET(request: NextRequest) {
     }
   })
 }
-

@@ -1,6 +1,7 @@
 /**
- * LandGuard AI - Property Scam Risk Engine
+ * LandGuard AI - Property Scam Risk Engine v2.0
  * Comprehensive analysis for property listings, sellers, and documents
+ * Includes: Image Analysis, Template Detection, and Enhanced Risk Scoring
  */
 
 import { RiskFlag, ScanListingRequest, ScanSellerRequest, ScanDocumentRequest, ScanResult } from './types'
@@ -74,6 +75,78 @@ const DOCUMENT_PATTERNS = [
   { pattern: /attorney|lawyer/i, description: 'Legal representation', weight: -8 },
   { pattern: /forged|fake/i, description: 'Potential document issues', weight: 25 },
   { pattern: /expired/i, description: 'Expired document', weight: 15 },
+]
+
+// === TEMPLATE DETECTION PATTERNS ===
+// Common phrases found in scam listings (generic/copy-paste text)
+const TEMPLATE_PHRASES = [
+  'beautiful property',
+  'great investment opportunity',
+  'won\'t last long',
+  'contact me for more details',
+  'serious inquiries only',
+  'ready to move in',
+  'prime location',
+  'motivated seller',
+  'must see to appreciate',
+  'priced to sell',
+  'as is condition',
+  'cash buyers preferred',
+  'no agents please',
+  'owner must relocate',
+  'rare opportunity',
+  'once in a lifetime',
+  'dream home',
+  'perfect starter home',
+  'investment property',
+  'rental income potential',
+]
+
+// Scam-specific template patterns
+const SCAM_TEMPLATE_PATTERNS = [
+  { pattern: /i am (selling|listing) (this|the) (property|house|land) (because|due to)/i, weight: 12 },
+  { pattern: /my (husband|wife|spouse|father|mother) (passed away|died|is deceased)/i, weight: 15 },
+  { pattern: /i am (relocating|moving) (to another|out of) (country|state|city)/i, weight: 12 },
+  { pattern: /god bless/i, weight: 8 },
+  { pattern: /you will (not|never) (regret|be disappointed)/i, weight: 8 },
+  { pattern: /send (me|us) (your|the) (email|phone|contact)/i, weight: 10 },
+  { pattern: /reply (to this email|with your)/i, weight: 10 },
+  { pattern: /i will (send|provide) (you |)(the |)(keys|documents|deed)/i, weight: 15 },
+  { pattern: /(keys|deed|documents) will be (sent|mailed|shipped)/i, weight: 18 },
+  { pattern: /airbnb|booking\.com/i, weight: 12 }, // Fake rental scams
+]
+
+// === STOCK IMAGE DETECTION PATTERNS ===
+// Common stock photo URL patterns and image hosting sites
+const STOCK_IMAGE_INDICATORS = [
+  'shutterstock',
+  'istockphoto',
+  'gettyimages',
+  'depositphotos',
+  'dreamstime',
+  'adobestock',
+  'stock.adobe',
+  '123rf',
+  'alamy',
+  'bigstockphoto',
+  'canstockphoto',
+  'fotolia',
+  'pixabay',
+  'unsplash',
+  'pexels',
+  'freepik',
+]
+
+// Suspicious image filename patterns
+const SUSPICIOUS_IMAGE_PATTERNS = [
+  /stock[_-]?(photo|image)/i,
+  /sample[_-]?(image|photo)/i,
+  /placeholder/i,
+  /default[_-]?(image|photo)/i,
+  /generic/i,
+  /\d{8,}[_-]?\d+/,  // Long numeric IDs typical of stock photos
+  /DSC_?\d{4,}/i,    // Generic camera naming
+  /IMG_?\d{4,}/i,
 ]
 
 // === ANALYSIS FUNCTIONS ===
@@ -257,6 +330,267 @@ function analyzePhone(phone: string | undefined): RiskFlag[] {
   return flags
 }
 
+// === NEW: IMAGE ANALYSIS ===
+
+export interface ImageAnalysisResult {
+  imageCount: number
+  stockImageDetected: boolean
+  suspiciousPatterns: string[]
+  flags: RiskFlag[]
+  score: number
+}
+
+export function analyzeImages(
+  imageUrls: string[] = [],
+  imageCount?: number
+): ImageAnalysisResult {
+  const flags: RiskFlag[] = []
+  const suspiciousPatterns: string[] = []
+  let stockImageDetected = false
+  let analysisScore = 0
+  
+  const actualImageCount = imageUrls.length || imageCount || 0
+  
+  // Check image count
+  if (actualImageCount === 0) {
+    flags.push({
+      id: generateFlagId(),
+      category: 'Image Analysis',
+      severity: 'high',
+      description: 'No images provided (suspicious for property listing)',
+      weight: 18
+    })
+    analysisScore += 18
+  } else if (actualImageCount === 1) {
+    flags.push({
+      id: generateFlagId(),
+      category: 'Image Analysis',
+      severity: 'medium',
+      description: 'Only 1 image (legitimate sellers typically provide multiple)',
+      weight: 10
+    })
+    analysisScore += 10
+  } else if (actualImageCount < 3) {
+    flags.push({
+      id: generateFlagId(),
+      category: 'Image Analysis',
+      severity: 'low',
+      description: 'Few images provided (2 photos)',
+      weight: 5
+    })
+    analysisScore += 5
+  }
+  
+  // Analyze each image URL
+  for (const url of imageUrls) {
+    const urlLower = url.toLowerCase()
+    
+    // Check for stock image hosting sites
+    for (const stockSite of STOCK_IMAGE_INDICATORS) {
+      if (urlLower.includes(stockSite)) {
+        stockImageDetected = true
+        suspiciousPatterns.push(`Stock image source: ${stockSite}`)
+        flags.push({
+          id: generateFlagId(),
+          category: 'Image Analysis',
+          severity: 'critical',
+          description: `Stock photo detected (${stockSite})`,
+          weight: 25,
+          evidence: url
+        })
+        analysisScore += 25
+        break
+      }
+    }
+    
+    // Check for suspicious filename patterns
+    for (const pattern of SUSPICIOUS_IMAGE_PATTERNS) {
+      if (pattern.test(urlLower)) {
+        suspiciousPatterns.push(`Suspicious filename pattern: ${pattern.source}`)
+        if (!stockImageDetected) {
+          flags.push({
+            id: generateFlagId(),
+            category: 'Image Analysis',
+            severity: 'medium',
+            description: 'Suspicious image filename pattern',
+            weight: 12,
+            evidence: url.split('/').pop()
+          })
+          analysisScore += 12
+        }
+        break
+      }
+    }
+    
+    // Check for generic/placeholder image indicators in URL
+    if (/no[_-]?image|placeholder|default|sample/i.test(urlLower)) {
+      flags.push({
+        id: generateFlagId(),
+        category: 'Image Analysis',
+        severity: 'high',
+        description: 'Placeholder/default image detected',
+        weight: 15,
+        evidence: url
+      })
+      analysisScore += 15
+    }
+    
+    // Check for data URIs (sometimes used to embed stock images)
+    if (url.startsWith('data:image')) {
+      flags.push({
+        id: generateFlagId(),
+        category: 'Image Analysis',
+        severity: 'low',
+        description: 'Embedded image (cannot verify source)',
+        weight: 5
+      })
+      analysisScore += 5
+    }
+  }
+  
+  return {
+    imageCount: actualImageCount,
+    stockImageDetected,
+    suspiciousPatterns,
+    flags,
+    score: Math.min(100, analysisScore)
+  }
+}
+
+// === NEW: TEMPLATE DETECTION ===
+
+export interface TemplateAnalysisResult {
+  isTemplateText: boolean
+  genericPhraseCount: number
+  scamPatternCount: number
+  matchedPhrases: string[]
+  flags: RiskFlag[]
+  score: number
+}
+
+export function analyzeTemplate(text: string): TemplateAnalysisResult {
+  const flags: RiskFlag[] = []
+  const matchedPhrases: string[] = []
+  const textLower = text.toLowerCase()
+  let genericPhraseCount = 0
+  let scamPatternCount = 0
+  let analysisScore = 0
+  
+  // Check for generic template phrases
+  for (const phrase of TEMPLATE_PHRASES) {
+    if (textLower.includes(phrase.toLowerCase())) {
+      genericPhraseCount++
+      matchedPhrases.push(phrase)
+    }
+  }
+  
+  // Check for scam-specific template patterns
+  for (const { pattern, weight } of SCAM_TEMPLATE_PATTERNS) {
+    const match = text.match(pattern)
+    if (match) {
+      scamPatternCount++
+      matchedPhrases.push(match[0])
+      
+      const severity = weight >= 15 ? 'high' : weight >= 10 ? 'medium' : 'low'
+      flags.push({
+        id: generateFlagId(),
+        category: 'Template Detection',
+        severity,
+        description: 'Scam template phrase detected',
+        weight,
+        evidence: match[0]
+      })
+      analysisScore += weight
+    }
+  }
+  
+  // Flag if many generic phrases found (indicates copy-paste)
+  if (genericPhraseCount >= 5) {
+    flags.push({
+      id: generateFlagId(),
+      category: 'Template Detection',
+      severity: 'high',
+      description: `High number of generic phrases (${genericPhraseCount} found)`,
+      weight: 15,
+      evidence: matchedPhrases.slice(0, 3).join(', ')
+    })
+    analysisScore += 15
+  } else if (genericPhraseCount >= 3) {
+    flags.push({
+      id: generateFlagId(),
+      category: 'Template Detection',
+      severity: 'medium',
+      description: `Multiple generic phrases detected (${genericPhraseCount} found)`,
+      weight: 8,
+      evidence: matchedPhrases.slice(0, 3).join(', ')
+    })
+    analysisScore += 8
+  }
+  
+  // Check for very short descriptions (lazy/template)
+  const wordCount = text.split(/\s+/).filter(w => w.length > 0).length
+  if (wordCount < 20 && text.length > 0) {
+    flags.push({
+      id: generateFlagId(),
+      category: 'Template Detection',
+      severity: 'medium',
+      description: 'Very short description (possibly copy-paste)',
+      weight: 10
+    })
+    analysisScore += 10
+  }
+  
+  // Check for excessive capitalization (common in scam templates)
+  const capsRatio = (text.match(/[A-Z]/g) || []).length / text.length
+  if (capsRatio > 0.3 && text.length > 50) {
+    flags.push({
+      id: generateFlagId(),
+      category: 'Template Detection',
+      severity: 'medium',
+      description: 'Excessive capitalization (SHOUTING text)',
+      weight: 8
+    })
+    analysisScore += 8
+  }
+  
+  // Check for repetitive punctuation
+  if (/[!?]{3,}/.test(text)) {
+    flags.push({
+      id: generateFlagId(),
+      category: 'Template Detection',
+      severity: 'low',
+      description: 'Excessive punctuation (unprofessional)',
+      weight: 5
+    })
+    analysisScore += 5
+  }
+  
+  // Check for ALL CAPS sections
+  const allCapsWords = text.match(/\b[A-Z]{4,}\b/g) || []
+  if (allCapsWords.length >= 3) {
+    flags.push({
+      id: generateFlagId(),
+      category: 'Template Detection',
+      severity: 'low',
+      description: `Multiple ALL CAPS words (${allCapsWords.length} found)`,
+      weight: 5,
+      evidence: allCapsWords.slice(0, 3).join(', ')
+    })
+    analysisScore += 5
+  }
+  
+  const isTemplateText = genericPhraseCount >= 3 || scamPatternCount >= 2
+  
+  return {
+    isTemplateText,
+    genericPhraseCount,
+    scamPatternCount,
+    matchedPhrases,
+    flags,
+    score: Math.min(100, analysisScore)
+  }
+}
+
 // === MAIN SCAN FUNCTIONS ===
 
 export function scanListing(request: ScanListingRequest): ScanResult {
@@ -280,6 +614,14 @@ export function scanListing(request: ScanListingRequest): ScanResult {
   flags.push(...analyzeUrl(request.url))
   flags.push(...analyzePricing(request.price, textToAnalyze))
   
+  // NEW: Image Analysis
+  const imageAnalysis = analyzeImages(request.imageUrls, request.imageCount)
+  flags.push(...imageAnalysis.flags)
+  
+  // NEW: Template Detection
+  const templateAnalysis = analyzeTemplate(textToAnalyze)
+  flags.push(...templateAnalysis.flags)
+  
   // Calculate score
   const totalWeight = flags.reduce((sum, f) => sum + Math.max(0, f.weight), 0)
   const score = Math.min(100, totalWeight)
@@ -292,7 +634,7 @@ export function scanListing(request: ScanListingRequest): ScanResult {
     : 'safe'
   
   // Generate recommendations
-  const recommendations = generateRecommendations(riskLevel, flags)
+  const recommendations = generateRecommendations(riskLevel, flags, imageAnalysis, templateAnalysis)
   
   return {
     scanId: `scan_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`,
@@ -305,7 +647,19 @@ export function scanListing(request: ScanListingRequest): ScanResult {
       url: request.url,
       scannedAt: new Date().toISOString(),
       processingTime: Date.now() - startTime,
-      apiVersion: '1.0.0'
+      apiVersion: '2.0.0'
+    },
+    analysis: {
+      imageAnalysis: {
+        imageCount: imageAnalysis.imageCount,
+        stockImageDetected: imageAnalysis.stockImageDetected,
+        score: imageAnalysis.score
+      },
+      templateAnalysis: {
+        isTemplateText: templateAnalysis.isTemplateText,
+        genericPhraseCount: templateAnalysis.genericPhraseCount,
+        score: templateAnalysis.score
+      }
     }
   }
 }
@@ -341,6 +695,13 @@ export function scanSeller(request: ScanSellerRequest): ScanResult {
     })
   }
   
+  // Template analysis on listing history
+  if (request.listingHistory && request.listingHistory.length > 0) {
+    const historyText = request.listingHistory.join(' ')
+    const templateAnalysis = analyzeTemplate(historyText)
+    flags.push(...templateAnalysis.flags)
+  }
+  
   const totalWeight = flags.reduce((sum, f) => sum + Math.max(0, f.weight), 0)
   const score = Math.min(100, totalWeight)
   
@@ -360,7 +721,7 @@ export function scanSeller(request: ScanSellerRequest): ScanResult {
     metadata: {
       scannedAt: new Date().toISOString(),
       processingTime: Date.now() - startTime,
-      apiVersion: '1.0.0'
+      apiVersion: '2.0.0'
     }
   }
 }
@@ -372,6 +733,10 @@ export function scanDocument(request: ScanDocumentRequest): ScanResult {
   const textToAnalyze = request.documentText || ''
   
   flags.push(...analyzePatterns(textToAnalyze, DOCUMENT_PATTERNS, 'Document'))
+  
+  // Template detection for documents
+  const templateAnalysis = analyzeTemplate(textToAnalyze)
+  flags.push(...templateAnalysis.flags)
   
   // Document-specific checks
   if (request.documentType === 'deed') {
@@ -426,12 +791,17 @@ export function scanDocument(request: ScanDocumentRequest): ScanResult {
     metadata: {
       scannedAt: new Date().toISOString(),
       processingTime: Date.now() - startTime,
-      apiVersion: '1.0.0'
+      apiVersion: '2.0.0'
     }
   }
 }
 
-function generateRecommendations(riskLevel: string, flags: RiskFlag[]): string[] {
+function generateRecommendations(
+  riskLevel: string, 
+  flags: RiskFlag[],
+  imageAnalysis?: ImageAnalysisResult,
+  templateAnalysis?: TemplateAnalysisResult
+): string[] {
   const recs: string[] = []
   
   if (riskLevel === 'critical' || riskLevel === 'high') {
@@ -468,6 +838,30 @@ function generateRecommendations(riskLevel: string, flags: RiskFlag[]): string[]
     recs.push('📞 Request a video call to verify identity')
   }
   
+  // NEW: Image-specific recommendations
+  if (imageAnalysis) {
+    if (imageAnalysis.stockImageDetected) {
+      recs.push('🖼️ Stock photo detected - Request actual property photos')
+      recs.push('📸 Ask for photos with today\'s date visible')
+    }
+    if (imageAnalysis.imageCount === 0) {
+      recs.push('📷 No photos provided - Legitimate sellers show their property')
+    } else if (imageAnalysis.imageCount < 3) {
+      recs.push('📷 Request more photos of the property (interior/exterior)')
+    }
+  }
+  
+  // NEW: Template-specific recommendations
+  if (templateAnalysis) {
+    if (templateAnalysis.isTemplateText) {
+      recs.push('📝 Generic/template text detected - Ask seller for specific details')
+      recs.push('❓ Ask questions about the property that require unique answers')
+    }
+    if (templateAnalysis.scamPatternCount >= 2) {
+      recs.push('⚠️ Multiple scam phrase patterns detected - High likelihood of fraud')
+    }
+  }
+  
   return recs
 }
 
@@ -495,4 +889,3 @@ function generateDocumentRecommendations(riskLevel: string, flags: RiskFlag[], d
   
   return recs
 }
-

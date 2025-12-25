@@ -1,8 +1,9 @@
 /**
- * LandGuard AI - API Documentation Root
+ * LandGuard AI - API Documentation Root v2.0
  * GET /api/v1
  * 
  * Returns API documentation and available endpoints
+ * Now includes Image Analysis, Template Detection, and Report Export
  */
 
 import { NextResponse } from 'next/server'
@@ -13,9 +14,15 @@ export const dynamic = 'force-dynamic'
 export async function GET() {
   return NextResponse.json({
     name: 'LandGuard AI Property Scam Detection API',
-    version: '1.0.0',
+    version: '2.0.0',
     baseUrl: 'https://landguardai.co/api/v1',
     documentation: 'https://landguardai.co/api-docs',
+    
+    features: {
+      imageAnalysis: 'Detects stock photos, placeholder images, and suspicious image patterns',
+      templateDetection: 'Identifies generic/copy-paste text common in scam listings',
+      reportExport: 'Generate professional PDF reports of scan results'
+    },
     
     authentication: {
       methods: [
@@ -37,10 +44,11 @@ export async function GET() {
         tiers: 'All'
       },
       'POST /api/v1/scan-listing': {
-        description: 'Scan a property listing for scam indicators',
+        description: 'Scan a property listing for scam indicators (includes Image & Template Analysis)',
         authentication: true,
         tiers: 'Starter, Growth, Business, Enterprise',
-        creditsPerRequest: 1
+        creditsPerRequest: 1,
+        newInV2: ['imageUrls parameter for image analysis', 'analysis.imageAnalysis in response', 'analysis.templateAnalysis in response']
       },
       'POST /api/v1/scan-seller': {
         description: 'Analyze a seller profile for risk indicators',
@@ -59,6 +67,12 @@ export async function GET() {
         authentication: true,
         tiers: 'Business, Enterprise',
         creditsPerRequest: '1 per listing (max 100)'
+      },
+      'POST /api/v1/report': {
+        description: 'Generate HTML report for PDF export',
+        authentication: false,
+        tiers: 'All',
+        newInV2: true
       }
     },
     
@@ -71,10 +85,44 @@ export async function GET() {
       features: tier.features
     })),
     
+    requestExamples: {
+      'scan-listing': {
+        url: 'https://facebook.com/marketplace/listing/123',
+        title: 'Beautiful 5 Acre Land - URGENT SALE',
+        description: 'Must sell today, wire transfer only...',
+        price: 5000,
+        imageUrls: [
+          'https://example.com/image1.jpg',
+          'https://example.com/image2.jpg'
+        ],
+        imageCount: 2
+      }
+    },
+    
     responseFormat: {
       success: {
         success: true,
-        data: '{ ... response data ... }',
+        data: {
+          scanId: 'scan_xxxxx',
+          score: 75,
+          riskLevel: 'high',
+          flags: [
+            { category: 'Payment', severity: 'high', description: 'Wire transfer requested' }
+          ],
+          recommendations: ['Do NOT send money...'],
+          analysis: {
+            imageAnalysis: {
+              imageCount: 2,
+              stockImageDetected: false,
+              score: 0
+            },
+            templateAnalysis: {
+              isTemplateText: true,
+              genericPhraseCount: 5,
+              score: 15
+            }
+          }
+        },
         meta: {
           requestId: 'Unique request identifier',
           timestamp: 'ISO timestamp',
@@ -102,6 +150,7 @@ export async function GET() {
       MISSING_FIELD: 'Required field missing in request',
       INVALID_URL: 'Invalid URL format',
       INVALID_EMAIL: 'Invalid email format',
+      SCAN_LIMIT_REACHED: 'Free scan limit reached (web app users)',
       INTERNAL_ERROR: 'Server error - contact support'
     },
     
@@ -113,6 +162,27 @@ export async function GET() {
       critical: 'Major scam indicators detected, avoid (score 70-100)'
     },
     
+    analysisTypes: {
+      imageAnalysis: {
+        description: 'Analyzes listing images for authenticity',
+        detects: [
+          'Stock photos from known image sites',
+          'Placeholder/default images',
+          'Suspicious filename patterns',
+          'Missing or too few images'
+        ]
+      },
+      templateAnalysis: {
+        description: 'Detects generic/copy-paste text patterns',
+        detects: [
+          'Common scam template phrases',
+          'Generic listing language',
+          'Excessive capitalization',
+          'Very short descriptions'
+        ]
+      }
+    },
+    
     support: {
       email: 'api@landguardai.co',
       documentation: 'https://landguardai.co/api-docs',
@@ -120,4 +190,3 @@ export async function GET() {
     }
   })
 }
-

@@ -76,6 +76,7 @@
   let currentScan = null;
   let settings = { autoScan: true, showBanner: true, useApiScans: true };
   let apiKey = '';
+  let isScanning = false;
 
   // Get current site config
   function getCurrentSite() {
@@ -126,9 +127,10 @@
     }
 
     // Count images
-    const images = document.querySelectorAll('img[src*="scontent"], img[src*="image"], .gallery img');
-    data.imageCount = images.length;
+    const images = document.querySelectorAll('img[src*="scontent"], img[src*="image"], .gallery img, img');
+    data.imageCount = Math.min(images.length, 50);
 
+    console.log('[LandGuard AI] Extracted data:', data.title?.substring(0, 50), 'Price:', data.price, 'Images:', data.imageCount);
     return data;
   }
 
@@ -136,6 +138,7 @@
   async function scanListingAPI(data) {
     if (!apiKey) throw new Error('No API key');
 
+    console.log('[LandGuard AI] Calling API...');
     const response = await fetch(`${API_BASE}/scan-listing`, {
       method: 'POST',
       headers: {
@@ -146,16 +149,22 @@
     });
 
     const json = await response.json();
-    if (!json.success) throw new Error(json.error?.message || 'API error');
-    return json.data;
+    console.log('[LandGuard AI] API response:', json);
+    
+    if (!json.success && !json.scanId && json.score === undefined) {
+      throw new Error(json.error?.message || json.error || 'API error');
+    }
+    return json.data || json;
   }
 
-  // Local scan (fallback)
+  // Local scan (fallback) - always works
   function scanListingLocal(data) {
+    console.log('[LandGuard AI] Running local scan...');
+    
     let score = 0;
     const flags = [];
     const recommendations = [];
-    const text = `${data.title} ${data.description}`.toLowerCase();
+    const text = `${data.title || ''} ${data.description || ''}`.toLowerCase();
 
     // Price analysis
     if (data.price) {
@@ -164,20 +173,22 @@
         flags.push({ severity: 'high', description: 'Unrealistically low price' });
       } else if (data.price < 20000) {
         score += 12;
-        flags.push({ severity: 'medium', description: 'Suspicious pricing' });
+        flags.push({ severity: 'medium', description: 'Suspiciously low pricing' });
       }
     }
 
     // Risk patterns
     const patterns = [
-      { pattern: /urgent|urgently/i, weight: 15, desc: 'Urgency language' },
+      { pattern: /urgent|urgently/i, weight: 15, desc: 'Urgency language detected' },
       { pattern: /wire transfer/i, weight: 25, desc: 'Wire transfer requested' },
       { pattern: /gift card/i, weight: 30, desc: 'Gift card payment' },
       { pattern: /bitcoin|crypto/i, weight: 22, desc: 'Cryptocurrency payment' },
-      { pattern: /deposit today|immediate deposit/i, weight: 22, desc: 'Immediate deposit' },
+      { pattern: /deposit today|immediate deposit/i, weight: 22, desc: 'Immediate deposit requested' },
       { pattern: /overseas|abroad|out of country/i, weight: 18, desc: 'Seller overseas' },
-      { pattern: /cannot meet|can't meet/i, weight: 15, desc: 'No in-person meeting' },
-      { pattern: /whatsapp only|text only/i, weight: 12, desc: 'Unusual contact method' }
+      { pattern: /cannot meet|can't meet|can not meet/i, weight: 15, desc: 'No in-person meeting' },
+      { pattern: /whatsapp only|text only/i, weight: 12, desc: 'Unusual contact method' },
+      { pattern: /too good to be true/i, weight: 20, desc: 'Too good to be true' },
+      { pattern: /no viewing|no visits/i, weight: 18, desc: 'No property viewing allowed' }
     ];
 
     patterns.forEach(({ pattern, weight, desc }) => {
@@ -190,13 +201,19 @@
       }
     });
 
-    // Image count
+    // Image count analysis
     if (data.imageCount === 0) {
       score += 18;
       flags.push({ severity: 'high', description: 'No images provided' });
     } else if (data.imageCount < 3) {
       score += 8;
-      flags.push({ severity: 'low', description: 'Very few images' });
+      flags.push({ severity: 'medium', description: 'Very few images' });
+    }
+
+    // Missing title/description
+    if (!data.title && !data.description) {
+      score += 10;
+      flags.push({ severity: 'medium', description: 'Limited listing information' });
     }
 
     score = Math.min(100, Math.max(0, score));
@@ -208,27 +225,85 @@
     else if (score >= 10) riskLevel = 'low';
     else riskLevel = 'safe';
 
-    // Recommendations
+    // Recommendations based on risk
     if (riskLevel === 'critical' || riskLevel === 'high') {
       recommendations.push('⛔ Do NOT send any money or deposit');
       recommendations.push('🔍 Verify ownership through county records');
+      recommendations.push('📞 Report this listing to the platform');
     } else if (riskLevel === 'medium') {
       recommendations.push('⚠️ Proceed with caution');
-      recommendations.push('🔍 Verify seller identity');
+      recommendations.push('🔍 Verify seller identity before meeting');
+      recommendations.push('🏛️ Check county property records');
     } else {
       recommendations.push('✅ Listing appears legitimate');
+      recommendations.push('📋 Standard due diligence recommended');
     }
     recommendations.push('Always verify property ownership independently');
 
+    console.log('[LandGuard AI] Local scan result - Score:', score, 'Risk:', riskLevel, 'Flags:', flags.length);
     return { score, riskLevel, flags, recommendations };
   }
 
-  // Create banner
+  // Create banner with scan button
   function createBanner() {
     if (bannerElement) return;
 
+    console.log('[LandGuard AI] Creating banner...');
+    
     bannerElement = document.createElement('div');
     bannerElement.id = 'landguard-banner';
+    
+    // Show banner with Scan button initially (not just loading)
+    showInitialBanner();
+
+    document.body.insertBefore(bannerElement, document.body.firstChild);
+    document.body.style.marginTop = bannerElement.offsetHeight + 'px';
+  }
+
+  // Show initial banner with Scan button
+  function showInitialBanner() {
+    if (!bannerElement) return;
+    
+    const site = getCurrentSite();
+    const siteName = site ? site.name : 'this page';
+    
+    bannerElement.innerHTML = `
+      <div class="lg-content">
+        <div class="lg-logo">
+          <img src="${chrome.runtime.getURL('icons/icon32.png')}" alt="LandGuard AI" class="lg-logo-img">
+          <span class="lg-logo-text">LandGuard AI</span>
+          <span class="lg-version">v${VERSION}</span>
+        </div>
+        
+        <div class="lg-status">
+          <span class="lg-status-text">Ready to analyze ${siteName}</span>
+        </div>
+        
+        <div class="lg-actions">
+          <button class="lg-btn lg-btn-primary lg-scan-btn" id="lg-scan-now">
+            🔍 Scan This Listing
+          </button>
+          <button class="lg-btn lg-btn-close" id="lg-close">✕</button>
+        </div>
+      </div>
+      <div class="lg-disclaimer">${BRAND.disclaimer}</div>
+    `;
+
+    // Attach event listeners
+    attachBannerEventListeners();
+    
+    // Update body margin
+    requestAnimationFrame(() => {
+      if (bannerElement) {
+        document.body.style.marginTop = bannerElement.offsetHeight + 'px';
+      }
+    });
+  }
+
+  // Show loading state
+  function showLoadingState() {
+    if (!bannerElement) return;
+    
     bannerElement.innerHTML = `
       <div class="lg-content">
         <div class="lg-logo">
@@ -238,19 +313,76 @@
         </div>
         <div class="lg-loading">
           <div class="lg-spinner"></div>
-          <span>Analyzing listing...</span>
+          <span>Analyzing listing for scam indicators...</span>
+        </div>
+        <div class="lg-actions">
+          <button class="lg-btn lg-btn-close" id="lg-close">✕</button>
         </div>
       </div>
     `;
+    
+    // Re-attach close button listener
+    const closeBtn = document.getElementById('lg-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', closeBanner);
+    }
+  }
 
-    document.body.insertBefore(bannerElement, document.body.firstChild);
-    document.body.style.marginTop = bannerElement.offsetHeight + 'px';
+  // Attach event listeners to banner buttons
+  function attachBannerEventListeners() {
+    console.log('[LandGuard AI] Attaching event listeners...');
+    
+    // Scan button
+    const scanBtn = document.getElementById('lg-scan-now');
+    if (scanBtn) {
+      scanBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('[LandGuard AI] Scan button clicked!');
+        performScan();
+      });
+    }
+    
+    // Re-scan button
+    const rescanBtn = document.getElementById('lg-rescan');
+    if (rescanBtn) {
+      rescanBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('[LandGuard AI] Re-scan button clicked!');
+        performScan();
+      });
+    }
+    
+    // Details button
+    const detailsBtn = document.getElementById('lg-details');
+    if (detailsBtn) {
+      detailsBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('[LandGuard AI] Details button clicked!');
+        showDetailsModal();
+      });
+    }
+    
+    // Close button
+    const closeBtn = document.getElementById('lg-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('[LandGuard AI] Close button clicked!');
+        closeBanner();
+      });
+    }
   }
 
   // Update banner with results
   function updateBanner(result) {
     if (!bannerElement) return;
 
+    console.log('[LandGuard AI] Updating banner with results:', result);
+    
     currentScan = result;
     const { score, riskLevel, flags, recommendations } = result;
     const color = COLORS[riskLevel] || COLORS.medium;
@@ -263,7 +395,7 @@
       critical: '⛔ Critical Risk'
     };
 
-    const displayFlags = flags.slice(0, 4);
+    const displayFlags = (flags || []).slice(0, 4);
 
     bannerElement.innerHTML = `
       <div class="lg-content">
@@ -285,7 +417,7 @@
         <div class="lg-flags">
           ${displayFlags.length > 0 ? displayFlags.map(flag => `
             <div class="lg-flag-chip lg-flag-${flag.severity || 'medium'}">
-              <span class="lg-flag-icon">${flag.severity === 'high' ? '🚨' : '⚠️'}</span>
+              <span class="lg-flag-icon">${flag.severity === 'high' || flag.severity === 'critical' ? '🚨' : '⚠️'}</span>
               <span>${flag.description}</span>
             </div>
           `).join('') : `
@@ -305,20 +437,59 @@
       <div class="lg-disclaimer">${BRAND.disclaimer}</div>
     `;
 
-    // Event listeners
-    document.getElementById('lg-rescan')?.addEventListener('click', performScan);
-    document.getElementById('lg-details')?.addEventListener('click', showDetailsModal);
-    document.getElementById('lg-close')?.addEventListener('click', closeBanner);
+    // Attach event listeners
+    attachBannerEventListeners();
 
-    document.body.style.marginTop = bannerElement.offsetHeight + 'px';
+    // Update body margin
+    requestAnimationFrame(() => {
+      if (bannerElement) {
+        document.body.style.marginTop = bannerElement.offsetHeight + 'px';
+      }
+    });
+  }
+
+  // Show error in banner
+  function showErrorInBanner(errorMessage) {
+    if (!bannerElement) return;
+    
+    bannerElement.innerHTML = `
+      <div class="lg-content">
+        <div class="lg-logo">
+          <img src="${chrome.runtime.getURL('icons/icon32.png')}" alt="LandGuard AI" class="lg-logo-img">
+          <span class="lg-logo-text">LandGuard AI</span>
+          <span class="lg-version">v${VERSION}</span>
+        </div>
+        
+        <div class="lg-error">
+          <span class="lg-error-icon">⚠️</span>
+          <span class="lg-error-text">${errorMessage}</span>
+        </div>
+        
+        <div class="lg-actions">
+          <button class="lg-btn lg-btn-primary" id="lg-scan-now">🔄 Try Again</button>
+          <button class="lg-btn lg-btn-close" id="lg-close">✕</button>
+        </div>
+      </div>
+    `;
+
+    attachBannerEventListeners();
   }
 
   // Show details modal
   function showDetailsModal() {
-    if (!currentScan) return;
+    if (!currentScan) {
+      console.log('[LandGuard AI] No scan data for modal');
+      return;
+    }
 
+    console.log('[LandGuard AI] Opening details modal');
+    
     const { score, riskLevel, flags, recommendations } = currentScan;
     const color = COLORS[riskLevel] || COLORS.medium;
+
+    // Remove any existing modal
+    const existingModal = document.getElementById('lg-modal-overlay');
+    if (existingModal) existingModal.remove();
 
     const overlay = document.createElement('div');
     overlay.id = 'lg-modal-overlay';
@@ -342,21 +513,21 @@
           </div>
           
           <div class="lg-modal-section">
-            <h3>🚩 Risk Flags (${flags.length})</h3>
+            <h3>🚩 Risk Flags (${(flags || []).length})</h3>
             <ul class="lg-modal-flags">
-              ${flags.length > 0 ? flags.map(f => `
+              ${(flags || []).length > 0 ? flags.map(f => `
                 <li class="lg-modal-flag-${f.severity || 'medium'}">
-                  <span>${f.severity === 'high' ? '🚨' : '⚠️'}</span>
+                  <span>${f.severity === 'high' || f.severity === 'critical' ? '🚨' : '⚠️'}</span>
                   ${f.description}
                 </li>
-              `).join('') : '<li class="lg-modal-flag-low"><span>✅</span> No significant red flags</li>'}
+              `).join('') : '<li class="lg-modal-flag-low"><span>✅</span> No significant red flags detected</li>'}
             </ul>
           </div>
           
           <div class="lg-modal-section">
             <h3>💡 Recommendations</h3>
             <ul class="lg-modal-recommendations">
-              ${recommendations.map(r => `<li>${r}</li>`).join('')}
+              ${(recommendations || ['Always verify property ownership']).map(r => `<li>${r}</li>`).join('')}
             </ul>
           </div>
         </div>
@@ -365,14 +536,24 @@
 
     document.body.appendChild(overlay);
 
-    document.getElementById('lg-modal-close')?.addEventListener('click', () => overlay.remove());
+    // Close button
+    document.getElementById('lg-modal-close')?.addEventListener('click', () => {
+      console.log('[LandGuard AI] Modal close clicked');
+      overlay.remove();
+    });
+    
+    // Click outside to close
     overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) overlay.remove();
+      if (e.target === overlay) {
+        console.log('[LandGuard AI] Modal overlay clicked');
+        overlay.remove();
+      }
     });
   }
 
   // Close banner
   function closeBanner() {
+    console.log('[LandGuard AI] Closing banner');
     if (bannerElement) {
       bannerElement.remove();
       bannerElement = null;
@@ -380,43 +561,69 @@
     }
   }
 
-  // Perform scan
+  // Perform scan - main function
   async function performScan() {
+    if (isScanning) {
+      console.log('[LandGuard AI] Scan already in progress');
+      return;
+    }
+    
+    console.log('[LandGuard AI] Starting scan...');
+    isScanning = true;
+    
+    // Show loading state
+    showLoadingState();
+    
     const data = extractListingData();
     let result;
 
     try {
       if (settings.useApiScans && apiKey) {
-        result = await scanListingAPI(data);
+        console.log('[LandGuard AI] Attempting API scan...');
+        try {
+          result = await scanListingAPI(data);
+        } catch (apiError) {
+          console.log('[LandGuard AI] API failed, using local scan:', apiError.message);
+          result = scanListingLocal(data);
+        }
       } else {
+        console.log('[LandGuard AI] Using local scan (no API key)');
         result = scanListingLocal(data);
       }
-    } catch (e) {
-      console.log('API scan failed, using local:', e.message);
-      result = scanListingLocal(data);
-    }
+      
+      updateBanner(result);
 
-    updateBanner(result);
-
-    // Save to history
-    try {
-      chrome.runtime.sendMessage({
-        action: 'saveScan',
-        scan: {
-          ...result,
-          url: data.url,
-          timestamp: Date.now()
-        }
-      });
-    } catch (e) {
-      console.log('Could not save scan');
+      // Save to history
+      try {
+        chrome.runtime.sendMessage({
+          action: 'saveScan',
+          scan: {
+            ...result,
+            url: data.url,
+            timestamp: Date.now()
+          }
+        });
+      } catch (e) {
+        console.log('[LandGuard AI] Could not save scan to history');
+      }
+      
+    } catch (error) {
+      console.error('[LandGuard AI] Scan error:', error);
+      showErrorInBanner('Scan failed. Click to try again.');
+    } finally {
+      isScanning = false;
     }
   }
 
-  // Message listener
+  // Message listener for popup communication
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    console.log('[LandGuard AI] Message received:', request.action);
+    
     if (request.action === 'getPageData') {
       sendResponse(extractListingData());
+    } else if (request.action === 'triggerScan') {
+      performScan();
+      sendResponse({ status: 'scanning' });
     }
     return true;
   });
@@ -424,9 +631,12 @@
   // Initialize
   async function init() {
     const site = getCurrentSite();
-    if (!site) return;
+    if (!site) {
+      console.log('[LandGuard AI] Not a supported site');
+      return;
+    }
 
-    console.log(`LandGuard AI v${VERSION}: Detected ${site.name}`);
+    console.log(`[LandGuard AI] v${VERSION}: Detected ${site.name}`);
 
     // Load settings
     try {
@@ -437,16 +647,23 @@
       if (result.lg_api_key) {
         apiKey = result.lg_api_key;
       }
+      console.log('[LandGuard AI] Settings loaded, hasApiKey:', !!apiKey);
     } catch (e) {
-      console.log('Could not load settings');
+      console.log('[LandGuard AI] Could not load settings:', e.message);
     }
 
-    // Auto-scan if enabled
-    if (settings.autoScan && settings.showBanner) {
+    // Always show banner if enabled
+    if (settings.showBanner) {
+      // Wait for page to settle
       setTimeout(() => {
         createBanner();
-        performScan();
-      }, 1500);
+        
+        // Auto-scan if enabled
+        if (settings.autoScan) {
+          console.log('[LandGuard AI] Auto-scan enabled, starting scan...');
+          setTimeout(performScan, 500);
+        }
+      }, 1000);
     }
   }
 
@@ -457,4 +674,3 @@
     init();
   }
 })();
-

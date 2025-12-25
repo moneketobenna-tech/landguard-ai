@@ -21,6 +21,19 @@
     </div>
   </div>
 
+  <!-- Auto-Rescan Section (PRO only) -->
+  <div class="auto-rescan-bar" id="autoRescanSection" style="display: none;">
+    <div class="auto-rescan-left">
+      <span class="auto-rescan-icon">🔄</span>
+      <span class="auto-rescan-label">Auto-Rescan</span>
+      <span class="auto-rescan-countdown" id="autoRescanCountdown"></span>
+    </div>
+    <label class="toggle-switch">
+      <input type="checkbox" id="autoRescanToggle" checked>
+      <span class="toggle-slider"></span>
+    </label>
+  </div>
+
   <!-- Status Bar -->
   <div class="status-bar">
     <div class="status-indicator">
@@ -122,12 +135,20 @@
           <ul class="flags-list" id="flagsList"></ul>
         </div>
 
+        <!-- NEW: Analysis Section -->
+        <div class="analysis-section" id="analysisSection" style="display: none;">
+          <!-- Dynamically filled by JS -->
+        </div>
+
         <div class="recommendations-section">
           <div class="recommendations-title">💡 Recommendations</div>
           <ul class="recommendations-list" id="recommendationsList"></ul>
         </div>
 
         <div class="results-actions">
+          <button class="btn btn-primary btn-sm" id="exportReportBtn" style="display: none;" onclick="exportReport()">
+            <span>📄</span> Export PDF Report
+          </button>
           <button class="btn btn-secondary btn-sm" id="saveToHistory">
             <span>💾</span> Save
           </button>

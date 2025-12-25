@@ -1,5 +1,6 @@
 /**
- * LandGuard AI - API Types
+ * LandGuard AI - API Types v2.0
+ * Includes Image Analysis and Template Detection
  */
 
 export type ApiTier = 'starter' | 'growth' | 'business' | 'enterprise'
@@ -65,6 +66,9 @@ export interface ScanListingRequest {
   location?: string
   sellerName?: string
   sellerContact?: string
+  // NEW: Image analysis fields
+  imageUrls?: string[]
+  imageCount?: number
 }
 
 export interface ScanSellerRequest {
@@ -96,6 +100,20 @@ export interface RiskFlag {
   evidence?: string
 }
 
+// NEW: Image Analysis Result
+export interface ImageAnalysisData {
+  imageCount: number
+  stockImageDetected: boolean
+  score: number
+}
+
+// NEW: Template Analysis Result
+export interface TemplateAnalysisData {
+  isTemplateText: boolean
+  genericPhraseCount: number
+  score: number
+}
+
 export interface ScanResult {
   scanId: string
   status: 'completed' | 'pending' | 'failed'
@@ -108,6 +126,11 @@ export interface ScanResult {
     scannedAt: string
     processingTime: number
     apiVersion: string
+  }
+  // NEW: Enhanced analysis results
+  analysis?: {
+    imageAnalysis?: ImageAnalysisData
+    templateAnalysis?: TemplateAnalysisData
   }
 }
 
@@ -127,3 +150,16 @@ export interface ApiResponse<T = any> {
   }
 }
 
+// NEW: Report Export Types
+export interface ScanReport {
+  reportId: string
+  scanId: string
+  generatedAt: string
+  format: 'pdf' | 'json'
+  scanResult: ScanResult
+  additionalInfo?: {
+    userEmail?: string
+    propertyAddress?: string
+    notes?: string
+  }
+}

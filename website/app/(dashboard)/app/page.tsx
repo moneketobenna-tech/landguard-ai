@@ -3,6 +3,7 @@
 /**
  * Dashboard Home - LandGuard AI v2.0
  * Enhanced property scanner with seller verification and API integration
+ * Free users: 3 scans per month
  */
 
 import { useEffect, useState } from 'react'
@@ -30,6 +31,12 @@ interface ScanResult {
     processingTime?: number
     apiVersion?: string
   }
+  scanUsage?: {
+    used: number
+    remaining: number
+    limit: number
+    isPro: boolean
+  }
 }
 
 interface ScanHistoryItem {
@@ -42,7 +49,16 @@ interface ScanHistoryItem {
   scannedAt: string
 }
 
+interface ScanUsage {
+  used: number
+  remaining: number
+  limit: number
+  isPro: boolean
+}
+
 type ScanTab = 'listing' | 'seller'
+
+const FREE_SCAN_LIMIT = 3
 
 export default function DashboardHome() {
   const router = useRouter()
@@ -54,7 +70,14 @@ export default function DashboardHome() {
   const [scanResult, setScanResult] = useState<ScanResult | null>(null)
   const [error, setError] = useState('')
   const [recentScans, setRecentScans] = useState<ScanHistoryItem[]>([])
-  const [scansRemaining, setScansRemaining] = useState(3)
+  const [scanUsage, setScanUsage] = useState<ScanUsage>({ used: 0, remaining: FREE_SCAN_LIMIT, limit: FREE_SCAN_LIMIT, isPro: false })
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  
+  // Auto-rescan state (PRO feature)
+  const [autoRescan, setAutoRescan] = useState(true)
+  const [lastScanTime, setLastScanTime] = useState<number | null>(null)
+  const [countdown, setCountdown] = useState(300) // 5 minutes in seconds
+  const AUTO_RESCAN_INTERVAL = 300 // 5 minutes (300 seconds)
   
   // Listing inputs
   const [url, setUrl] = useState('')
@@ -76,6 +99,25 @@ export default function DashboardHome() {
     }
   }, [isLoading, isAuthenticated, router])
 
+  // Fetch scan usage from API
+  useEffect(() => {
+    const fetchScanUsage = async () => {
+      if (!isAuthenticated) return
+      
+      try {
+        const res = await fetch('/api/v1/usage')
+        const data = await res.json()
+        if (data.success && data.scanUsage) {
+          setScanUsage(data.scanUsage)
+        }
+      } catch (err) {
+        console.error('Failed to fetch scan usage:', err)
+      }
+    }
+    
+    fetchScanUsage()
+  }, [isAuthenticated])
+
   // Load scan history
   useEffect(() => {
     const saved = localStorage.getItem('lg_scan_history')
@@ -84,7 +126,31 @@ export default function DashboardHome() {
         setRecentScans(JSON.parse(saved).slice(0, 10))
       } catch (e) {}
     }
+    
+    // Load auto-rescan preference
+    const autoRescanPref = localStorage.getItem('lg_auto_rescan')
+    if (autoRescanPref !== null) {
+      setAutoRescan(autoRescanPref === 'true')
+    }
   }, [])
+  
+  // Auto-rescan timer (PRO only)
+  useEffect(() => {
+    if (!isPro || !autoRescan || !lastScanTime || !scanResult) return
+    
+    const interval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - lastScanTime) / 1000)
+      const remaining = Math.max(0, AUTO_RESCAN_INTERVAL - elapsed)
+      setCountdown(remaining)
+      
+      // Trigger rescan when countdown reaches 0
+      if (remaining === 0 && !scanning && url.trim()) {
+        handleScanListing()
+      }
+    }, 1000)
+    
+    return () => clearInterval(interval)
+  }, [isPro, autoRescan, lastScanTime, scanResult, scanning, url])
 
   if (isLoading) {
     return (
@@ -102,6 +168,12 @@ export default function DashboardHome() {
   const handleScanListing = async () => {
     if (!url.trim()) {
       setError('Please enter a listing URL')
+      return
+    }
+
+    // Check scan limit for free users
+    if (!isPro && scanUsage.remaining <= 0) {
+      setShowUpgradeModal(true)
       return
     }
 
@@ -124,9 +196,27 @@ export default function DashboardHome() {
 
       const data = await res.json()
 
+      // Check if scan limit was reached
+      if (data.error === 'SCAN_LIMIT_REACHED') {
+        setShowUpgradeModal(true)
+        if (data.scanUsage) {
+          setScanUsage(data.scanUsage)
+        }
+        return
+      }
+
       if (data.success || data.scanId || data.score !== undefined) {
         const result = data.data || data
         setScanResult(result)
+        
+        // Update last scan time for auto-rescan
+        setLastScanTime(Date.now())
+        setCountdown(AUTO_RESCAN_INTERVAL)
+        
+        // Update scan usage from response
+        if (result.scanUsage) {
+          setScanUsage(result.scanUsage)
+        }
         
         // Save to history
         const newScan: ScanHistoryItem = {
@@ -141,10 +231,6 @@ export default function DashboardHome() {
         const updatedHistory = [newScan, ...recentScans].slice(0, 20)
         setRecentScans(updatedHistory)
         localStorage.setItem('lg_scan_history', JSON.stringify(updatedHistory))
-        
-        if (!isPro) {
-          setScansRemaining(prev => Math.max(0, prev - 1))
-        }
       } else {
         setError(data.error?.message || data.error || 'Scan failed')
       }
@@ -159,6 +245,12 @@ export default function DashboardHome() {
   const handleScanSeller = async () => {
     if (!sellerName && !sellerEmail && !sellerPhone && !sellerProfile) {
       setError('Please enter at least one seller detail')
+      return
+    }
+
+    // Check scan limit for free users
+    if (!isPro && scanUsage.remaining <= 0) {
+      setShowUpgradeModal(true)
       return
     }
 
@@ -180,9 +272,23 @@ export default function DashboardHome() {
 
       const data = await res.json()
 
+      // Check if scan limit was reached
+      if (data.error === 'SCAN_LIMIT_REACHED') {
+        setShowUpgradeModal(true)
+        if (data.scanUsage) {
+          setScanUsage(data.scanUsage)
+        }
+        return
+      }
+
       if (data.success || data.scanId || data.score !== undefined) {
         const result = data.data || data
         setScanResult(result)
+        
+        // Update scan usage from response
+        if (result.scanUsage) {
+          setScanUsage(result.scanUsage)
+        }
         
         // Save to history
         const newScan: ScanHistoryItem = {
@@ -197,10 +303,6 @@ export default function DashboardHome() {
         const updatedHistory = [newScan, ...recentScans].slice(0, 20)
         setRecentScans(updatedHistory)
         localStorage.setItem('lg_scan_history', JSON.stringify(updatedHistory))
-        
-        if (!isPro) {
-          setScansRemaining(prev => Math.max(0, prev - 1))
-        }
       } else {
         setError(data.error?.message || data.error || 'Scan failed')
       }
@@ -258,6 +360,48 @@ export default function DashboardHome() {
     }
   }
 
+  // Export report as PDF
+  const handleExportReport = async (result: ScanResult) => {
+    try {
+      const res = await fetch('/api/v1/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          scanResult: result,
+          propertyInfo: {
+            url: url || undefined,
+            title: title || undefined,
+            price: price || undefined,
+            location: location || undefined
+          },
+          userInfo: {
+            email: user?.email
+          }
+        })
+      })
+
+      const data = await res.json()
+
+      if (data.success && data.html) {
+        // Open in new window for printing/saving as PDF
+        const printWindow = window.open('', '_blank')
+        if (printWindow) {
+          printWindow.document.write(data.html)
+          printWindow.document.close()
+          // Trigger print dialog after a short delay
+          setTimeout(() => {
+            printWindow.print()
+          }, 500)
+        }
+      } else {
+        alert('Failed to generate report. Please try again.')
+      }
+    } catch (error) {
+      console.error('Report export error:', error)
+      alert('Failed to generate report. Please try again.')
+    }
+  }
+
   return (
     <DashboardLayout>
       <div className="space-y-8">
@@ -272,32 +416,37 @@ export default function DashboardHome() {
           <div className="flex items-center gap-4">
             <span className="text-sm text-white/60">LandGuard AI v2.0</span>
             <span className="bg-white/20 px-2 py-0.5 rounded text-xs">
-              {isPro ? '⚡ PRO' : `${scansRemaining} scans left`}
+              {isPro ? '⚡ PRO' : `${scanUsage.remaining}/${scanUsage.limit} scans left`}
             </span>
           </div>
         </div>
 
         {/* Pro Banner */}
         {!isPro && (
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-6">
+          <div className={`bg-gradient-to-r ${scanUsage.remaining <= 0 ? 'from-red-50 to-orange-50 border-red-200' : 'from-green-50 to-emerald-50 border-green-200'} border rounded-xl p-6`}>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-2xl">⚡</span>
-                  <span className="font-semibold text-gray-800">Upgrade to PRO</span>
+                  <span className="text-2xl">{scanUsage.remaining <= 0 ? '🔒' : '⚡'}</span>
+                  <span className="font-semibold text-gray-800">
+                    {scanUsage.remaining <= 0 ? 'Free Scans Exhausted' : 'Upgrade to PRO'}
+                  </span>
                 </div>
                 <p className="text-gray-600 text-sm">
-                  Unlimited scans • Seller verification • Document scanning • Auto-scan • Priority support
+                  {scanUsage.remaining <= 0 
+                    ? 'You\'ve used all your free scans this month. Upgrade to PRO for unlimited property scans!'
+                    : 'Unlimited scans • Seller verification • Document scanning • Auto-scan • Priority support'
+                  }
                 </p>
-                <p className="text-green-600 text-sm mt-1">
-                  <strong>{scansRemaining} scans remaining</strong> this month
+                <p className={`text-sm mt-1 ${scanUsage.remaining <= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                  <strong>{scanUsage.remaining} of {scanUsage.limit} scans remaining</strong> this month
                 </p>
               </div>
               <button
                 onClick={handleUpgrade}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors whitespace-nowrap"
+                className={`${scanUsage.remaining <= 0 ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} text-white px-6 py-3 rounded-lg font-semibold transition-colors whitespace-nowrap`}
               >
-                Upgrade for $9.99/mo
+                {scanUsage.remaining <= 0 ? 'Unlock Unlimited Scans' : 'Upgrade for $9.99/mo'}
               </button>
             </div>
           </div>
@@ -379,8 +528,8 @@ export default function DashboardHome() {
 
               <button
                 onClick={handleScanListing}
-                disabled={scanning || (!isPro && scansRemaining <= 0)}
-                className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                disabled={scanning}
+                className={`w-full ${!isPro && scanUsage.remaining <= 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'} disabled:opacity-70 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2`}
               >
                 {scanning ? (
                   <>
@@ -390,10 +539,45 @@ export default function DashboardHome() {
                     </svg>
                     Analyzing Listing...
                   </>
+                ) : !isPro && scanUsage.remaining <= 0 ? (
+                  <>🔒 Upgrade to Scan</>
                 ) : (
                   <>🔍 Scan Listing</>
                 )}
               </button>
+              
+              {/* Auto-Rescan Toggle (PRO only) */}
+              {isPro && scanResult && (
+                <div className="mt-4 flex items-center justify-between bg-amber-50 border border-amber-200 rounded-lg p-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl animate-spin-slow">🔄</span>
+                    <div>
+                      <div className="font-medium text-amber-800 text-sm">Auto-Rescan</div>
+                      {autoRescan && (
+                        <div className="text-xs text-amber-600">
+                          Next scan in {Math.floor(countdown / 60)}:{(countdown % 60).toString().padStart(2, '0')}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const newValue = !autoRescan
+                      setAutoRescan(newValue)
+                      localStorage.setItem('lg_auto_rescan', String(newValue))
+                    }}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      autoRescan ? 'bg-green-500' : 'bg-gray-300'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        autoRescan ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -452,8 +636,8 @@ export default function DashboardHome() {
 
               <button
                 onClick={handleScanSeller}
-                disabled={scanning || (!isPro && scansRemaining <= 0)}
-                className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                disabled={scanning}
+                className={`w-full ${!isPro && scanUsage.remaining <= 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'} disabled:opacity-70 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2`}
               >
                 {scanning ? (
                   <>
@@ -463,6 +647,8 @@ export default function DashboardHome() {
                     </svg>
                     Verifying Seller...
                   </>
+                ) : !isPro && scanUsage.remaining <= 0 ? (
+                  <>🔒 Upgrade to Scan</>
                 ) : (
                   <>👤 Verify Seller</>
                 )}
@@ -537,6 +723,25 @@ export default function DashboardHome() {
                   {scanResult.metadata.apiVersion && ` • API ${scanResult.metadata.apiVersion}`}
                 </div>
               )}
+
+              {/* Export Report Button */}
+              <div className="pt-4 border-t border-gray-200 flex gap-3">
+                <button
+                  onClick={() => handleExportReport(scanResult)}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-colors"
+                >
+                  📄 Download PDF Report
+                </button>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(JSON.stringify(scanResult, null, 2))
+                    alert('Scan results copied to clipboard!')
+                  }}
+                  className="px-4 py-2 border border-gray-300 hover:bg-gray-50 rounded-lg font-medium text-sm text-gray-600 transition-colors"
+                >
+                  📋 Copy JSON
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -623,6 +828,52 @@ export default function DashboardHome() {
           </div>
         </div>
       </div>
+
+      {/* Upgrade Modal */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl animate-in">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">🔒</span>
+              </div>
+              <h2 className="text-xl font-bold text-gray-800 mb-2">Free Scans Exhausted</h2>
+              <p className="text-gray-600 mb-6">
+                You've used all <strong>{scanUsage.limit} free scans</strong> this month. Upgrade to PRO for unlimited property scans and keep yourself protected from scams!
+              </p>
+              
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
+                <h3 className="font-semibold text-green-800 mb-2">PRO Features</h3>
+                <ul className="text-sm text-green-700 space-y-1 text-left">
+                  <li>✅ Unlimited property scans</li>
+                  <li>✅ Seller verification</li>
+                  <li>✅ Document scanning</li>
+                  <li>✅ Auto-scan supported sites</li>
+                  <li>✅ Priority support</li>
+                </ul>
+              </div>
+              
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => {
+                    setShowUpgradeModal(false)
+                    handleUpgrade()
+                  }}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition-colors"
+                >
+                  Upgrade to PRO - $9.99/mo
+                </button>
+                <button
+                  onClick={() => setShowUpgradeModal(false)}
+                  className="w-full text-gray-500 hover:text-gray-700 py-2 text-sm"
+                >
+                  Maybe Later
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   )
 }

@@ -2,11 +2,18 @@
  * LandGuard AI - User Database v2
  * Uses Vercel KV or in-memory fallback
  * Supports admin functions: ban, unban, delete
+ * Includes scan tracking for free users (3/month)
  */
 
 import { createClient } from '@vercel/kv'
 
 export type PlanType = 'free' | 'pro' | 'banned'
+
+export interface ScanUsage {
+  count: number
+  month: string // YYYY-MM format
+  lastScanAt?: string
+}
 
 export interface User {
   id: string
@@ -19,7 +26,10 @@ export interface User {
   updatedAt: string
   isBanned?: boolean
   banReason?: string
+  scanUsage?: ScanUsage
 }
+
+export const FREE_SCAN_LIMIT = 3
 
 // In-memory storage for development
 const memoryUsers = new Map<string, User>()
@@ -63,6 +73,14 @@ function generateLicenseKey(isPro: boolean = false): string {
     segments.push(segment)
   }
   return segments.join('-')
+}
+
+/**
+ * Get current month string (YYYY-MM)
+ */
+function getCurrentMonth(): string {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
 }
 
 /**
@@ -115,7 +133,11 @@ export async function createUser(email: string, passwordHash: string): Promise<U
     licenseKey: generateLicenseKey(),
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    isBanned: false
+    isBanned: false,
+    scanUsage: {
+      count: 0,
+      month: getCurrentMonth()
+    }
   }
 
   const kv = await getKV()
@@ -192,6 +214,100 @@ export async function updateUserPlan(id: string, planType: PlanType, stripeCusto
   if (stripeCustomerId) updates.stripeCustomerId = stripeCustomerId
   if (planType !== 'banned') updates.isBanned = false
   return updateUser(id, updates)
+}
+
+/**
+ * Check if user can perform a scan (free users have 3/month limit)
+ */
+export async function canUserScan(userId: string): Promise<{ allowed: boolean; remaining: number; limit: number }> {
+  const user = await getUserById(userId)
+  if (!user) {
+    return { allowed: false, remaining: 0, limit: FREE_SCAN_LIMIT }
+  }
+
+  // Pro users have unlimited scans
+  if (user.planType === 'pro') {
+    return { allowed: true, remaining: -1, limit: -1 } // -1 = unlimited
+  }
+
+  // Banned users cannot scan
+  if (user.planType === 'banned' || user.isBanned) {
+    return { allowed: false, remaining: 0, limit: FREE_SCAN_LIMIT }
+  }
+
+  const currentMonth = getCurrentMonth()
+  let scanUsage = user.scanUsage
+
+  // Reset count if new month
+  if (!scanUsage || scanUsage.month !== currentMonth) {
+    scanUsage = { count: 0, month: currentMonth }
+    await updateUser(userId, { scanUsage })
+  }
+
+  const remaining = Math.max(0, FREE_SCAN_LIMIT - scanUsage.count)
+  return {
+    allowed: scanUsage.count < FREE_SCAN_LIMIT,
+    remaining,
+    limit: FREE_SCAN_LIMIT
+  }
+}
+
+/**
+ * Increment user's scan count (call after successful scan)
+ */
+export async function incrementScanCount(userId: string): Promise<ScanUsage> {
+  const user = await getUserById(userId)
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  // Pro users don't need tracking
+  if (user.planType === 'pro') {
+    return { count: 0, month: getCurrentMonth() }
+  }
+
+  const currentMonth = getCurrentMonth()
+  let scanUsage = user.scanUsage
+
+  // Reset if new month
+  if (!scanUsage || scanUsage.month !== currentMonth) {
+    scanUsage = { count: 0, month: currentMonth }
+  }
+
+  scanUsage.count += 1
+  scanUsage.lastScanAt = new Date().toISOString()
+
+  await updateUser(userId, { scanUsage })
+  
+  return scanUsage
+}
+
+/**
+ * Get user's scan usage
+ */
+export async function getUserScanUsage(userId: string): Promise<{ used: number; remaining: number; limit: number; isPro: boolean }> {
+  const user = await getUserById(userId)
+  if (!user) {
+    return { used: 0, remaining: 0, limit: FREE_SCAN_LIMIT, isPro: false }
+  }
+
+  if (user.planType === 'pro') {
+    return { used: 0, remaining: -1, limit: -1, isPro: true }
+  }
+
+  const currentMonth = getCurrentMonth()
+  const scanUsage = user.scanUsage
+
+  if (!scanUsage || scanUsage.month !== currentMonth) {
+    return { used: 0, remaining: FREE_SCAN_LIMIT, limit: FREE_SCAN_LIMIT, isPro: false }
+  }
+
+  return {
+    used: scanUsage.count,
+    remaining: Math.max(0, FREE_SCAN_LIMIT - scanUsage.count),
+    limit: FREE_SCAN_LIMIT,
+    isPro: false
+  }
 }
 
 /**

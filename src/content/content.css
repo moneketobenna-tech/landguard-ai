@@ -52,6 +52,44 @@
   border-radius: 4px;
 }
 
+/* Status */
+.lg-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.lg-status-text {
+  color: #166534;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Error */
+.lg-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  color: #dc2626;
+  font-size: 14px;
+}
+
+.lg-error-icon {
+  font-size: 18px;
+}
+
+.lg-error-text {
+  font-weight: 500;
+}
+
+/* Scan Button */
+.lg-scan-btn {
+  font-size: 14px !important;
+  padding: 10px 20px !important;
+}
+
 /* Loading */
 .lg-loading {
   display: flex;
@@ -59,6 +97,7 @@
   gap: 10px;
   color: #166534;
   font-size: 14px;
+  flex: 1;
 }
 
 .lg-spinner {
