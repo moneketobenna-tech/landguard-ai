@@ -1,24 +1,30 @@
 /**
- * LandGuard AI - User Database
+ * LandGuard AI - User Database v2
  * Uses Vercel KV or in-memory fallback
+ * Supports admin functions: ban, unban, delete
  */
 
 import { createClient } from '@vercel/kv'
+
+export type PlanType = 'free' | 'pro' | 'banned'
 
 export interface User {
   id: string
   email: string
   passwordHash: string
-  planType: 'free' | 'pro'
+  planType: PlanType
   licenseKey?: string
   stripeCustomerId?: string
   createdAt: string
   updatedAt: string
+  isBanned?: boolean
+  banReason?: string
 }
 
 // In-memory storage for development
 const memoryUsers = new Map<string, User>()
 const memoryEmailIndex = new Map<string, string>()
+const memoryUserIdsList: string[] = []
 
 let kvClient: ReturnType<typeof createClient> | null = null
 
@@ -40,10 +46,14 @@ function generateId(): string {
   return 'lg_' + Date.now().toString(36) + Math.random().toString(36).slice(2)
 }
 
-function generateLicenseKey(): string {
+function generateLicenseKey(isPro: boolean = false): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-  const segments = []
-  for (let s = 0; s < 4; s++) {
+  const prefix = isPro ? 'LGPRO' : ''
+  const segments = isPro ? [] : []
+  
+  if (isPro) segments.push(prefix)
+  
+  for (let s = 0; s < (isPro ? 3 : 4); s++) {
     let segment = ''
     for (let i = 0; i < 4; i++) {
       segment += chars[Math.floor(Math.random() * chars.length)]
@@ -51,6 +61,44 @@ function generateLicenseKey(): string {
     segments.push(segment)
   }
   return segments.join('-')
+}
+
+/**
+ * Get the master list of user IDs
+ */
+async function getUserIdList(kv: any): Promise<string[]> {
+  try {
+    const listData = await kv.get('users:all_ids')
+    if (!listData) return []
+    if (Array.isArray(listData)) return listData
+    if (typeof listData === 'string') {
+      try { return JSON.parse(listData) } catch { return [] }
+    }
+    return []
+  } catch (e) {
+    console.error('[DB] Error getting user ID list:', e)
+    return []
+  }
+}
+
+/**
+ * Add a user ID to the master list
+ */
+async function addUserIdToList(kv: any, userId: string): Promise<void> {
+  const currentList = await getUserIdList(kv)
+  if (!currentList.includes(userId)) {
+    currentList.push(userId)
+    await kv.set('users:all_ids', JSON.stringify(currentList))
+  }
+}
+
+/**
+ * Remove a user ID from the master list
+ */
+async function removeUserIdFromList(kv: any, userId: string): Promise<void> {
+  const currentList = await getUserIdList(kv)
+  const newList = currentList.filter((id: string) => id !== userId)
+  await kv.set('users:all_ids', JSON.stringify(newList))
 }
 
 export async function createUser(email: string, passwordHash: string): Promise<User> {
@@ -64,7 +112,8 @@ export async function createUser(email: string, passwordHash: string): Promise<U
     planType: 'free',
     licenseKey: generateLicenseKey(),
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
+    isBanned: false
   }
 
   const kv = await getKV()
@@ -72,9 +121,13 @@ export async function createUser(email: string, passwordHash: string): Promise<U
   if (kv) {
     await kv.set(`user:${id}`, JSON.stringify(user))
     await kv.set(`email:${normalizedEmail}`, id)
+    await addUserIdToList(kv, id)
+    console.log(`[DB/KV] Created user: ${normalizedEmail}`)
   } else {
     memoryUsers.set(id, user)
     memoryEmailIndex.set(normalizedEmail, id)
+    memoryUserIdsList.push(id)
+    console.log(`[DB/Memory] Created user: ${normalizedEmail}`)
   }
 
   return user
@@ -107,46 +160,161 @@ export async function getUserByEmail(email: string): Promise<User | null> {
   return memoryUsers.get(userId) || null
 }
 
-export async function updateUserPlan(id: string, planType: 'free' | 'pro', stripeCustomerId?: string): Promise<User | null> {
+export async function updateUser(
+  id: string,
+  updates: Partial<Omit<User, 'id' | 'email' | 'createdAt'>>
+): Promise<User | null> {
   const user = await getUserById(id)
   if (!user) return null
 
-  user.planType = planType
-  if (stripeCustomerId) user.stripeCustomerId = stripeCustomerId
-  user.updatedAt = new Date().toISOString()
+  const updatedUser: User = {
+    ...user,
+    ...updates,
+    updatedAt: new Date().toISOString()
+  }
 
   const kv = await getKV()
   if (kv) {
-    await kv.set(`user:${id}`, JSON.stringify(user))
+    await kv.set(`user:${id}`, JSON.stringify(updatedUser))
+    console.log(`[DB/KV] Updated user: ${user.email}`)
   } else {
-    memoryUsers.set(id, user)
+    memoryUsers.set(id, updatedUser)
+    console.log(`[DB/Memory] Updated user: ${user.email}`)
   }
 
-  return user
+  return updatedUser
+}
+
+export async function updateUserPlan(id: string, planType: PlanType, stripeCustomerId?: string): Promise<User | null> {
+  const updates: Partial<User> = { planType }
+  if (stripeCustomerId) updates.stripeCustomerId = stripeCustomerId
+  if (planType !== 'banned') updates.isBanned = false
+  return updateUser(id, updates)
+}
+
+/**
+ * Ban a user
+ */
+export async function banUser(id: string, reason?: string): Promise<User | null> {
+  console.log(`[DB] Banning user ${id}${reason ? ` - Reason: ${reason}` : ''}`)
+  return updateUser(id, { 
+    planType: 'banned' as PlanType, 
+    isBanned: true,
+    banReason: reason 
+  })
+}
+
+/**
+ * Unban a user
+ */
+export async function unbanUser(id: string): Promise<User | null> {
+  console.log(`[DB] Unbanning user ${id}`)
+  return updateUser(id, { 
+    planType: 'free', 
+    isBanned: false,
+    banReason: undefined 
+  })
+}
+
+/**
+ * Delete a user permanently
+ */
+export async function deleteUser(id: string): Promise<boolean> {
+  const user = await getUserById(id)
+  if (!user) return false
+
+  const kv = await getKV()
+
+  if (kv) {
+    await kv.del(`user:${id}`)
+    await kv.del(`email:${user.email}`)
+    await removeUserIdFromList(kv, id)
+    
+    if (user.stripeCustomerId) {
+      await kv.del(`stripe:${user.stripeCustomerId}`)
+    }
+    
+    console.log(`[DB/KV] Deleted user: ${user.email}`)
+  } else {
+    memoryUsers.delete(id)
+    memoryEmailIndex.delete(user.email)
+    const idx = memoryUserIdsList.indexOf(id)
+    if (idx > -1) memoryUserIdsList.splice(idx, 1)
+    console.log(`[DB/Memory] Deleted user: ${user.email}`)
+  }
+
+  return true
 }
 
 export async function getAllUsers(): Promise<User[]> {
   const kv = await getKV()
   
   if (kv) {
-    const keys = await kv.keys('user:*')
-    const users: User[] = []
-    for (const key of keys) {
-      const data = await kv.get(key)
-      if (data) {
-        users.push(typeof data === 'string' ? JSON.parse(data) : data as User)
+    try {
+      // First try the master ID list
+      const userIds = await getUserIdList(kv)
+      if (userIds.length > 0) {
+        const users: User[] = []
+        for (const userId of userIds) {
+          const user = await getUserById(userId)
+          if (user) users.push(user)
+        }
+        return users
       }
+      
+      // Fallback to keys scan
+      const keys = await kv.keys('user:*')
+      const users: User[] = []
+      for (const key of keys) {
+        const data = await kv.get(key)
+        if (data) {
+          users.push(typeof data === 'string' ? JSON.parse(data) : data as User)
+        }
+      }
+      return users
+    } catch (e) {
+      console.error('[DB/KV] Error fetching all users:', e)
+      return []
     }
-    return users
   }
   
   return Array.from(memoryUsers.values())
 }
 
+export async function getUserByStripeId(stripeCustomerId: string): Promise<User | null> {
+  const kv = await getKV()
+  
+  if (kv) {
+    const userId = await kv.get(`stripe:${stripeCustomerId}`)
+    if (!userId) {
+      // Fallback: search all users
+      const allUsers = await getAllUsers()
+      return allUsers.find(u => u.stripeCustomerId === stripeCustomerId) || null
+    }
+    return getUserById(userId as string)
+  }
+  
+  // Memory fallback
+  const allUsers = Array.from(memoryUsers.values())
+  return allUsers.find(u => u.stripeCustomerId === stripeCustomerId) || null
+}
+
 export function maskLicenseKey(key?: string): string {
   if (!key) return ''
   const parts = key.split('-')
-  if (parts.length !== 4) return '****-****-****-****'
-  return `${parts[0]}-****-****-${parts[3]}`
+  if (parts.length < 2) return '****-****-****-****'
+  return `${parts[0]}-****-****-${parts[parts.length - 1]}`
 }
 
+/**
+ * Get debug info for admin
+ */
+export async function getDbDebugInfo(): Promise<Record<string, any>> {
+  const kv = await getKV()
+  
+  return {
+    kvConnected: !!kv,
+    timestamp: new Date().toISOString(),
+    memoryUsersCount: memoryUsers.size
+  }
+}
