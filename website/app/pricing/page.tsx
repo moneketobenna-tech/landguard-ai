@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import LanguageSelector from '@/components/LanguageSelector'
 
 interface PriceData {
   cad: string
@@ -95,6 +96,7 @@ export default function PricingPage() {
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/login" className="text-lg-gray-600 hover:text-lg-dark transition">Login</Link>
+            <LanguageSelector />
             <Link href="/download" className="px-4 py-2 bg-lg-green-600 text-white rounded-lg font-semibold hover:bg-lg-green-700 transition text-sm">Get Extension</Link>
           </div>
         </div>

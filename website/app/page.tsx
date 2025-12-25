@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { LanguageProvider } from '@/lib/i18n/LanguageContext'
 import LanguageSelector from '@/components/LanguageSelector'
 
 function HomePageContent() {
@@ -662,11 +661,7 @@ const result = await response.json();
   )
 }
 
-// Wrap with LanguageProvider
+// Export the page component (LanguageProvider is now in layout)
 export default function HomePage() {
-  return (
-    <LanguageProvider>
-      <HomePageContent />
-    </LanguageProvider>
-  )
+  return <HomePageContent />
 }
