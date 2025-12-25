@@ -47,7 +47,7 @@ export default function LanguageSelector() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-lg-border py-2 z-50 max-h-80 overflow-y-auto">
+        <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-lg-border py-2 z-[9999] max-h-80 overflow-y-auto">
           <div className="px-3 py-2 text-xs font-semibold text-lg-text-muted uppercase tracking-wider border-b border-lg-border">
             Select Language
           </div>
@@ -79,4 +79,5 @@ export default function LanguageSelector() {
     </div>
   )
 }
+
 

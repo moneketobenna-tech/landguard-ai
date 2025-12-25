@@ -477,16 +477,16 @@ export default function DashboardHome() {
               <span className="mr-2">👤</span> Verify Seller
             </button>
           </div>
-
+          
           {/* Listing Tab Content */}
           {activeTab === 'listing' && (
             <div className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Listing URL *</label>
-                <input
-                  type="url"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
+              <input
+                type="url"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
                   placeholder="https://facebook.com/marketplace/..."
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-800"
                 />
@@ -657,34 +657,34 @@ export default function DashboardHome() {
           )}
 
           {/* Error */}
-          {error && (
+            {error && (
             <div className="mx-6 mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-              {error}
-            </div>
-          )}
+                {error}
+              </div>
+            )}
 
           {/* Scan Results */}
-          {scanResult && (
+            {scanResult && (
             <div className="mx-6 mb-6 space-y-4 p-5 bg-gray-50 rounded-xl">
               {/* Score Header */}
               <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm text-gray-500">Risk Score</div>
+                  <div>
+                    <div className="text-sm text-gray-500">Risk Score</div>
                   <div className={`text-4xl font-bold ${getScoreColor(scanResult.riskLevel)}`}>
                     {scanResult.score}/100
+                    </div>
+                  </div>
+                  <div className={`px-4 py-2 rounded-full text-sm font-semibold ${getRiskColor(scanResult.riskLevel)}`}>
+                    {scanResult.riskLevel.toUpperCase()} RISK
                   </div>
                 </div>
-                <div className={`px-4 py-2 rounded-full text-sm font-semibold ${getRiskColor(scanResult.riskLevel)}`}>
-                  {scanResult.riskLevel.toUpperCase()} RISK
-                </div>
-              </div>
 
-              {/* Flags */}
+                {/* Flags */}
               {scanResult.flags && scanResult.flags.length > 0 && (
-                <div>
+                  <div>
                   <h3 className="font-semibold text-gray-800 mb-2">🚩 Risk Flags ({scanResult.flags.length})</h3>
-                  <ul className="space-y-2">
-                    {scanResult.flags.map((flag, i) => (
+                    <ul className="space-y-2">
+                      {scanResult.flags.map((flag, i) => (
                       <li key={i} className={`flex items-start gap-2 text-sm p-2 rounded ${
                         flag.severity === 'high' || flag.severity === 'critical' 
                           ? 'bg-red-50 text-red-700' 
@@ -694,26 +694,26 @@ export default function DashboardHome() {
                       }`}>
                         <span>{flag.severity === 'high' || flag.severity === 'critical' ? '🚨' : '⚠️'}</span>
                         {flag.description}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
-              {/* Recommendations */}
+                {/* Recommendations */}
               {scanResult.recommendations && scanResult.recommendations.length > 0 && (
-                <div>
-                  <h3 className="font-semibold text-gray-800 mb-2">💡 Recommendations</h3>
-                  <ul className="space-y-2">
-                    {scanResult.recommendations.map((rec, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                        <span className="text-green-500 mt-0.5">✓</span>
-                        {rec}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+                  <div>
+                    <h3 className="font-semibold text-gray-800 mb-2">💡 Recommendations</h3>
+                    <ul className="space-y-2">
+                      {scanResult.recommendations.map((rec, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                          <span className="text-green-500 mt-0.5">✓</span>
+                          {rec}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
               {/* Metadata */}
               {scanResult.metadata && (
@@ -742,8 +742,8 @@ export default function DashboardHome() {
                   📋 Copy JSON
                 </button>
               </div>
-            </div>
-          )}
+              </div>
+            )}
         </div>
 
         {/* Supported Platforms */}
@@ -788,7 +788,7 @@ export default function DashboardHome() {
                         {scan.type === 'seller' ? '👤' : '🏠'}
                       </span>
                       <span className="font-medium text-gray-800 truncate text-sm">
-                        {scan.url}
+                      {scan.url}
                       </span>
                     </div>
                     <div className="text-xs text-gray-500">
@@ -850,7 +850,7 @@ export default function DashboardHome() {
                   <li>✅ Document scanning</li>
                   <li>✅ Auto-scan supported sites</li>
                   <li>✅ Priority support</li>
-                </ul>
+          </ul>
               </div>
               
               <div className="flex flex-col gap-3">
@@ -871,8 +871,8 @@ export default function DashboardHome() {
                 </button>
               </div>
             </div>
-          </div>
         </div>
+      </div>
       )}
     </DashboardLayout>
   )
