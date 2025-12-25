@@ -46,7 +46,8 @@ export default function HomePage() {
           <div className="flex items-center gap-6">
             <Link href="#features" className="text-lg-text-muted hover:text-lg-green transition">Features</Link>
             <Link href="#pricing" className="text-lg-text-muted hover:text-lg-green transition">Pricing</Link>
-            <Link href="/login" className="text-lg-text-muted hover:text-lg-green transition">Login</Link>
+            <Link href="#api" className="text-lg-text-muted hover:text-lg-green transition">API</Link>
+            <Link href="/app/login" className="text-lg-text-muted hover:text-lg-green transition">Login</Link>
             <Link href="/download" className="btn-primary text-sm">Get Extension</Link>
           </div>
         </div>
@@ -306,8 +307,181 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* API Section */}
+      <section id="api" className="py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 bg-lg-bg-alt border border-lg-green/30 rounded-full px-4 py-2 mb-4">
+              <span className="text-lg-green text-sm font-medium">🔌 Developer API</span>
+            </div>
+            <h2 className="text-4xl font-bold mb-4 text-lg-text">Property Scam Detection API</h2>
+            <p className="text-lg-text-muted text-lg max-w-3xl mx-auto">
+              Integrate AI-powered property scam detection into your platform. 
+              Perfect for real estate marketplaces, CRMs, and PropTech applications.
+            </p>
+          </div>
+
+          {/* API Features */}
+          <div className="grid md:grid-cols-4 gap-6 mb-16">
+            {[
+              { icon: '⚡', title: 'Fast Response', desc: '<500ms latency' },
+              { icon: '🔒', title: 'Secure', desc: 'SOC 2 compliant' },
+              { icon: '📊', title: '99.9% Uptime', desc: 'Enterprise SLA' },
+              { icon: '🌍', title: 'Global CDN', desc: 'Low latency worldwide' }
+            ].map((item, i) => (
+              <div key={i} className="card text-center py-6">
+                <div className="text-3xl mb-2">{item.icon}</div>
+                <div className="font-semibold text-lg-text">{item.title}</div>
+                <div className="text-sm text-lg-text-muted">{item.desc}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* API Pricing Tiers */}
+          <div className="grid md:grid-cols-4 gap-6 mb-12">
+            {/* Starter */}
+            <div className="card">
+              <div className="text-lg-text-muted text-sm font-semibold mb-2">STARTER</div>
+              <div className="text-3xl font-bold mb-1 text-lg-text">$199<span className="text-base text-lg-text-muted">/mo</span></div>
+              <div className="text-sm text-lg-green mb-4">5,000 API credits</div>
+              <ul className="space-y-2 mb-6 text-sm">
+                <li className="flex items-center gap-2 text-lg-text">
+                  <span className="text-lg-safe">✓</span> scan-listing endpoint
+                </li>
+                <li className="flex items-center gap-2 text-lg-text">
+                  <span className="text-lg-safe">✓</span> scan-seller endpoint
+                </li>
+                <li className="flex items-center gap-2 text-lg-text-muted">
+                  <span>✗</span> scan-document
+                </li>
+                <li className="flex items-center gap-2 text-lg-text-muted">
+                  <span>✗</span> bulk export
+                </li>
+              </ul>
+              <div className="text-xs text-lg-text-muted mb-4">Best for: Early dev / small agencies</div>
+              <Link href="/api/pricing" className="btn-secondary w-full block text-center text-sm">
+                Get Started
+              </Link>
+            </div>
+
+            {/* Growth */}
+            <div className="card border-2 border-lg-green relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-lg-green text-white text-xs font-bold px-3 py-1 rounded-full">
+                POPULAR
+              </div>
+              <div className="text-lg-green text-sm font-semibold mb-2">GROWTH</div>
+              <div className="text-3xl font-bold mb-1 text-lg-text">$799<span className="text-base text-lg-text-muted">/mo</span></div>
+              <div className="text-sm text-lg-green mb-4">25,000 API credits</div>
+              <ul className="space-y-2 mb-6 text-sm">
+                <li className="flex items-center gap-2 text-lg-text">
+                  <span className="text-lg-safe">✓</span> scan-listing endpoint
+                </li>
+                <li className="flex items-center gap-2 text-lg-text">
+                  <span className="text-lg-safe">✓</span> scan-seller endpoint
+                </li>
+                <li className="flex items-center gap-2 text-lg-text">
+                  <span className="text-lg-safe">✓</span> scan-document endpoint
+                </li>
+                <li className="flex items-center gap-2 text-lg-text-muted">
+                  <span>✗</span> bulk export
+                </li>
+              </ul>
+              <div className="text-xs text-lg-text-muted mb-4">Best for: PropTech & legal teams</div>
+              <Link href="/api/pricing" className="btn-primary w-full block text-center text-sm">
+                Get Started
+              </Link>
+            </div>
+
+            {/* Business */}
+            <div className="card">
+              <div className="text-lg-text-muted text-sm font-semibold mb-2">BUSINESS</div>
+              <div className="text-3xl font-bold mb-1 text-lg-text">$2,499<span className="text-base text-lg-text-muted">/mo</span></div>
+              <div className="text-sm text-lg-green mb-4">100,000 API credits</div>
+              <ul className="space-y-2 mb-6 text-sm">
+                <li className="flex items-center gap-2 text-lg-text">
+                  <span className="text-lg-safe">✓</span> scan-listing endpoint
+                </li>
+                <li className="flex items-center gap-2 text-lg-text">
+                  <span className="text-lg-safe">✓</span> scan-seller endpoint
+                </li>
+                <li className="flex items-center gap-2 text-lg-text">
+                  <span className="text-lg-safe">✓</span> scan-document endpoint
+                </li>
+                <li className="flex items-center gap-2 text-lg-text">
+                  <span className="text-lg-safe">✓</span> bulk export
+                </li>
+              </ul>
+              <div className="text-xs text-lg-text-muted mb-4">Best for: Marketplaces & CRM</div>
+              <Link href="/api/pricing" className="btn-secondary w-full block text-center text-sm">
+                Get Started
+              </Link>
+            </div>
+
+            {/* Enterprise */}
+            <div className="card bg-gradient-to-br from-lg-green/10 to-lg-green/5">
+              <div className="text-lg-green text-sm font-semibold mb-2">ENTERPRISE</div>
+              <div className="text-3xl font-bold mb-1 text-lg-text">Custom<span className="text-base text-lg-text-muted"> $5k+</span></div>
+              <div className="text-sm text-lg-green mb-4">Unlimited credits</div>
+              <ul className="space-y-2 mb-6 text-sm">
+                <li className="flex items-center gap-2 text-lg-text">
+                  <span className="text-lg-safe">✓</span> All endpoints
+                </li>
+                <li className="flex items-center gap-2 text-lg-text">
+                  <span className="text-lg-safe">✓</span> Custom connectors
+                </li>
+                <li className="flex items-center gap-2 text-lg-text">
+                  <span className="text-lg-safe">✓</span> Dedicated SLA
+                </li>
+                <li className="flex items-center gap-2 text-lg-text">
+                  <span className="text-lg-safe">✓</span> Priority support
+                </li>
+              </ul>
+              <div className="text-xs text-lg-text-muted mb-4">Best for: Major platforms & portals</div>
+              <Link href="/api/pricing" className="btn-primary w-full block text-center text-sm">
+                Contact Sales
+              </Link>
+            </div>
+          </div>
+
+          {/* Code Example */}
+          <div className="max-w-4xl mx-auto">
+            <div className="card overflow-hidden">
+              <div className="bg-lg-bg-alt border-b border-lg-border px-4 py-3 flex items-center gap-2">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                </div>
+                <span className="text-sm text-lg-text-muted ml-2">Quick Start</span>
+              </div>
+              <pre className="p-6 bg-gray-900 text-sm overflow-x-auto">
+                <code className="text-gray-300">{`// Scan a property listing for scams
+const response = await fetch('https://api.landguardai.co/v1/scan-listing', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    url: 'https://facebook.com/marketplace/item/123456'
+  })
+});
+
+const result = await response.json();
+// { score: 75, riskLevel: "high", flags: [...], recommendations: [...] }`}</code>
+              </pre>
+            </div>
+            <div className="text-center mt-6">
+              <Link href="/api/docs" className="text-lg-green hover:underline font-medium">
+                View Full API Documentation →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
-      <section className="py-20 px-6">
+      <section className="py-20 px-6 bg-section-alt">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold mb-6 text-lg-text">
             Don't Become a Victim
@@ -315,9 +489,14 @@ export default function HomePage() {
           <p className="text-xl text-lg-text-muted mb-8">
             Property scams cost victims thousands of dollars. Protect yourself with LandGuard AI.
           </p>
-          <Link href="/download" className="btn-primary text-lg px-10 py-4 inline-block">
-            Get Free Chrome Extension
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/download" className="btn-primary text-lg px-10 py-4 inline-block">
+              Get Free Chrome Extension
+            </Link>
+            <Link href="/api/docs" className="btn-secondary text-lg px-10 py-4 inline-block">
+              Explore API
+            </Link>
+          </div>
         </div>
       </section>
 
