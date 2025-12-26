@@ -34,6 +34,7 @@ function HomePageContent() {
   const [scanning, setScanning] = useState(false)
   const [result, setResult] = useState<any>(null)
   const [pricing, setPricing] = useState<PricingData | null>(null)
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly')
   const { t } = useLanguage()
 
   // Fetch pricing data
@@ -295,6 +296,26 @@ function HomePageContent() {
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4 text-lg-text">{t('pricing.title')}</h2>
             <p className="text-lg-text-muted text-lg">{t('pricing.subtitle')}</p>
+            
+            {/* Billing Toggle */}
+            <div className="inline-flex items-center gap-4 bg-lg-bg-alt border border-lg-green/30 p-2 rounded-full mt-8">
+              <button
+                onClick={() => setBillingCycle('monthly')}
+                className={`px-6 py-2 rounded-full transition font-medium ${
+                  billingCycle === 'monthly' ? 'bg-lg-green text-white' : 'text-lg-text-muted hover:text-lg-text'
+                }`}
+              >
+                {t('pricing.monthly')}
+              </button>
+              <button
+                onClick={() => setBillingCycle('yearly')}
+                className={`px-6 py-2 rounded-full transition font-medium ${
+                  billingCycle === 'yearly' ? 'bg-lg-green text-white' : 'text-lg-text-muted hover:text-lg-text'
+                }`}
+              >
+                {t('pricing.yearly')} <span className="text-lg-safe text-xs ml-1">{t('pricing.save20')}</span>
+              </button>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -326,13 +347,23 @@ function HomePageContent() {
               </div>
               <div className="text-lg-green text-sm font-semibold mb-2">{t('pricing.pro')}</div>
               <div className="text-4xl font-bold mb-1 text-lg-text">
-                {displayPrice(pricing?.pro.monthly, 'CA$14.99')}
+                {billingCycle === 'monthly' 
+                  ? displayPrice(pricing?.pro.monthly, 'CA$14.99')
+                  : displayPrice(pricing?.pro.yearlyMonthly, 'CA$11.99')
+                }
                 <span className="text-lg text-lg-text-muted">/{t('pricing.monthly')}</span>
               </div>
+              {/* Show billing info */}
+              <div className="text-sm text-lg-text-muted mb-3">
+                {billingCycle === 'yearly' 
+                  ? `${t('pricing.billedAnnually')} (${displayPrice(pricing?.pro.yearly, 'CA$143.88')}/${t('pricing.year')})`
+                  : t('pricing.billedMonthly')
+                }
+              </div>
               {/* Show CAD equivalent for non-Canadian users */}
-              {pricing?.country && pricing.country !== 'CA' && pricing.pro.monthly.local && (
-                <div className="text-sm text-lg-text-muted mb-3">
-                  ≈ {pricing.pro.monthly.cad} CAD
+              {pricing?.country && pricing.country !== 'CA' && (
+                <div className="text-xs text-lg-text-muted mb-3">
+                  ≈ {billingCycle === 'monthly' ? pricing.pro.monthly.cad : pricing.pro.yearly.cad} CAD
                 </div>
               )}
               <ul className="space-y-3 mb-8">
