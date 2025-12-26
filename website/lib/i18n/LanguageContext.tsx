@@ -175,7 +175,7 @@ const DEFAULT_TRANSLATIONS: Translations = {
   'footer.privacy': 'Privacy',
   'footer.terms': 'Terms',
   'footer.contact': 'Contact',
-  'footer.copyright': '© 2024 LandGuard AI. All rights reserved.',
+  'footer.copyright': '© 2026 LandGuard AI. All rights reserved.',
   'footer.disclaimer': '⚠️ Disclaimer: This is a risk analysis tool, not legal advice or ownership verification.',
   
   // Common

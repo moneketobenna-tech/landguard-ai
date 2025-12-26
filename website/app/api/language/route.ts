@@ -184,7 +184,7 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     'footer.privacy': 'Privacy',
     'footer.terms': 'Terms',
     'footer.contact': 'Contact',
-    'footer.copyright': '© 2024 LandGuard AI. All rights reserved.',
+    'footer.copyright': '© 2026 LandGuard AI. All rights reserved.',
     'footer.disclaimer': '⚠️ Disclaimer: This is a risk analysis tool, not legal advice or ownership verification.',
     
     // Common
@@ -401,7 +401,7 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     'footer.privacy': 'Datenschutz',
     'footer.terms': 'AGB',
     'footer.contact': 'Kontakt',
-    'footer.copyright': '© 2024 LandGuard AI. Alle Rechte vorbehalten.',
+    'footer.copyright': '© 2026 LandGuard AI. Alle Rechte vorbehalten.',
     'footer.disclaimer': '⚠️ Haftungsausschluss: Dies ist ein Risikoanalyse-Tool, keine Rechtsberatung oder Eigentumsüberprüfung.',
     'common.loading': 'Laden...',
     'common.error': 'Ein Fehler ist aufgetreten',
