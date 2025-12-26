@@ -201,7 +201,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   // Translation function
   const t = (key: string): string => {
-    return translations[key] || key
+    return translations[key] || DEFAULT_TRANSLATIONS[key] || key
   }
 
   return (
