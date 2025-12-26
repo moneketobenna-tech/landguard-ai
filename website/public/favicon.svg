@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4A90E2;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#357ABD;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2C5F9E;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Shield -->
+  <path d="M32 3 L54.4 12.8 L54.4 38.4 C54.4 45.76 49.28 52.48 32 60.8 C14.72 52.48 9.6 45.76 9.6 38.4 L9.6 12.8 Z" 
+        fill="url(#shieldGrad)" stroke="#5BA3FF" stroke-width="1.5"/>
+  
+  <!-- Location Pin Circle -->
+  <circle cx="32" cy="28.8" r="11.52" fill="#E74C3C"/>
+  
+  <!-- Pin Point -->
+  <path d="M25.088 34.022 L32 46.08 L38.912 34.022 Z" fill="#E74C3C"/>
+  
+  <!-- Inner White Circle -->
+  <circle cx="32" cy="28.8" r="5.184" fill="white"/>
+</svg>
+
