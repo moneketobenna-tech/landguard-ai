@@ -5,17 +5,28 @@ import Link from 'next/link'
 import LanguageSelector from '@/components/LanguageSelector'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
 
+interface PricePoint {
+  cad: string
+  local: string | null
+  localCode: string | null
+  localAmount: number | null
+}
+
 interface PricingData {
   country: string
   localCurrency: string
   localCurrencySymbol: string
   baseCurrency: string
   pro: {
-    monthly: { cad: string; local: string | null; localCode: string | null; localAmount: number | null }
-    yearly: { cad: string; local: string | null; localCode: string | null; localAmount: number | null }
-    yearlyMonthly: { cad: string; local: string | null; localCode: string | null; localAmount: number | null }
+    monthly: PricePoint
+    yearly: PricePoint
+    yearlyMonthly: PricePoint
     yearlySavings: string
   }
+  apiStarter: { monthly: PricePoint; credits: number }
+  apiGrowth: { monthly: PricePoint; credits: number }
+  apiBusiness: { monthly: PricePoint; credits: number }
+  apiEnterprise: { monthly: PricePoint; credits: number }
 }
 
 function HomePageContent() {
@@ -131,7 +142,7 @@ function HomePageContent() {
                 </button>
               </div>
               <p className="text-xs text-lg-text-muted mt-3">
-                ⚠️ This is a risk analysis tool, not legal advice or ownership verification.
+                {t('hero.disclaimer')}
               </p>
             </div>
           </div>
@@ -141,9 +152,9 @@ function HomePageContent() {
             <div className="max-w-2xl mx-auto mb-16 animate-fade-in">
               <div className="card p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold text-lg-text">Scan Result</h3>
+                  <h3 className="text-xl font-semibold text-lg-text">{t('result.title')}</h3>
                   <span className={`risk-pill risk-pill-${result.riskLevel}`}>
-                    {result.riskLevel?.toUpperCase()} RISK
+                    {result.riskLevel === 'high' ? t('result.high') : result.riskLevel === 'medium' ? t('result.medium') : t('result.low')}
                   </span>
                 </div>
                 
@@ -155,7 +166,7 @@ function HomePageContent() {
                     }`}>
                       {result.score}
                     </div>
-                    <div className="text-sm text-lg-text-muted">Risk Score</div>
+                    <div className="text-sm text-lg-text-muted">{t('result.riskScore')}</div>
                   </div>
                   <div className="flex-1 text-left">
                     {result.flags?.length > 0 ? (
@@ -168,14 +179,14 @@ function HomePageContent() {
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-lg-safe">✅ No major red flags detected</p>
+                      <p className="text-lg-safe">✅ {t('result.noFlags')}</p>
                     )}
                   </div>
                 </div>
 
                 {result.recommendations?.length > 0 && (
                   <div className="border-t border-lg-border pt-4">
-                    <h4 className="text-sm text-lg-green font-semibold mb-2">Recommendations:</h4>
+                    <h4 className="text-sm text-lg-green font-semibold mb-2">{t('result.recommendations')}:</h4>
                     <ul className="space-y-1">
                       {result.recommendations.slice(0, 3).map((rec: string, i: number) => (
                         <li key={i} className="text-sm text-lg-text-muted">{rec}</li>
@@ -191,15 +202,15 @@ function HomePageContent() {
           <div className="flex flex-wrap justify-center gap-8 text-lg-text-muted">
             <div className="flex items-center gap-2">
               <span className="text-2xl">✅</span>
-              <span>100% Local Analysis</span>
+              <span>{t('trust.local')}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-2xl">🔒</span>
-              <span>Privacy First</span>
+              <span>{t('trust.privacy')}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-2xl">⚡</span>
-              <span>Instant Results</span>
+              <span>{t('trust.instant')}</span>
             </div>
           </div>
         </div>
@@ -209,47 +220,47 @@ function HomePageContent() {
       <section id="features" className="py-20 px-6 bg-section-alt">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 text-lg-text">Detect Scams Before They Happen</h2>
-            <p className="text-lg-text-muted text-lg">Our AI analyzes dozens of signals to protect you</p>
+            <h2 className="text-4xl font-bold mb-4 text-lg-text">{t('features.sectionTitle')}</h2>
+            <p className="text-lg-text-muted text-lg">{t('features.sectionSubtitle')}</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
                 icon: '🚨',
-                title: 'Urgency Detection',
-                description: 'Flags pressure tactics like "urgent sale", "wire transfer only", and "deposit today"'
+                titleKey: 'features.urgency.title',
+                descKey: 'features.urgency.desc'
               },
               {
                 icon: '💳',
-                title: 'Payment Red Flags',
-                description: 'Warns about untraceable payment requests like gift cards, crypto, and wire transfers'
+                titleKey: 'features.payment.title',
+                descKey: 'features.payment.desc'
               },
               {
                 icon: '🌍',
-                title: 'Remote Seller Alerts',
-                description: 'Detects sellers claiming to be overseas or unable to meet in person'
+                titleKey: 'features.remote.title',
+                descKey: 'features.remote.desc'
               },
               {
                 icon: '📸',
-                title: 'Image Analysis',
-                description: 'Flags listings with suspiciously few photos or stock images'
+                titleKey: 'features.image.title',
+                descKey: 'features.image.desc'
               },
               {
                 icon: '📝',
-                title: 'Template Detection',
-                description: 'Identifies generic, copy-paste language common in scam listings'
+                titleKey: 'features.template.title',
+                descKey: 'features.template.desc'
               },
               {
                 icon: '💰',
-                title: 'Price Analysis',
-                description: 'Warns about unrealistically low prices that are too good to be true'
+                titleKey: 'features.price.title',
+                descKey: 'features.price.desc'
               }
             ].map((feature, i) => (
               <div key={i} className="card text-center">
                 <div className="text-4xl mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-semibold mb-2 text-lg-text">{feature.title}</h3>
-                <p className="text-lg-text-muted">{feature.description}</p>
+                <h3 className="text-xl font-semibold mb-2 text-lg-text">{t(feature.titleKey)}</h3>
+                <p className="text-lg-text-muted">{t(feature.descKey)}</p>
               </div>
             ))}
           </div>
@@ -259,18 +270,18 @@ function HomePageContent() {
       {/* Supported Sites */}
       <section className="py-20 px-6">
         <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-4 text-lg-text">Works Where You Shop</h2>
-          <p className="text-lg-text-muted text-lg mb-12">Automatic protection on popular listing sites</p>
+          <h2 className="text-4xl font-bold mb-4 text-lg-text">{t('works.title')}</h2>
+          <p className="text-lg-text-muted text-lg mb-12">{t('works.subtitle')}</p>
           
           <div className="flex flex-wrap justify-center gap-8">
             {[
-              { name: 'Facebook Marketplace', icon: '📘' },
-              { name: 'Kijiji', icon: '🟢' },
-              { name: 'Craigslist', icon: '📋' }
+              { nameKey: 'works.fb', icon: '📘' },
+              { nameKey: 'works.kijiji', icon: '🟢' },
+              { nameKey: 'works.craigslist', icon: '📋' }
             ].map((site, i) => (
               <div key={i} className="card px-8 py-6 flex items-center gap-4">
                 <span className="text-3xl">{site.icon}</span>
-                <span className="text-lg font-medium text-lg-text">{site.name}</span>
+                <span className="text-lg font-medium text-lg-text">{t(site.nameKey)}</span>
                 <span className="text-lg-safe">✓</span>
               </div>
             ))}
@@ -295,7 +306,7 @@ function HomePageContent() {
                 {[
                   `3 ${t('pricing.scans')}`,
                   t('features.listing.desc'),
-                  'Chrome extension',
+                  t('pricing.chrome'),
                   t('features.listing.title')
                 ].map((feature, i) => (
                   <li key={i} className="flex items-center gap-2 text-lg-text">
@@ -351,27 +362,26 @@ function HomePageContent() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 bg-lg-bg-alt border border-lg-green/30 rounded-full px-4 py-2 mb-4">
-              <span className="text-lg-green text-sm font-medium">🔌 Developer API</span>
+              <span className="text-lg-green text-sm font-medium">{t('api.badge')}</span>
             </div>
-            <h2 className="text-4xl font-bold mb-4 text-lg-text">Property Scam Detection API</h2>
+            <h2 className="text-4xl font-bold mb-4 text-lg-text">{t('api.title')}</h2>
             <p className="text-lg-text-muted text-lg max-w-3xl mx-auto">
-              Integrate AI-powered property scam detection into your platform. 
-              Perfect for real estate marketplaces, CRMs, and PropTech applications.
+              {t('api.subtitle')}
             </p>
           </div>
 
           {/* API Features */}
           <div className="grid md:grid-cols-4 gap-6 mb-16">
             {[
-              { icon: '⚡', title: 'Fast Response', desc: '<500ms latency' },
-              { icon: '🔒', title: 'Secure', desc: 'SOC 2 compliant' },
-              { icon: '📊', title: '99.9% Uptime', desc: 'Enterprise SLA' },
-              { icon: '🌍', title: 'Global CDN', desc: 'Low latency worldwide' }
+              { icon: '⚡', titleKey: 'api.fast', descKey: 'api.fast.desc' },
+              { icon: '🔒', titleKey: 'api.secure', descKey: 'api.secure.desc' },
+              { icon: '📊', titleKey: 'api.uptime', descKey: 'api.uptime.desc' },
+              { icon: '🌍', titleKey: 'api.global', descKey: 'api.global.desc' }
             ].map((item, i) => (
               <div key={i} className="card text-center py-6">
                 <div className="text-3xl mb-2">{item.icon}</div>
-                <div className="font-semibold text-lg-text">{item.title}</div>
-                <div className="text-sm text-lg-text-muted">{item.desc}</div>
+                <div className="font-semibold text-lg-text">{t(item.titleKey)}</div>
+                <div className="text-sm text-lg-text-muted">{t(item.descKey)}</div>
               </div>
             ))}
           </div>
@@ -380,104 +390,116 @@ function HomePageContent() {
           <div className="grid md:grid-cols-4 gap-6 mb-12">
             {/* Starter */}
             <div className="card">
-              <div className="text-lg-text-muted text-sm font-semibold mb-2">STARTER</div>
-              <div className="text-3xl font-bold mb-1 text-lg-text">$199<span className="text-base text-lg-text-muted">/mo</span></div>
-              <div className="text-sm text-lg-green mb-4">5,000 API credits</div>
+              <div className="text-lg-text-muted text-sm font-semibold mb-2">{t('api.starter')}</div>
+              <div className="text-3xl font-bold mb-1 text-lg-text">
+                {displayPrice(pricing?.apiStarter?.monthly, 'CA$269')}
+                <span className="text-base text-lg-text-muted">{t('pricing.perMonth')}</span>
+              </div>
+              <div className="text-sm text-lg-green mb-4">5,000 {t('api.credits')}</div>
               <ul className="space-y-2 mb-6 text-sm">
                 <li className="flex items-center gap-2 text-lg-text">
-                  <span className="text-lg-safe">✓</span> scan-listing endpoint
+                  <span className="text-lg-safe">✓</span> {t('api.scanListing')}
                 </li>
                 <li className="flex items-center gap-2 text-lg-text">
-                  <span className="text-lg-safe">✓</span> scan-seller endpoint
+                  <span className="text-lg-safe">✓</span> {t('api.scanSeller')}
                 </li>
                 <li className="flex items-center gap-2 text-lg-text-muted">
-                  <span>✗</span> scan-document
+                  <span>✗</span> {t('api.scanDocument')}
                 </li>
                 <li className="flex items-center gap-2 text-lg-text-muted">
-                  <span>✗</span> bulk export
+                  <span>✗</span> {t('api.bulkExport')}
                 </li>
               </ul>
-              <div className="text-xs text-lg-text-muted mb-4">Best for: Early dev / small agencies</div>
+              <div className="text-xs text-lg-text-muted mb-4">{t('api.bestFor.starter')}</div>
               <Link href="/api/pricing" className="btn-secondary w-full block text-center text-sm">
-                Get Started
+                {t('api.getStarted')}
               </Link>
             </div>
 
             {/* Growth */}
             <div className="card border-2 border-lg-green relative">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-lg-green text-white text-xs font-bold px-3 py-1 rounded-full">
-                POPULAR
+                {t('pricing.popular')}
               </div>
-              <div className="text-lg-green text-sm font-semibold mb-2">GROWTH</div>
-              <div className="text-3xl font-bold mb-1 text-lg-text">$799<span className="text-base text-lg-text-muted">/mo</span></div>
-              <div className="text-sm text-lg-green mb-4">25,000 API credits</div>
+              <div className="text-lg-green text-sm font-semibold mb-2">{t('api.growth')}</div>
+              <div className="text-3xl font-bold mb-1 text-lg-text">
+                {displayPrice(pricing?.apiGrowth?.monthly, 'CA$1,079')}
+                <span className="text-base text-lg-text-muted">{t('pricing.perMonth')}</span>
+              </div>
+              <div className="text-sm text-lg-green mb-4">25,000 {t('api.credits')}</div>
               <ul className="space-y-2 mb-6 text-sm">
                 <li className="flex items-center gap-2 text-lg-text">
-                  <span className="text-lg-safe">✓</span> scan-listing endpoint
+                  <span className="text-lg-safe">✓</span> {t('api.scanListing')}
                 </li>
                 <li className="flex items-center gap-2 text-lg-text">
-                  <span className="text-lg-safe">✓</span> scan-seller endpoint
+                  <span className="text-lg-safe">✓</span> {t('api.scanSeller')}
                 </li>
                 <li className="flex items-center gap-2 text-lg-text">
-                  <span className="text-lg-safe">✓</span> scan-document endpoint
+                  <span className="text-lg-safe">✓</span> {t('api.scanDocument')}
                 </li>
                 <li className="flex items-center gap-2 text-lg-text-muted">
-                  <span>✗</span> bulk export
+                  <span>✗</span> {t('api.bulkExport')}
                 </li>
               </ul>
-              <div className="text-xs text-lg-text-muted mb-4">Best for: PropTech & legal teams</div>
+              <div className="text-xs text-lg-text-muted mb-4">{t('api.bestFor.growth')}</div>
               <Link href="/api/pricing" className="btn-primary w-full block text-center text-sm">
-                Get Started
+                {t('api.getStarted')}
               </Link>
             </div>
 
             {/* Business */}
             <div className="card">
-              <div className="text-lg-text-muted text-sm font-semibold mb-2">BUSINESS</div>
-              <div className="text-3xl font-bold mb-1 text-lg-text">$2,499<span className="text-base text-lg-text-muted">/mo</span></div>
-              <div className="text-sm text-lg-green mb-4">100,000 API credits</div>
+              <div className="text-lg-text-muted text-sm font-semibold mb-2">{t('api.business')}</div>
+              <div className="text-3xl font-bold mb-1 text-lg-text">
+                {displayPrice(pricing?.apiBusiness?.monthly, 'CA$3,374')}
+                <span className="text-base text-lg-text-muted">{t('pricing.perMonth')}</span>
+              </div>
+              <div className="text-sm text-lg-green mb-4">100,000 {t('api.credits')}</div>
               <ul className="space-y-2 mb-6 text-sm">
                 <li className="flex items-center gap-2 text-lg-text">
-                  <span className="text-lg-safe">✓</span> scan-listing endpoint
+                  <span className="text-lg-safe">✓</span> {t('api.scanListing')}
                 </li>
                 <li className="flex items-center gap-2 text-lg-text">
-                  <span className="text-lg-safe">✓</span> scan-seller endpoint
+                  <span className="text-lg-safe">✓</span> {t('api.scanSeller')}
                 </li>
                 <li className="flex items-center gap-2 text-lg-text">
-                  <span className="text-lg-safe">✓</span> scan-document endpoint
+                  <span className="text-lg-safe">✓</span> {t('api.scanDocument')}
                 </li>
                 <li className="flex items-center gap-2 text-lg-text">
-                  <span className="text-lg-safe">✓</span> bulk export
+                  <span className="text-lg-safe">✓</span> {t('api.bulkExport')}
                 </li>
               </ul>
-              <div className="text-xs text-lg-text-muted mb-4">Best for: Marketplaces & CRM</div>
+              <div className="text-xs text-lg-text-muted mb-4">{t('api.bestFor.business')}</div>
               <Link href="/api/pricing" className="btn-secondary w-full block text-center text-sm">
-                Get Started
+                {t('api.getStarted')}
               </Link>
             </div>
 
             {/* Enterprise */}
             <div className="card bg-gradient-to-br from-lg-green/10 to-lg-green/5">
-              <div className="text-lg-green text-sm font-semibold mb-2">ENTERPRISE</div>
-              <div className="text-3xl font-bold mb-1 text-lg-text">Custom<span className="text-base text-lg-text-muted"> $5k+</span></div>
-              <div className="text-sm text-lg-green mb-4">Unlimited credits</div>
+              <div className="text-lg-green text-sm font-semibold mb-2">{t('api.enterprise')}</div>
+              <div className="text-3xl font-bold mb-1 text-lg-text">
+                {t('api.custom')}
+                <span className="text-base text-lg-text-muted"> {displayPrice(pricing?.apiEnterprise?.monthly, 'CA$6,749')}+</span>
+              </div>
+              <div className="text-sm text-lg-green mb-4">{t('api.unlimited')}</div>
               <ul className="space-y-2 mb-6 text-sm">
                 <li className="flex items-center gap-2 text-lg-text">
-                  <span className="text-lg-safe">✓</span> All endpoints
+                  <span className="text-lg-safe">✓</span> {t('api.allEndpoints')}
                 </li>
                 <li className="flex items-center gap-2 text-lg-text">
-                  <span className="text-lg-safe">✓</span> Custom connectors
+                  <span className="text-lg-safe">✓</span> {t('api.customConnectors')}
                 </li>
                 <li className="flex items-center gap-2 text-lg-text">
-                  <span className="text-lg-safe">✓</span> Dedicated SLA
+                  <span className="text-lg-safe">✓</span> {t('api.dedicatedSLA')}
                 </li>
                 <li className="flex items-center gap-2 text-lg-text">
-                  <span className="text-lg-safe">✓</span> Priority support
+                  <span className="text-lg-safe">✓</span> {t('api.prioritySupport')}
                 </li>
               </ul>
-              <div className="text-xs text-lg-text-muted mb-4">Best for: Major platforms & portals</div>
+              <div className="text-xs text-lg-text-muted mb-4">{t('api.bestFor.enterprise')}</div>
               <Link href="/api/pricing" className="btn-primary w-full block text-center text-sm">
-                Contact Sales
+                {t('api.contactSales')}
               </Link>
             </div>
           </div>
@@ -491,7 +513,7 @@ function HomePageContent() {
                   <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                   <div className="w-3 h-3 rounded-full bg-green-500"></div>
                 </div>
-                <span className="text-sm text-lg-text-muted ml-2">Quick Start</span>
+                <span className="text-sm text-lg-text-muted ml-2">{t('api.quickStart')}</span>
               </div>
               <pre className="p-6 bg-gray-900 text-sm overflow-x-auto">
                 <code className="text-gray-300">{`// Scan a property listing for scams
@@ -512,7 +534,7 @@ const result = await response.json();
             </div>
             <div className="text-center mt-6">
               <Link href="/api/docs" className="text-lg-green hover:underline font-medium">
-                View Full API Documentation →
+                {t('api.viewDocs')}
               </Link>
             </div>
           </div>
@@ -524,13 +546,13 @@ const result = await response.json();
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <span className="inline-flex items-center gap-2 bg-lg-green/10 border border-lg-green/30 rounded-full px-4 py-2 mb-4">
-              <span className="text-lg-green text-sm font-medium">📱 Coming Soon</span>
+              <span className="text-lg-green text-sm font-medium">📱 {t('mobile.badge')}</span>
             </span>
             <h2 className="text-4xl font-bold mb-4 text-lg-text">
-              LandGuard AI <span className="gradient-text">Mobile App</span>
+              {t('mobile.title')}
             </h2>
             <p className="text-xl text-lg-text-muted max-w-2xl mx-auto">
-              Scan property listings on-the-go. Get instant risk alerts right from your phone.
+              {t('mobile.subtitle')}
             </p>
           </div>
 
@@ -584,8 +606,8 @@ const result = await response.json();
                   📸
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg-text mb-1">Scan from Screenshots</h3>
-                  <p className="text-lg-text-muted text-sm">Take a screenshot of any listing and our AI will analyze it instantly.</p>
+                  <h3 className="font-semibold text-lg-text mb-1">{t('mobile.feature1.title')}</h3>
+                  <p className="text-lg-text-muted text-sm">{t('mobile.feature1.desc')}</p>
                 </div>
               </div>
 
@@ -594,8 +616,8 @@ const result = await response.json();
                   🔔
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg-text mb-1">Push Notifications</h3>
-                  <p className="text-lg-text-muted text-sm">Get real-time alerts when new scams are detected in your area.</p>
+                  <h3 className="font-semibold text-lg-text mb-1">{t('mobile.feature2.title')}</h3>
+                  <p className="text-lg-text-muted text-sm">{t('mobile.feature2.desc')}</p>
                 </div>
               </div>
 
@@ -604,8 +626,8 @@ const result = await response.json();
                   🔄
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg-text mb-1">Sync with Extension</h3>
-                  <p className="text-lg-text-muted text-sm">Your scan history and settings sync across all your devices.</p>
+                  <h3 className="font-semibold text-lg-text mb-1">{t('mobile.feature3.title')}</h3>
+                  <p className="text-lg-text-muted text-sm">{t('mobile.feature3.desc')}</p>
                 </div>
               </div>
 
@@ -614,8 +636,8 @@ const result = await response.json();
                   ⭐
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg-text mb-1">Pro Features Included</h3>
-                  <p className="text-lg-text-muted text-sm">Pro subscribers get full access to mobile app features at no extra cost.</p>
+                  <h3 className="font-semibold text-lg-text mb-1">{t('mobile.feature4.title')}</h3>
+                  <p className="text-lg-text-muted text-sm">{t('mobile.feature4.desc')}</p>
                 </div>
               </div>
 
@@ -636,7 +658,7 @@ const result = await response.json();
                   </div>
                   <div>
                     <div className="text-sm font-semibold text-lg-text">iOS & Android</div>
-                    <div className="text-xs text-lg-text-muted">Coming Q2 2025</div>
+                    <div className="text-xs text-lg-text-muted">{t('mobile.coming')}</div>
                   </div>
                 </div>
               </div>
@@ -649,17 +671,17 @@ const result = await response.json();
       <section className="py-20 px-6 bg-section-alt">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold mb-6 text-lg-text">
-            Don't Become a Victim
+            {t('cta.title')}
           </h2>
           <p className="text-xl text-lg-text-muted mb-8">
-            Property scams cost victims thousands of dollars. Protect yourself with LandGuard AI.
+            {t('cta.subtitle')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/download" className="btn-primary text-lg px-10 py-4 inline-block">
-              Get Free Chrome Extension
+              {t('hero.cta.chrome')}
             </Link>
             <Link href="/api/docs" className="btn-secondary text-lg px-10 py-4 inline-block">
-              Explore API
+              {t('hero.cta.api')}
             </Link>
           </div>
         </div>
@@ -680,16 +702,16 @@ const result = await response.json();
               <span className="font-semibold text-lg-text">LandGuard AI</span>
             </div>
             <div className="flex gap-8 text-lg-text-muted text-sm">
-              <Link href="/privacy" className="hover:text-lg-green transition">Privacy</Link>
-              <Link href="/terms" className="hover:text-lg-green transition">Terms</Link>
-              <Link href="/contact" className="hover:text-lg-green transition">Contact</Link>
+              <Link href="/privacy" className="hover:text-lg-green transition">{t('footer.privacy')}</Link>
+              <Link href="/terms" className="hover:text-lg-green transition">{t('footer.terms')}</Link>
+              <Link href="/contact" className="hover:text-lg-green transition">{t('footer.contact')}</Link>
             </div>
             <div className="text-lg-text-muted text-sm">
-              © 2024 LandGuard AI. All rights reserved.
+              {t('footer.copyright')}
             </div>
           </div>
           <div className="mt-6 text-center text-xs text-lg-text-muted">
-            ⚠️ Disclaimer: This is a risk analysis tool, not legal advice or ownership verification.
+            {t('footer.disclaimer')}
           </div>
         </div>
       </footer>

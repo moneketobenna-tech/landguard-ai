@@ -21,6 +21,23 @@ const BASE_PRICES = {
     yearly: 388.80, // $32.40/month
     yearlyMonthly: 32.40,
   },
+  // API Tiers
+  apiStarter: {
+    monthly: 269,  // ~$199 USD
+    credits: 5000,
+  },
+  apiGrowth: {
+    monthly: 1079, // ~$799 USD
+    credits: 25000,
+  },
+  apiBusiness: {
+    monthly: 3374, // ~$2499 USD
+    credits: 100000,
+  },
+  apiEnterprise: {
+    monthly: 6749, // ~$5000 USD minimum
+    credits: -1, // Unlimited
+  },
 }
 
 // Exchange rates FROM CAD to other currencies
@@ -194,6 +211,24 @@ export async function GET(request: NextRequest) {
       yearly: convertPrice(BASE_PRICES.api.yearly, countryCode),
       yearlyMonthly: convertPrice(BASE_PRICES.api.yearlyMonthly, countryCode),
       yearlySavings: '17%',
+    },
+    
+    // API Tiers
+    apiStarter: {
+      monthly: convertPrice(BASE_PRICES.apiStarter.monthly, countryCode),
+      credits: BASE_PRICES.apiStarter.credits,
+    },
+    apiGrowth: {
+      monthly: convertPrice(BASE_PRICES.apiGrowth.monthly, countryCode),
+      credits: BASE_PRICES.apiGrowth.credits,
+    },
+    apiBusiness: {
+      monthly: convertPrice(BASE_PRICES.apiBusiness.monthly, countryCode),
+      credits: BASE_PRICES.apiBusiness.credits,
+    },
+    apiEnterprise: {
+      monthly: convertPrice(BASE_PRICES.apiEnterprise.monthly, countryCode),
+      credits: BASE_PRICES.apiEnterprise.credits,
     },
     
     // Raw CAD prices for reference
