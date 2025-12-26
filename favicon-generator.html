@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LandGuard AI Favicon Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            color: #333;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        canvas {
+            border: 2px solid #ddd;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 10px 5px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .preview {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+            align-items: center;
+        }
+        .preview-item {
+            text-align: center;
+        }
+        .instructions {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ LandGuard AI Favicon Generator</h1>
+        
+        <div class="instructions">
+            <strong>Instructions:</strong>
+            <ol>
+                <li>The favicon will be generated from the LandGuard AI logo</li>
+                <li>Click each download button to save the favicon in different formats</li>
+                <li>Place the files in the <code>website/public/</code> folder</li>
+            </ol>
+        </div>
+
+        <div class="preview">
+            <div class="preview-item">
+                <h3>16x16 (favicon.ico)</h3>
+                <canvas id="canvas16" width="16" height="16"></canvas>
+                <br>
+                <button onclick="download('canvas16', 'favicon-16x16.png')">Download 16x16</button>
+            </div>
+            <div class="preview-item">
+                <h3>32x32</h3>
+                <canvas id="canvas32" width="32" height="32"></canvas>
+                <br>
+                <button onclick="download('canvas32', 'favicon-32x32.png')">Download 32x32</button>
+            </div>
+            <div class="preview-item">
+                <h3>64x64</h3>
+                <canvas id="canvas64" width="64" height="64"></canvas>
+                <br>
+                <button onclick="download('canvas64', 'favicon.ico')">Download favicon.ico</button>
+            </div>
+            <div class="preview-item">
+                <h3>180x180 (Apple Touch)</h3>
+                <canvas id="canvas180" width="180" height="180"></canvas>
+                <br>
+                <button onclick="download('canvas180', 'apple-touch-icon.png')">Download Apple Touch</button>
+            </div>
+            <div class="preview-item">
+                <h3>192x192 (Android)</h3>
+                <canvas id="canvas192" width="192" height="192"></canvas>
+                <br>
+                <button onclick="download('canvas192', 'android-chrome-192x192.png')">Download Android 192</button>
+            </div>
+            <div class="preview-item">
+                <h3>512x512 (Android)</h3>
+                <canvas id="canvas512" width="512" height="512"></canvas>
+                <br>
+                <button onclick="download('canvas512', 'android-chrome-512x512.png')">Download Android 512</button>
+            </div>
+        </div>
+
+        <button onclick="location.reload()" style="background: #e74c3c;">Reset</button>
+    </div>
+
+    <script>
+        // Create a blue shield with location pin design for LandGuard AI
+        function drawLandGuardIcon(canvas) {
+            const ctx = canvas.getContext('2d');
+            const size = canvas.width;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, size, size);
+            
+            // Draw shield background with gradient (blue)
+            const gradient = ctx.createLinearGradient(0, 0, 0, size);
+            gradient.addColorStop(0, '#4A90E2');
+            gradient.addColorStop(0.5, '#357ABD');
+            gradient.addColorStop(1, '#2C5F9E');
+            
+            // Shield shape
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.moveTo(size * 0.5, size * 0.05);
+            ctx.lineTo(size * 0.85, size * 0.2);
+            ctx.lineTo(size * 0.85, size * 0.6);
+            ctx.quadraticCurveTo(size * 0.85, size * 0.8, size * 0.5, size * 0.95);
+            ctx.quadraticCurveTo(size * 0.15, size * 0.8, size * 0.15, size * 0.6);
+            ctx.lineTo(size * 0.15, size * 0.2);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Shield border (lighter blue)
+            ctx.strokeStyle = '#5BA3FF';
+            ctx.lineWidth = size * 0.02;
+            ctx.stroke();
+            
+            // Draw location pin (red)
+            const pinCenterX = size * 0.5;
+            const pinCenterY = size * 0.45;
+            const pinRadius = size * 0.18;
+            
+            // Pin circle
+            ctx.fillStyle = '#E74C3C';
+            ctx.beginPath();
+            ctx.arc(pinCenterX, pinCenterY, pinRadius, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Pin point
+            ctx.beginPath();
+            ctx.moveTo(pinCenterX - pinRadius * 0.6, pinCenterY + pinRadius * 0.8);
+            ctx.lineTo(pinCenterX, pinCenterY + pinRadius * 1.8);
+            ctx.lineTo(pinCenterX + pinRadius * 0.6, pinCenterY + pinRadius * 0.8);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Pin inner circle (white)
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(pinCenterX, pinCenterY, pinRadius * 0.45, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.fill();
+        }
+        
+        // Generate all sizes
+        ['canvas16', 'canvas32', 'canvas64', 'canvas180', 'canvas192', 'canvas512'].forEach(id => {
+            const canvas = document.getElementById(id);
+            drawLandGuardIcon(canvas);
+        });
+        
+        function download(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
+
