@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import LanguageSelector from '@/components/LanguageSelector'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface PricingData {
   country: string
@@ -22,6 +23,7 @@ function HomePageContent() {
   const [scanning, setScanning] = useState(false)
   const [result, setResult] = useState<any>(null)
   const [pricing, setPricing] = useState<PricingData | null>(null)
+  const { t } = useLanguage()
 
   // Fetch pricing data
   useEffect(() => {
@@ -73,13 +75,13 @@ function HomePageContent() {
             <span className="text-xl font-bold text-lg-text">LandGuard AI</span>
           </div>
           <div className="flex items-center gap-6">
-            <Link href="#features" className="text-lg-text-muted hover:text-lg-green transition">Features</Link>
-            <Link href="#pricing" className="text-lg-text-muted hover:text-lg-green transition">Pricing</Link>
-            <Link href="#api" className="text-lg-text-muted hover:text-lg-green transition">API</Link>
-            <Link href="#mobile" className="text-lg-text-muted hover:text-lg-green transition">Mobile App</Link>
-            <Link href="/app/login" className="text-lg-text-muted hover:text-lg-green transition">Login</Link>
+            <Link href="#features" className="text-lg-text-muted hover:text-lg-green transition">{t('nav.features')}</Link>
+            <Link href="#pricing" className="text-lg-text-muted hover:text-lg-green transition">{t('nav.pricing')}</Link>
+            <Link href="#api" className="text-lg-text-muted hover:text-lg-green transition">{t('nav.api')}</Link>
+            <Link href="#mobile" className="text-lg-text-muted hover:text-lg-green transition">{t('nav.mobile')}</Link>
+            <Link href="/app/login" className="text-lg-text-muted hover:text-lg-green transition">{t('nav.login')}</Link>
             <LanguageSelector />
-            <Link href="/download" className="btn-primary text-sm">Get Extension</Link>
+            <Link href="/download" className="btn-primary text-sm">{t('nav.download')}</Link>
           </div>
         </div>
       </nav>
@@ -88,18 +90,15 @@ function HomePageContent() {
       <section className="pt-32 pb-20 px-6">
         <div className="max-w-6xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-lg-bg-alt border border-lg-green/30 rounded-full px-4 py-2 mb-8">
-            <span className="text-lg-green text-sm font-medium">🛡️ AI-Powered Protection</span>
+            <span className="text-lg-green text-sm font-medium">{t('hero.badge')}</span>
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight text-lg-text">
-            Stop Property Scams
-            <br />
-            <span className="gradient-text">Before They Start</span>
+            {t('hero.title')}
           </h1>
           
           <p className="text-xl text-lg-text-muted max-w-3xl mx-auto mb-12">
-            LandGuard AI protects buyers from land and property scams before money changes hands. 
-            Our AI analyzes listings on Facebook Marketplace, Kijiji, and Craigslist to detect fraud.
+            {t('hero.subtitle')}
           </p>
 
           {/* Scan Box */}
@@ -110,7 +109,7 @@ function HomePageContent() {
                   type="url"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
-                  placeholder="Paste listing URL to scan..."
+                  placeholder={t('hero.scan.placeholder')}
                   className="flex-1 bg-white border border-lg-border rounded-lg px-4 py-3 text-lg-text placeholder-lg-text-muted focus:outline-none focus:border-lg-green transition"
                 />
                 <button
@@ -124,10 +123,10 @@ function HomePageContent() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
-                      Scanning...
+                      {t('hero.scan.scanning')}
                     </span>
                   ) : (
-                    <span className="flex items-center gap-2">🔍 Scan Listing</span>
+                    <span className="flex items-center gap-2">🔍 {t('hero.scan.button')}</span>
                   )}
                 </button>
               </div>
@@ -283,21 +282,21 @@ function HomePageContent() {
       <section id="pricing" className="py-20 px-6 bg-section-alt">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 text-lg-text">Simple Pricing</h2>
-            <p className="text-lg-text-muted text-lg">Start free, upgrade when you need more</p>
+            <h2 className="text-4xl font-bold mb-4 text-lg-text">{t('pricing.title')}</h2>
+            <p className="text-lg-text-muted text-lg">{t('pricing.subtitle')}</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Free Plan */}
             <div className="card">
-              <div className="text-lg-text-muted text-sm font-semibold mb-2">FREE</div>
-              <div className="text-4xl font-bold mb-4 text-lg-text">$0<span className="text-lg text-lg-text-muted">/month</span></div>
+              <div className="text-lg-text-muted text-sm font-semibold mb-2">{t('pricing.free')}</div>
+              <div className="text-4xl font-bold mb-4 text-lg-text">$0<span className="text-lg text-lg-text-muted">/{t('pricing.monthly')}</span></div>
               <ul className="space-y-3 mb-8">
                 {[
-                  '3 scans per month',
-                  'Basic risk analysis',
+                  `3 ${t('pricing.scans')}`,
+                  t('features.listing.desc'),
                   'Chrome extension',
-                  'Manual scanning'
+                  t('features.listing.title')
                 ].map((feature, i) => (
                   <li key={i} className="flex items-center gap-2 text-lg-text">
                     <span className="text-lg-safe">✓</span> {feature}
@@ -305,7 +304,7 @@ function HomePageContent() {
                 ))}
               </ul>
               <Link href="/download" className="btn-secondary w-full block text-center">
-                Get Started Free
+                {t('pricing.cta.free')}
               </Link>
             </div>
 
@@ -314,10 +313,10 @@ function HomePageContent() {
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-lg-green text-white text-xs font-bold px-3 py-1 rounded-full">
                 POPULAR
               </div>
-              <div className="text-lg-green text-sm font-semibold mb-2">PRO</div>
+              <div className="text-lg-green text-sm font-semibold mb-2">{t('pricing.pro')}</div>
               <div className="text-4xl font-bold mb-1 text-lg-text">
                 {displayPrice(pricing?.pro.monthly, 'CA$14.99')}
-                <span className="text-lg text-lg-text-muted">/month</span>
+                <span className="text-lg text-lg-text-muted">/{t('pricing.monthly')}</span>
               </div>
               {/* Show CAD equivalent for non-Canadian users */}
               {pricing?.country && pricing.country !== 'CA' && pricing.pro.monthly.local && (
@@ -327,12 +326,12 @@ function HomePageContent() {
               )}
               <ul className="space-y-3 mb-8">
                 {[
-                  'Unlimited scans',
-                  'Advanced AI analysis',
-                  'Auto-scan on all sites',
-                  'Priority support',
-                  'Detailed reports',
-                  'API access'
+                  t('pricing.unlimited'),
+                  t('features.listing.desc'),
+                  t('features.seller.title'),
+                  t('features.price.title'),
+                  t('features.document.title'),
+                  t('nav.api')
                 ].map((feature, i) => (
                   <li key={i} className="flex items-center gap-2 text-lg-text">
                     <span className="text-lg-safe">✓</span> {feature}
@@ -340,7 +339,7 @@ function HomePageContent() {
                 ))}
               </ul>
               <Link href="/pricing" className="btn-primary w-full block text-center">
-                Upgrade to Pro
+                {t('pricing.cta.pro')}
               </Link>
             </div>
           </div>
