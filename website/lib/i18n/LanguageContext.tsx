@@ -83,9 +83,81 @@ function detectBrowserLanguage(): LanguageCode {
   return 'en' // Default to English
 }
 
+// Default English translations (shown while API loads)
+const DEFAULT_TRANSLATIONS: Translations = {
+  // Navigation
+  'nav.features': 'Features',
+  'nav.pricing': 'Pricing',
+  'nav.api': 'API',
+  'nav.mobile': 'Mobile App',
+  'nav.login': 'Login',
+  'nav.download': 'Get Extension',
+  
+  // Hero
+  'hero.badge': '🛡️ AI-Powered Protection',
+  'hero.title': 'Stop Property Scams Before They Start',
+  'hero.subtitle': 'LandGuard AI protects buyers from land and property scams before money changes hands. Our AI analyzes listings on Facebook Marketplace, Kijiji, and Craigslist to detect fraud.',
+  'hero.scan.placeholder': 'Paste listing URL to scan...',
+  'hero.scan.button': 'Scan Listing',
+  'hero.disclaimer': '⚠️ This is a risk analysis tool, not legal advice or property verification.',
+  'hero.cta.chrome': 'Free Chrome Extension',
+  'hero.cta.api': 'Explore API',
+  
+  // Pricing
+  'pricing.title': 'Choose Your Protection',
+  'pricing.subtitle': 'Start free, upgrade when you need more scans',
+  'pricing.free': 'Free',
+  'pricing.pro': 'Pro',
+  'pricing.monthly': 'Monthly',
+  'pricing.yearly': 'Yearly',
+  'pricing.save20': 'Save 20%',
+  'pricing.billedAnnually': 'Billed annually',
+  'pricing.billedMonthly': 'Billed monthly',
+  'pricing.year': 'year',
+  'pricing.unlimited': 'Unlimited scans',
+  'pricing.scans': 'scans per month',
+  'pricing.chrome': 'Chrome extension',
+  'pricing.cta.free': 'Get Started',
+  'pricing.cta.pro': 'Upgrade to Pro',
+  
+  // Features
+  'features.listing.title': 'Listing Analysis',
+  'features.listing.desc': 'AI scans listing details for red flags',
+  'features.seller.title': 'Seller Verification',
+  'features.seller.desc': 'Cross-reference seller information',
+  'features.price.title': 'Price Analysis',
+  'features.price.desc': 'Compare prices with market data',
+  'features.document.title': 'Document Scanning',
+  'features.document.desc': 'Verify property documents',
+  
+  // CTA
+  'cta.title': 'Don\'t Become A Victim',
+  'cta.subtitle': 'Property scams cost victims thousands of dollars. Protect yourself with LandGuard AI.',
+  
+  // Footer
+  'footer.privacy': 'Privacy',
+  'footer.terms': 'Terms',
+  'footer.contact': 'Contact',
+  'footer.copyright': '© 2024 LandGuard AI. All rights reserved.',
+  
+  // API Section
+  'api.badge': '🔌 Developer API',
+  'api.title': 'Property Scam Detection API',
+  'api.subtitle': 'Integrate AI-powered property scam detection into your platform.',
+  'api.getStarted': 'Get Started',
+  'api.contactSales': 'Contact Sales',
+  'api.viewDocs': 'View Full API Documentation →',
+  
+  // Mobile
+  'mobile.badge': 'Coming Soon',
+  'mobile.title': 'LandGuard AI Mobile App',
+  'mobile.subtitle': 'Scan properties on the go with our upcoming mobile app.',
+  'mobile.coming': 'Coming Q1 2026',
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<LanguageCode>('en')
-  const [translations, setTranslations] = useState<Translations>({})
+  const [translations, setTranslations] = useState<Translations>(DEFAULT_TRANSLATIONS)
   const [isLoading, setIsLoading] = useState(true)
 
   // Load translations for a language
