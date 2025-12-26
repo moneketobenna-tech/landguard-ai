@@ -5,14 +5,16 @@
  * All prices in CAD (billed in CAD, shown in local currency on website):
  * - LandGuard Pro Monthly: $14.99 CAD/month
  * - LandGuard Pro Yearly: $143.88 CAD/year ($11.99/month, save 20%)
- * - LandGuard API Monthly: $39 CAD/month
- * - LandGuard API Yearly: $388.80 CAD/year ($32.40/month, save 17%)
+ * - API Starter: $269 CAD/month (5,000 credits)
+ * - API Growth: $1,079 CAD/month (25,000 credits)
+ * - API Business: $3,374 CAD/month (100,000 credits)
  * 
  * Stripe Price IDs (set in environment variables):
  * - STRIPE_PRO_MONTHLY_PRICE_ID
  * - STRIPE_PRO_YEARLY_PRICE_ID
- * - STRIPE_API_MONTHLY_PRICE_ID
- * - STRIPE_API_YEARLY_PRICE_ID
+ * - STRIPE_API_STARTER_PRICE_ID
+ * - STRIPE_API_GROWTH_PRICE_ID
+ * - STRIPE_API_BUSINESS_PRICE_ID
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -26,10 +28,17 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
 
 // Price IDs from Stripe Dashboard (all in CAD)
 const PRICE_IDS: Record<string, string | undefined> = {
+  // Pro Plans (Chrome Extension & Web App)
   'pro-monthly': process.env.STRIPE_PRO_MONTHLY_PRICE_ID,
   'pro-yearly': process.env.STRIPE_PRO_YEARLY_PRICE_ID,
-  'api-monthly': process.env.STRIPE_API_MONTHLY_PRICE_ID,
-  'api-yearly': process.env.STRIPE_API_YEARLY_PRICE_ID,
+  
+  // API Plans
+  'api-starter': process.env.STRIPE_API_STARTER_PRICE_ID,
+  'api-growth': process.env.STRIPE_API_GROWTH_PRICE_ID,
+  'api-business': process.env.STRIPE_API_BUSINESS_PRICE_ID,
+  
+  // Legacy support
+  'pro': process.env.STRIPE_PRO_MONTHLY_PRICE_ID,
 }
 
 interface CheckoutRequest {
