@@ -48,6 +48,28 @@ body {
 .logo-text {
   font-weight: 700;
   font-size: 16px;
+}
+
+/* Language Selector */
+.language-selector {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 11px;
+  color: white;
+  cursor: pointer;
+  outline: none;
+  font-weight: 500;
+}
+
+.language-selector:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.language-selector option {
+  background: #166534;
+  color: white;
   color: #fff;
 }
 

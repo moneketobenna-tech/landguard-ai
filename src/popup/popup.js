@@ -43,11 +43,181 @@ let countdownTimer = null;
 let lastScanTime = null;
 let isScanning = false;
 
+// Language & Localization State
+let currentLanguage = 'en';
+let translations = {};
+let pricingData = null;
+
+// Default English translations for extension UI
+const DEFAULT_TRANSLATIONS = {
+  'ext.scanListing': 'Scan Listing',
+  'ext.scanSeller': 'Verify Seller',
+  'ext.currentPage': 'Current Page',
+  'ext.addDetails': 'Add Listing Details (Optional)',
+  'ext.title': 'Title',
+  'ext.description': 'Description',
+  'ext.price': 'Price',
+  'ext.location': 'Location',
+  'ext.useAI': 'Use AI API (more accurate)',
+  'ext.riskFlags': 'Risk Flags',
+  'ext.recommendations': 'Recommendations',
+  'ext.exportPDF': 'Export PDF Report',
+  'ext.save': 'Save',
+  'ext.share': 'Share',
+  'ext.report': 'Report',
+  'ext.sellerVerification': 'Seller Verification',
+  'ext.sellerName': 'Seller Name',
+  'ext.email': 'Email Address',
+  'ext.phone': 'Phone Number',
+  'ext.profileURL': 'Profile URL',
+  'ext.scanHistory': 'Scan History',
+  'ext.clearAll': 'Clear All',
+  'ext.noScans': 'No scans yet',
+  'ext.settings': 'Settings',
+  'ext.website': 'Website',
+  'ext.apiDocs': 'API Docs',
+  'ext.autoRescan': 'Auto-Rescan',
+  'ext.detecting': 'Detecting...',
+  'ext.analyzing': 'Analyzing...',
+  'ext.apiReady': 'API Ready',
+  'ext.listing': 'Listing',
+  'ext.seller': 'Seller',
+  'ext.history': 'History',
+  'ext.upgradePro': 'Upgrade to Pro',
+  'ext.scansRemaining': 'scans remaining',
+  'ext.unlimited': 'Unlimited',
+  'ext.low': 'LOW RISK',
+  'ext.medium': 'MEDIUM RISK',
+  'ext.high': 'HIGH RISK',
+  'ext.critical': 'CRITICAL'
+};
+
+// Fetch translations from API
+async function loadTranslations() {
+  try {
+    const stored = await chrome.storage.local.get(['lg_language']);
+    currentLanguage = stored.lg_language || getBrowserLanguage();
+    
+    // Set selector to current language
+    const langSelector = document.getElementById('languageSelector');
+    if (langSelector) {
+      langSelector.value = currentLanguage;
+      langSelector.addEventListener('change', async (e) => {
+        currentLanguage = e.target.value;
+        await chrome.storage.local.set({ lg_language: currentLanguage });
+        await fetchTranslations();
+        applyTranslations();
+      });
+    }
+    
+    await fetchTranslations();
+    applyTranslations();
+  } catch (e) {
+    console.error('[LandGuard AI] Translation load error:', e);
+    translations = DEFAULT_TRANSLATIONS;
+  }
+}
+
+// Get browser language
+function getBrowserLanguage() {
+  const lang = navigator.language || navigator.userLanguage;
+  const shortLang = lang.split('-')[0];
+  const supported = ['en', 'es', 'fr', 'de', 'zh', 'ja', 'ko', 'pt', 'it', 'nl'];
+  return supported.includes(shortLang) ? shortLang : 'en';
+}
+
+// Fetch translations from API
+async function fetchTranslations() {
+  try {
+    const response = await fetch(`https://landguardai.co/api/language?lang=${currentLanguage}`);
+    const data = await response.json();
+    translations = { ...DEFAULT_TRANSLATIONS, ...data.translations };
+    console.log('[LandGuard AI] Loaded translations for:', currentLanguage);
+  } catch (e) {
+    console.error('[LandGuard AI] Fetch translations error:', e);
+    translations = DEFAULT_TRANSLATIONS;
+  }
+}
+
+// Get translation
+function t(key) {
+  return translations[key] || DEFAULT_TRANSLATIONS[key] || key;
+}
+
+// Apply translations to UI
+function applyTranslations() {
+  // Tab labels
+  const listingTab = document.querySelector('[data-tab="listing"] span:last-child');
+  const sellerTab = document.querySelector('[data-tab="seller"] span:last-child');
+  const historyTab = document.querySelector('[data-tab="history"] span:last-child');
+  
+  if (listingTab) listingTab.textContent = t('ext.listing');
+  if (sellerTab) sellerTab.textContent = t('ext.seller');
+  if (historyTab) historyTab.textContent = t('ext.history');
+  
+  // Scan button
+  const scanBtn = document.querySelector('#scanListingBtn .btn-text');
+  if (scanBtn) scanBtn.textContent = t('ext.scanListing');
+  
+  const sellerScanBtn = document.querySelector('#scanSellerBtn .btn-text');
+  if (sellerScanBtn) sellerScanBtn.textContent = t('ext.scanSeller');
+  
+  // Section labels
+  const currentPageLabel = document.querySelector('#tab-listing .section-label');
+  if (currentPageLabel) currentPageLabel.textContent = t('ext.currentPage');
+  
+  // Auto-rescan
+  const autoRescanLabel = document.querySelector('.auto-rescan-label');
+  if (autoRescanLabel) autoRescanLabel.textContent = t('ext.autoRescan');
+  
+  // Footer links
+  const settingsLink = document.getElementById('settingsLink');
+  if (settingsLink) settingsLink.innerHTML = `⚙️ ${t('ext.settings')}`;
+  
+  // API status
+  const apiStatusText = document.getElementById('apiStatusText');
+  if (apiStatusText && apiStatusText.textContent === 'API Ready') {
+    apiStatusText.textContent = t('ext.apiReady');
+  }
+  
+  // Clear All button
+  const clearHistory = document.getElementById('clearHistory');
+  if (clearHistory) clearHistory.textContent = t('ext.clearAll');
+  
+  console.log('[LandGuard AI] UI translations applied');
+}
+
+// Fetch pricing from API
+async function loadPricing() {
+  try {
+    const response = await fetch('https://landguardai.co/api/pricing');
+    pricingData = await response.json();
+    console.log('[LandGuard AI] Pricing loaded:', pricingData.localCurrency);
+  } catch (e) {
+    console.error('[LandGuard AI] Pricing load error:', e);
+  }
+}
+
+// Get formatted price
+function getLocalPrice(cadAmount) {
+  if (!pricingData || pricingData.localCurrency === 'CAD') {
+    return `CA$${cadAmount}`;
+  }
+  // Convert CAD to local currency using approximate rate
+  const rate = pricingData.pro?.monthly?.localAmount / 14.99 || 1;
+  const localAmount = (cadAmount * rate).toFixed(2);
+  return `${pricingData.localCurrencySymbol}${localAmount}`;
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('[LandGuard AI] Popup initialized v' + VERSION);
   
   try {
+    // Load language and pricing first for UI
+    await loadTranslations();
+    await loadPricing();
+    
     await loadSettings();
     await loadScanUsage();
     await loadCurrentTab();
