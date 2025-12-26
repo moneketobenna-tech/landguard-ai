@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resize LandGuard AI Icon to 128x128</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        h1 { color: #4ade80; margin-bottom: 30px; }
+        .container {
+            background: #2d2d44;
+            padding: 30px;
+            border-radius: 16px;
+            display: inline-block;
+        }
+        canvas {
+            border: 2px solid #4ade80;
+            border-radius: 8px;
+            margin: 20px;
+        }
+        button {
+            background: linear-gradient(135deg, #4ade80, #22d3ee);
+            color: #1a1a2e;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover { opacity: 0.9; transform: scale(1.02); }
+        .info { color: #94a3b8; margin-top: 15px; }
+        input[type="file"] {
+            margin: 20px;
+            padding: 10px;
+            background: #374151;
+            border: none;
+            border-radius: 8px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏠 LandGuard AI - Icon Resizer</h1>
+    
+    <div class="container">
+        <p>Select your logo image:</p>
+        <input type="file" id="imageInput" accept="image/*">
+        
+        <h3>128 x 128 Preview:</h3>
+        <canvas id="canvas128" width="128" height="128"></canvas>
+        
+        <br>
+        <button onclick="downloadImage()">⬇️ Download 128x128 PNG</button>
+        <p class="info">The image will be saved as PNG (24-bit, no alpha)</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas128');
+        const ctx = canvas.getContext('2d');
+        
+        // Fill with white background initially
+        ctx.fillStyle = '#87CEEB'; // Light blue background matching the logo
+        ctx.fillRect(0, 0, 128, 128);
+        
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const img = new Image();
+                img.onload = function() {
+                    // Clear canvas with the background color
+                    ctx.fillStyle = '#87CEEB';
+                    ctx.fillRect(0, 0, 128, 128);
+                    
+                    // Draw image scaled to 128x128
+                    ctx.drawImage(img, 0, 0, 128, 128);
+                };
+                img.src = URL.createObjectURL(file);
+            }
+        });
+        
+        function downloadImage() {
+            // Create a temporary canvas for PNG without alpha
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 128;
+            tempCanvas.height = 128;
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            // Fill with solid background (removes alpha)
+            tempCtx.fillStyle = '#87CEEB';
+            tempCtx.fillRect(0, 0, 128, 128);
+            
+            // Draw the current canvas content
+            tempCtx.drawImage(canvas, 0, 0);
+            
+            // Download
+            const link = document.createElement('a');
+            link.download = 'landguard-icon-128x128.png';
+            link.href = tempCanvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
+
+
+
+

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LandGuard AI - Professional Icon Creator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 40px;
+        }
+        h1 { 
+            text-align: center; 
+            font-size: 32px;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #22c55e, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 40px;
+        }
+        .main-container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        .upload-section, .preview-section {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid #334155;
+        }
+        .drop-zone {
+            border: 3px dashed #4ade80;
+            border-radius: 12px;
+            padding: 60px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(74, 222, 128, 0.05);
+        }
+        .drop-zone:hover, .drop-zone.dragover {
+            background: rgba(74, 222, 128, 0.15);
+            border-color: #22c55e;
+        }
+        .drop-zone-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        .drop-zone-text {
+            font-size: 18px;
+            color: #e2e8f0;
+            margin-bottom: 10px;
+        }
+        .drop-zone-hint {
+            color: #64748b;
+            font-size: 14px;
+        }
+        input[type="file"] { display: none; }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #f1f5f9;
+        }
+        
+        .preview-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .preview-item {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .preview-item h4 {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        .canvas-wrapper {
+            display: inline-block;
+            background: #fff;
+            padding: 8px;
+            border-radius: 8px;
+        }
+        canvas {
+            display: block;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+        
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            margin-top: 15px;
+            transition: all 0.2s ease;
+        }
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(34, 197, 94, 0.3);
+        }
+        .download-btn:disabled {
+            background: #475569;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .original-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .status.success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid #22c55e;
+            color: #4ade80;
+        }
+        .status.waiting {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid #3b82f6;
+            color: #60a5fa;
+        }
+        
+        .all-sizes {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #334155;
+        }
+        .size-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: #1e293b;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .size-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .size-preview {
+            background: white;
+            padding: 4px;
+            border-radius: 4px;
+        }
+        .small-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .small-btn:hover { background: #2563eb; }
+        .small-btn:disabled { background: #475569; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <h1>🏠 LandGuard AI Icon Creator</h1>
+    <p class="subtitle">Create high-quality icons for Chrome Web Store submission</p>
+    
+    <div class="main-container">
+        <div class="upload-section">
+            <h3 class="section-title">📤 Upload Your Logo</h3>
+            
+            <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                <div class="drop-zone-icon">🖼️</div>
+                <div class="drop-zone-text">Drop your logo here</div>
+                <div class="drop-zone-hint">or click to browse (PNG, JPG)</div>
+            </div>
+            <input type="file" id="fileInput" accept="image/*">
+            
+            <div id="originalPreviewContainer" style="margin-top: 20px; text-align: center; display: none;">
+                <h4 style="color: #94a3b8; margin-bottom: 10px;">Original Image:</h4>
+                <img id="originalPreview" class="original-preview">
+            </div>
+            
+            <div id="status" class="status waiting">
+                Waiting for image upload...
+            </div>
+        </div>
+        
+        <div class="preview-section">
+            <h3 class="section-title">👁️ Preview & Download</h3>
+            
+            <div class="preview-grid">
+                <div class="preview-item">
+                    <h4>128 × 128 (Chrome Web Store Icon)</h4>
+                    <div class="canvas-wrapper">
+                        <canvas id="canvas128" width="128" height="128"></canvas>
+                    </div>
+                    <br>
+                    <button class="download-btn" id="download128" onclick="download(128)" disabled>
+                        ⬇️ Download 128×128
+                    </button>
+                </div>
+            </div>
+            
+            <div class="all-sizes">
+                <h4 style="color: #94a3b8; margin-bottom: 15px;">All Extension Icon Sizes:</h4>
+                
+                <div class="size-row">
+                    <div class="size-info">
+                        <div class="size-preview">
+                            <canvas id="canvas16" width="16" height="16"></canvas>
+                        </div>
+                        <span>16 × 16</span>
+                    </div>
+                    <button class="small-btn" onclick="download(16)" disabled id="btn16">Download</button>
+                </div>
+                
+                <div class="size-row">
+                    <div class="size-info">
+                        <div class="size-preview">
+                            <canvas id="canvas32" width="32" height="32"></canvas>
+                        </div>
+                        <span>32 × 32</span>
+                    </div>
+                    <button class="small-btn" onclick="download(32)" disabled id="btn32">Download</button>
+                </div>
+                
+                <div class="size-row">
+                    <div class="size-info">
+                        <div class="size-preview">
+                            <canvas id="canvas48" width="48" height="48"></canvas>
+                        </div>
+                        <span>48 × 48</span>
+                    </div>
+                    <button class="small-btn" onclick="download(48)" disabled id="btn48">Download</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const status = document.getElementById('status');
+        let loadedImage = null;
+        
+        // Drag and drop handlers
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                processImage(file);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                processImage(file);
+            }
+        });
+        
+        function processImage(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    loadedImage = img;
+                    
+                    // Show original preview
+                    document.getElementById('originalPreview').src = e.target.result;
+                    document.getElementById('originalPreviewContainer').style.display = 'block';
+                    
+                    // Generate all sizes
+                    generateIcon(128);
+                    generateIcon(48);
+                    generateIcon(32);
+                    generateIcon(16);
+                    
+                    // Enable buttons
+                    document.getElementById('download128').disabled = false;
+                    document.getElementById('btn16').disabled = false;
+                    document.getElementById('btn32').disabled = false;
+                    document.getElementById('btn48').disabled = false;
+                    
+                    // Update status
+                    status.className = 'status success';
+                    status.innerHTML = '✅ Image loaded! Ready to download.';
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function generateIcon(size) {
+            const canvas = document.getElementById('canvas' + size);
+            const ctx = canvas.getContext('2d');
+            
+            // Enable high-quality image scaling
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            
+            // Clear with white background (no alpha for Chrome Store)
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, size, size);
+            
+            if (loadedImage) {
+                // Calculate scaling to fit while maintaining aspect ratio
+                const scale = Math.min(size / loadedImage.width, size / loadedImage.height);
+                const width = loadedImage.width * scale;
+                const height = loadedImage.height * scale;
+                const x = (size - width) / 2;
+                const y = (size - height) / 2;
+                
+                // For better quality, use multiple steps for large reductions
+                if (loadedImage.width > size * 2) {
+                    // Step-down approach for better quality
+                    const tempCanvas = document.createElement('canvas');
+                    let currentWidth = loadedImage.width;
+                    let currentHeight = loadedImage.height;
+                    let currentSource = loadedImage;
+                    
+                    while (currentWidth > size * 2) {
+                        const newWidth = Math.floor(currentWidth / 2);
+                        const newHeight = Math.floor(currentHeight / 2);
+                        
+                        tempCanvas.width = newWidth;
+                        tempCanvas.height = newHeight;
+                        const tempCtx = tempCanvas.getContext('2d');
+                        tempCtx.imageSmoothingEnabled = true;
+                        tempCtx.imageSmoothingQuality = 'high';
+                        tempCtx.drawImage(currentSource, 0, 0, newWidth, newHeight);
+                        
+                        currentSource = tempCanvas;
+                        currentWidth = newWidth;
+                        currentHeight = newHeight;
+                    }
+                    
+                    // Final draw
+                    const finalScale = Math.min(size / currentWidth, size / currentHeight);
+                    const finalWidth = currentWidth * finalScale;
+                    const finalHeight = currentHeight * finalScale;
+                    const finalX = (size - finalWidth) / 2;
+                    const finalY = (size - finalHeight) / 2;
+                    
+                    ctx.drawImage(tempCanvas, finalX, finalY, finalWidth, finalHeight);
+                } else {
+                    ctx.drawImage(loadedImage, x, y, width, height);
+                }
+            }
+        }
+        
+        function download(size) {
+            const canvas = document.getElementById('canvas' + size);
+            
+            // Create a new canvas to ensure no alpha
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = size;
+            exportCanvas.height = size;
+            const exportCtx = exportCanvas.getContext('2d');
+            
+            // White background
+            exportCtx.fillStyle = '#FFFFFF';
+            exportCtx.fillRect(0, 0, size, size);
+            
+            // Draw the icon
+            exportCtx.drawImage(canvas, 0, 0);
+            
+            // Download as PNG
+            const link = document.createElement('a');
+            link.download = `landguard-icon-${size}x${size}.png`;
+            link.href = exportCanvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // Initialize canvases with placeholder
+        [16, 32, 48, 128].forEach(size => {
+            const canvas = document.getElementById('canvas' + size);
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#e2e8f0';
+            ctx.fillRect(0, 0, size, size);
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = `${Math.max(8, size/4)}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.fillText('?', size/2, size/2 + size/8);
+        });
+    </script>
+</body>
+</html>
+
+
+
+

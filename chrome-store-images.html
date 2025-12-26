@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LandGuard AI - Chrome Store Images Generator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #1a1a2e;
+            color: white;
+            padding: 20px;
+        }
+        h1 { margin-bottom: 20px; color: #4ade80; }
+        h2 { margin: 30px 0 15px; color: #22d3ee; }
+        .instructions { 
+            background: #2d2d44; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 20px;
+            border-left: 4px solid #4ade80;
+        }
+        .canvas-container {
+            margin: 20px 0;
+            background: #2d2d44;
+            padding: 20px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        canvas { 
+            border: 2px solid #4ade80;
+            border-radius: 8px;
+        }
+        button {
+            background: linear-gradient(135deg, #4ade80, #22d3ee);
+            color: #1a1a2e;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 10px 5px;
+        }
+        button:hover { opacity: 0.9; transform: scale(1.02); }
+    </style>
+</head>
+<body>
+    <h1>🏠 LandGuard AI - Chrome Store Images</h1>
+    
+    <div class="instructions">
+        <strong>Instructions:</strong> Click each "Download" button to save the images. 
+        Use PNG format for all images (24-bit, no alpha).
+    </div>
+
+    <!-- 128x128 Icon -->
+    <h2>1. Store Icon (128 x 128)</h2>
+    <div class="canvas-container">
+        <canvas id="icon128" width="128" height="128"></canvas>
+        <br>
+        <button onclick="downloadCanvas('icon128', 'landguard-icon-128.png')">Download Icon 128x128</button>
+    </div>
+
+    <!-- Screenshot 1: Main Popup -->
+    <h2>2. Screenshot 1 - Main Interface (1280 x 800)</h2>
+    <div class="canvas-container">
+        <canvas id="screenshot1" width="1280" height="800"></canvas>
+        <br>
+        <button onclick="downloadCanvas('screenshot1', 'screenshot-1-main.png')">Download Screenshot 1</button>
+    </div>
+
+    <!-- Screenshot 2: Scan Results -->
+    <h2>3. Screenshot 2 - Scan Results (1280 x 800)</h2>
+    <div class="canvas-container">
+        <canvas id="screenshot2" width="1280" height="800"></canvas>
+        <br>
+        <button onclick="downloadCanvas('screenshot2', 'screenshot-2-results.png')">Download Screenshot 2</button>
+    </div>
+
+    <!-- Screenshot 3: Features -->
+    <h2>4. Screenshot 3 - Features (1280 x 800)</h2>
+    <div class="canvas-container">
+        <canvas id="screenshot3" width="1280" height="800"></canvas>
+        <br>
+        <button onclick="downloadCanvas('screenshot3', 'screenshot-3-features.png')">Download Screenshot 3</button>
+    </div>
+
+    <!-- Small Promo Tile -->
+    <h2>5. Small Promo Tile (440 x 280)</h2>
+    <div class="canvas-container">
+        <canvas id="smallPromo" width="440" height="280"></canvas>
+        <br>
+        <button onclick="downloadCanvas('smallPromo', 'small-promo-440x280.png')">Download Small Promo</button>
+    </div>
+
+    <!-- Marquee Promo Tile -->
+    <h2>6. Marquee Promo Tile (1400 x 560)</h2>
+    <div class="canvas-container">
+        <canvas id="marqueePromo" width="1400" height="560"></canvas>
+        <br>
+        <button onclick="downloadCanvas('marqueePromo', 'marquee-promo-1400x560.png')">Download Marquee Promo</button>
+    </div>
+
+    <script>
+        // Colors
+        const PRIMARY_GREEN = '#22c55e';
+        const DARK_GREEN = '#16a34a';
+        const LIGHT_GREEN = '#4ade80';
+        const BG_GRADIENT_START = '#0f172a';
+        const BG_GRADIENT_END = '#1e293b';
+        const WHITE = '#ffffff';
+        const LIGHT_GRAY = '#e2e8f0';
+
+        // Draw 128x128 Icon
+        function drawIcon128() {
+            const canvas = document.getElementById('icon128');
+            const ctx = canvas.getContext('2d');
+            
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, 128, 128);
+            gradient.addColorStop(0, '#1e40af');
+            gradient.addColorStop(1, '#3b82f6');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.roundRect(0, 0, 128, 128, 24);
+            ctx.fill();
+            
+            // Shield shape
+            ctx.fillStyle = PRIMARY_GREEN;
+            ctx.beginPath();
+            ctx.moveTo(64, 15);
+            ctx.lineTo(108, 35);
+            ctx.lineTo(108, 70);
+            ctx.quadraticCurveTo(108, 100, 64, 115);
+            ctx.quadraticCurveTo(20, 100, 20, 70);
+            ctx.lineTo(20, 35);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Inner shield
+            ctx.fillStyle = LIGHT_GREEN;
+            ctx.beginPath();
+            ctx.moveTo(64, 25);
+            ctx.lineTo(98, 42);
+            ctx.lineTo(98, 68);
+            ctx.quadraticCurveTo(98, 92, 64, 105);
+            ctx.quadraticCurveTo(30, 92, 30, 68);
+            ctx.lineTo(30, 42);
+            ctx.closePath();
+            ctx.fill();
+            
+            // House icon inside
+            ctx.fillStyle = WHITE;
+            ctx.beginPath();
+            ctx.moveTo(64, 40);
+            ctx.lineTo(88, 58);
+            ctx.lineTo(88, 85);
+            ctx.lineTo(40, 85);
+            ctx.lineTo(40, 58);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Door
+            ctx.fillStyle = PRIMARY_GREEN;
+            ctx.fillRect(56, 65, 16, 20);
+            
+            // Location pin
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(78, 50, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = WHITE;
+            ctx.beginPath();
+            ctx.arc(78, 50, 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Draw Screenshot 1 - Main Interface
+        function drawScreenshot1() {
+            const canvas = document.getElementById('screenshot1');
+            const ctx = canvas.getContext('2d');
+            
+            // Background
+            const gradient = ctx.createLinearGradient(0, 0, 1280, 800);
+            gradient.addColorStop(0, '#0f172a');
+            gradient.addColorStop(1, '#1e293b');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 1280, 800);
+            
+            // Browser mockup
+            ctx.fillStyle = '#374151';
+            ctx.fillRect(100, 50, 1080, 700);
+            
+            // Browser header
+            ctx.fillStyle = '#1f2937';
+            ctx.fillRect(100, 50, 1080, 40);
+            
+            // Browser dots
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath(); ctx.arc(125, 70, 6, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath(); ctx.arc(145, 70, 6, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#22c55e';
+            ctx.beginPath(); ctx.arc(165, 70, 6, 0, Math.PI * 2); ctx.fill();
+            
+            // URL bar
+            ctx.fillStyle = '#4b5563';
+            ctx.beginPath();
+            ctx.roundRect(200, 58, 700, 24, 4);
+            ctx.fill();
+            ctx.fillStyle = '#9ca3af';
+            ctx.font = '12px Arial';
+            ctx.fillText('facebook.com/marketplace/item/property-listing', 215, 75);
+            
+            // Content area
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(100, 90, 1080, 660);
+            
+            // LandGuard popup overlay
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillRect(100, 90, 1080, 660);
+            
+            // Popup window
+            const popupX = 440;
+            const popupY = 150;
+            const popupW = 400;
+            const popupH = 500;
+            
+            ctx.fillStyle = WHITE;
+            ctx.beginPath();
+            ctx.roundRect(popupX, popupY, popupW, popupH, 16);
+            ctx.fill();
+            
+            // Popup header
+            const headerGrad = ctx.createLinearGradient(popupX, popupY, popupX + popupW, popupY);
+            headerGrad.addColorStop(0, PRIMARY_GREEN);
+            headerGrad.addColorStop(1, '#22d3ee');
+            ctx.fillStyle = headerGrad;
+            ctx.beginPath();
+            ctx.roundRect(popupX, popupY, popupW, 60, [16, 16, 0, 0]);
+            ctx.fill();
+            
+            // Header text
+            ctx.fillStyle = WHITE;
+            ctx.font = 'bold 20px Arial';
+            ctx.fillText('🏠 LandGuard AI', popupX + 20, popupY + 38);
+            
+            ctx.font = '12px Arial';
+            ctx.fillText('Property Scam Detector', popupX + 180, popupY + 38);
+            
+            // Scan button
+            ctx.fillStyle = PRIMARY_GREEN;
+            ctx.beginPath();
+            ctx.roundRect(popupX + 30, popupY + 80, popupW - 60, 50, 10);
+            ctx.fill();
+            ctx.fillStyle = WHITE;
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText('🔍 Scan This Listing', popupX + 110, popupY + 112);
+            
+            // Status area
+            ctx.fillStyle = '#f0fdf4';
+            ctx.beginPath();
+            ctx.roundRect(popupX + 30, popupY + 150, popupW - 60, 80, 10);
+            ctx.fill();
+            ctx.strokeStyle = PRIMARY_GREEN;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            ctx.fillStyle = '#166534';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('✓ Ready to Scan', popupX + 50, popupY + 190);
+            ctx.fillStyle = '#374151';
+            ctx.font = '13px Arial';
+            ctx.fillText('Detected: Facebook Marketplace', popupX + 50, popupY + 215);
+            
+            // Features list
+            const features = [
+                '✓ AI-Powered Analysis',
+                '✓ Seller Verification',
+                '✓ Price Comparison',
+                '✓ Image Analysis',
+                '✓ Document Scanning'
+            ];
+            
+            ctx.fillStyle = '#1f2937';
+            ctx.font = '14px Arial';
+            features.forEach((f, i) => {
+                ctx.fillText(f, popupX + 40, popupY + 280 + (i * 28));
+            });
+            
+            // Pro badge
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath();
+            ctx.roundRect(popupX + 30, popupY + 430, 100, 30, 6);
+            ctx.fill();
+            ctx.fillStyle = '#1f2937';
+            ctx.font = 'bold 12px Arial';
+            ctx.fillText('⭐ PRO', popupX + 60, popupY + 450);
+            
+            // Title
+            ctx.fillStyle = WHITE;
+            ctx.font = 'bold 36px Arial';
+            ctx.fillText('Protect Yourself from Property Scams', 180, 780);
+        }
+
+        // Draw Screenshot 2 - Scan Results
+        function drawScreenshot2() {
+            const canvas = document.getElementById('screenshot2');
+            const ctx = canvas.getContext('2d');
+            
+            // Background
+            const gradient = ctx.createLinearGradient(0, 0, 1280, 800);
+            gradient.addColorStop(0, '#0f172a');
+            gradient.addColorStop(1, '#1e293b');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 1280, 800);
+            
+            // Results panel
+            ctx.fillStyle = WHITE;
+            ctx.beginPath();
+            ctx.roundRect(340, 80, 600, 620, 20);
+            ctx.fill();
+            
+            // Header with risk score
+            ctx.fillStyle = '#fef3c7';
+            ctx.beginPath();
+            ctx.roundRect(340, 80, 600, 100, [20, 20, 0, 0]);
+            ctx.fill();
+            
+            // Risk badge
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.roundRect(380, 110, 150, 50, 10);
+            ctx.fill();
+            ctx.fillStyle = WHITE;
+            ctx.font = 'bold 20px Arial';
+            ctx.fillText('⚠️ MEDIUM', 405, 143);
+            
+            // Score
+            ctx.fillStyle = '#1f2937';
+            ctx.font = 'bold 28px Arial';
+            ctx.fillText('Risk Score: 65/100', 560, 145);
+            
+            // Analysis sections
+            const sections = [
+                { title: '📋 Listing Analysis', status: '✓', color: '#22c55e', desc: 'Description appears legitimate' },
+                { title: '👤 Seller Verification', status: '⚠', color: '#f59e0b', desc: 'New account (2 weeks old)' },
+                { title: '💰 Price Analysis', status: '⚠', color: '#f59e0b', desc: '15% below market average' },
+                { title: '🖼️ Image Analysis', status: '✓', color: '#22c55e', desc: 'Original photos detected' },
+                { title: '📍 Location Check', status: '✓', color: '#22c55e', desc: 'Address verified' }
+            ];
+            
+            sections.forEach((s, i) => {
+                const y = 210 + (i * 80);
+                ctx.fillStyle = '#f8fafc';
+                ctx.beginPath();
+                ctx.roundRect(360, y, 560, 65, 10);
+                ctx.fill();
+                
+                ctx.fillStyle = s.color;
+                ctx.font = 'bold 18px Arial';
+                ctx.fillText(s.status, 380, y + 35);
+                
+                ctx.fillStyle = '#1f2937';
+                ctx.font = 'bold 16px Arial';
+                ctx.fillText(s.title, 410, y + 28);
+                ctx.fillStyle = '#6b7280';
+                ctx.font = '13px Arial';
+                ctx.fillText(s.desc, 410, y + 50);
+            });
+            
+            // Action buttons
+            ctx.fillStyle = PRIMARY_GREEN;
+            ctx.beginPath();
+            ctx.roundRect(360, 620, 170, 45, 8);
+            ctx.fill();
+            ctx.fillStyle = WHITE;
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('📄 Export Report', 395, 650);
+            
+            ctx.fillStyle = '#3b82f6';
+            ctx.beginPath();
+            ctx.roundRect(550, 620, 170, 45, 8);
+            ctx.fill();
+            ctx.fillStyle = WHITE;
+            ctx.fillText('🔄 Rescan', 600, 650);
+            
+            ctx.fillStyle = '#6b7280';
+            ctx.beginPath();
+            ctx.roundRect(740, 620, 170, 45, 8);
+            ctx.fill();
+            ctx.fillStyle = WHITE;
+            ctx.fillText('📤 Share', 795, 650);
+            
+            // Title
+            ctx.fillStyle = WHITE;
+            ctx.font = 'bold 32px Arial';
+            ctx.fillText('Detailed Risk Analysis in Seconds', 350, 760);
+        }
+
+        // Draw Screenshot 3 - Features
+        function drawScreenshot3() {
+            const canvas = document.getElementById('screenshot3');
+            const ctx = canvas.getContext('2d');
+            
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, 1280, 800);
+            gradient.addColorStop(0, '#0f172a');
+            gradient.addColorStop(1, '#1e293b');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 1280, 800);
+            
+            // Title
+            ctx.fillStyle = WHITE;
+            ctx.font = 'bold 48px Arial';
+            ctx.fillText('🏠 LandGuard AI Features', 380, 80);
+            
+            // Feature cards
+            const features = [
+                { icon: '🔍', title: 'Smart Scanning', desc: 'AI analyzes listings in real-time', color: '#3b82f6' },
+                { icon: '👤', title: 'Seller Verification', desc: 'Check seller history & reputation', color: '#22c55e' },
+                { icon: '💰', title: 'Price Analysis', desc: 'Compare with market prices', color: '#f59e0b' },
+                { icon: '🖼️', title: 'Image Detection', desc: 'Detect stock or stolen photos', color: '#ec4899' },
+                { icon: '📄', title: 'Document Scan', desc: 'Verify property documents', color: '#8b5cf6' },
+                { icon: '🌐', title: 'Multi-Platform', desc: 'Works on all major sites', color: '#06b6d4' }
+            ];
+            
+            features.forEach((f, i) => {
+                const col = i % 3;
+                const row = Math.floor(i / 3);
+                const x = 140 + (col * 350);
+                const y = 150 + (row * 280);
+                
+                // Card background
+                ctx.fillStyle = '#1e293b';
+                ctx.beginPath();
+                ctx.roundRect(x, y, 320, 230, 16);
+                ctx.fill();
+                
+                // Colored top bar
+                ctx.fillStyle = f.color;
+                ctx.beginPath();
+                ctx.roundRect(x, y, 320, 8, [16, 16, 0, 0]);
+                ctx.fill();
+                
+                // Icon circle
+                ctx.fillStyle = f.color + '30';
+                ctx.beginPath();
+                ctx.arc(x + 60, y + 80, 40, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Icon
+                ctx.font = '40px Arial';
+                ctx.fillText(f.icon, x + 40, y + 95);
+                
+                // Title
+                ctx.fillStyle = WHITE;
+                ctx.font = 'bold 22px Arial';
+                ctx.fillText(f.title, x + 120, y + 75);
+                
+                // Description
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '16px Arial';
+                ctx.fillText(f.desc, x + 120, y + 105);
+                
+                // Checkmark
+                ctx.fillStyle = PRIMARY_GREEN;
+                ctx.font = 'bold 24px Arial';
+                ctx.fillText('✓', x + 280, y + 200);
+            });
+            
+            // Bottom tagline
+            ctx.fillStyle = PRIMARY_GREEN;
+            ctx.font = 'bold 28px Arial';
+            ctx.fillText('Protect Your Property Investment Today', 380, 750);
+        }
+
+        // Draw Small Promo Tile (440x280)
+        function drawSmallPromo() {
+            const canvas = document.getElementById('smallPromo');
+            const ctx = canvas.getContext('2d');
+            
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, 440, 280);
+            gradient.addColorStop(0, '#0f172a');
+            gradient.addColorStop(1, '#1e293b');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 440, 280);
+            
+            // Green accent
+            ctx.fillStyle = PRIMARY_GREEN;
+            ctx.beginPath();
+            ctx.moveTo(0, 280);
+            ctx.lineTo(0, 200);
+            ctx.quadraticCurveTo(220, 150, 440, 200);
+            ctx.lineTo(440, 280);
+            ctx.fill();
+            
+            // Shield icon
+            ctx.fillStyle = LIGHT_GREEN;
+            ctx.beginPath();
+            ctx.moveTo(60, 50);
+            ctx.lineTo(100, 65);
+            ctx.lineTo(100, 95);
+            ctx.quadraticCurveTo(100, 120, 60, 135);
+            ctx.quadraticCurveTo(20, 120, 20, 95);
+            ctx.lineTo(20, 65);
+            ctx.closePath();
+            ctx.fill();
+            
+            // House in shield
+            ctx.fillStyle = WHITE;
+            ctx.beginPath();
+            ctx.moveTo(60, 70);
+            ctx.lineTo(85, 85);
+            ctx.lineTo(85, 110);
+            ctx.lineTo(35, 110);
+            ctx.lineTo(35, 85);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Title
+            ctx.fillStyle = WHITE;
+            ctx.font = 'bold 32px Arial';
+            ctx.fillText('LandGuard AI', 130, 85);
+            
+            // Subtitle
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '16px Arial';
+            ctx.fillText('Property Scam Detector', 130, 115);
+            
+            // Features
+            ctx.fillStyle = WHITE;
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('✓ AI Analysis  ✓ Seller Verification  ✓ Price Check', 50, 250);
+        }
+
+        // Draw Marquee Promo Tile (1400x560)
+        function drawMarqueePromo() {
+            const canvas = document.getElementById('marqueePromo');
+            const ctx = canvas.getContext('2d');
+            
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, 1400, 560);
+            gradient.addColorStop(0, '#0f172a');
+            gradient.addColorStop(0.5, '#1e293b');
+            gradient.addColorStop(1, '#0f172a');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 1400, 560);
+            
+            // Decorative circles
+            ctx.fillStyle = PRIMARY_GREEN + '20';
+            ctx.beginPath();
+            ctx.arc(100, 100, 200, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(1300, 460, 250, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Large shield
+            ctx.fillStyle = PRIMARY_GREEN;
+            ctx.beginPath();
+            ctx.moveTo(200, 150);
+            ctx.lineTo(350, 200);
+            ctx.lineTo(350, 320);
+            ctx.quadraticCurveTo(350, 420, 200, 470);
+            ctx.quadraticCurveTo(50, 420, 50, 320);
+            ctx.lineTo(50, 200);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Inner shield
+            ctx.fillStyle = LIGHT_GREEN;
+            ctx.beginPath();
+            ctx.moveTo(200, 180);
+            ctx.lineTo(320, 220);
+            ctx.lineTo(320, 310);
+            ctx.quadraticCurveTo(320, 390, 200, 430);
+            ctx.quadraticCurveTo(80, 390, 80, 310);
+            ctx.lineTo(80, 220);
+            ctx.closePath();
+            ctx.fill();
+            
+            // House icon
+            ctx.fillStyle = WHITE;
+            ctx.beginPath();
+            ctx.moveTo(200, 230);
+            ctx.lineTo(280, 280);
+            ctx.lineTo(280, 370);
+            ctx.lineTo(120, 370);
+            ctx.lineTo(120, 280);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Door
+            ctx.fillStyle = PRIMARY_GREEN;
+            ctx.fillRect(180, 320, 40, 50);
+            
+            // Location pin
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(260, 260, 20, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = WHITE;
+            ctx.beginPath();
+            ctx.arc(260, 260, 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Main title
+            ctx.fillStyle = WHITE;
+            ctx.font = 'bold 72px Arial';
+            ctx.fillText('LandGuard AI', 450, 220);
+            
+            // Subtitle
+            ctx.fillStyle = PRIMARY_GREEN;
+            ctx.font = 'bold 36px Arial';
+            ctx.fillText('Property Scam Detector', 450, 280);
+            
+            // Description
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '24px Arial';
+            ctx.fillText('AI-powered protection against real estate fraud', 450, 340);
+            
+            // Feature badges
+            const badges = [
+                '🔍 AI Analysis',
+                '👤 Seller Verification',
+                '💰 Price Check',
+                '🖼️ Image Detection'
+            ];
+            
+            badges.forEach((badge, i) => {
+                ctx.fillStyle = '#1e293b';
+                ctx.beginPath();
+                ctx.roundRect(450 + (i * 220), 400, 200, 50, 25);
+                ctx.fill();
+                ctx.strokeStyle = PRIMARY_GREEN;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                ctx.fillStyle = WHITE;
+                ctx.font = '18px Arial';
+                ctx.fillText(badge, 470 + (i * 220), 432);
+            });
+            
+            // CTA
+            ctx.fillStyle = PRIMARY_GREEN;
+            ctx.beginPath();
+            ctx.roundRect(450, 480, 300, 60, 30);
+            ctx.fill();
+            ctx.fillStyle = WHITE;
+            ctx.font = 'bold 24px Arial';
+            ctx.fillText('Add to Chrome - Free', 490, 520);
+        }
+
+        // Download function
+        function downloadCanvas(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Initialize all canvases
+        window.onload = function() {
+            drawIcon128();
+            drawScreenshot1();
+            drawScreenshot2();
+            drawScreenshot3();
+            drawSmallPromo();
+            drawMarqueePromo();
+        };
+    </script>
+</body>
+</html>
+
