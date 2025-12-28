@@ -96,7 +96,7 @@ const DEFAULT_TRANSLATIONS: Translations = {
   // Hero
   'hero.badge': '🛡️ AI-Powered Protection',
   'hero.title': 'Stop Property Scams Before They Start',
-  'hero.subtitle': 'LandGuard AI protects buyers from land and property scams before money changes hands. Our AI analyzes listings on Facebook Marketplace, Kijiji, and Craigslist to detect fraud.',
+  'hero.subtitle': 'LandGuard AI protects buyers from land and property scams before money changes hands. Our AI analyzes listings on Facebook Marketplace, Kijiji, Craigslist, Property Pro Nigeria, and Jumia House to detect fraud.',
   'hero.scan.placeholder': 'Paste listing URL to scan...',
   'hero.scan.button': 'Scan Listing',
   'hero.disclaimer': '⚠️ This is a risk analysis tool, not legal advice or property verification.',
@@ -114,6 +114,8 @@ const DEFAULT_TRANSLATIONS: Translations = {
   'works.fb': 'Facebook Marketplace',
   'works.kijiji': 'Kijiji',
   'works.craigslist': 'Craigslist',
+  'works.propertypro': 'Property Pro Nigeria',
+  'works.jumia': 'Jumia House',
   
   // Pricing
   'pricing.title': 'Choose Your Protection',

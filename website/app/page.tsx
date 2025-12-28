@@ -298,7 +298,9 @@ function HomePageContent() {
             {[
               { nameKey: 'works.fb', icon: '📘' },
               { nameKey: 'works.kijiji', icon: '🟢' },
-              { nameKey: 'works.craigslist', icon: '📋' }
+              { nameKey: 'works.craigslist', icon: '📋' },
+              { nameKey: 'works.propertypro', icon: '🇳🇬' },
+              { nameKey: 'works.jumia', icon: '🏠' }
             ].map((site, i) => (
               <div key={i} className="card px-8 py-6 flex items-center gap-4">
                 <span className="text-3xl">{site.icon}</span>

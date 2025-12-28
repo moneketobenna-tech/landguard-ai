@@ -269,7 +269,7 @@ export default function Contact() {
                 <div>
                   <h3 className="font-semibold text-gray-800 mb-2">What websites does LandGuard AI support?</h3>
                   <p className="text-gray-600 text-sm">
-                    We support Facebook Marketplace, Kijiji, Craigslist, Zillow, Realtor.com, 
+                    We support Facebook Marketplace, Kijiji, Craigslist, Property Pro Nigeria, Jumia House, Zillow, Realtor.com, 
                     Trulia, Redfin, Rightmove, and Zoopla.
                   </p>
                 </div>

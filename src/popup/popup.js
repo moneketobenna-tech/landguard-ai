@@ -21,7 +21,9 @@ const SUPPORTED_SITES = [
   { hostname: 'trulia.com', name: 'Trulia', icon: '🔑' },
   { hostname: 'redfin.com', name: 'Redfin', icon: '🔴' },
   { hostname: 'rightmove.co.uk', name: 'Rightmove', icon: '🇬🇧' },
-  { hostname: 'zoopla.co.uk', name: 'Zoopla', icon: '🏘️' }
+  { hostname: 'zoopla.co.uk', name: 'Zoopla', icon: '🏘️' },
+  { hostname: 'propertypro.ng', name: 'Property Pro Nigeria', icon: '🇳🇬' },
+  { hostname: 'jumia.com.ng', name: 'Jumia House', icon: '🏠' }
 ];
 
 // State

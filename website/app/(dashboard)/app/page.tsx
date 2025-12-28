@@ -321,6 +321,8 @@ export default function DashboardHome() {
     if (url.includes('realtor')) return 'Realtor'
     if (url.includes('trulia')) return 'Trulia'
     if (url.includes('redfin')) return 'Redfin'
+    if (url.includes('propertypro')) return 'Property Pro Nigeria'
+    if (url.includes('jumia')) return 'Jumia House'
     return 'Other'
   }
 
@@ -750,7 +752,7 @@ export default function DashboardHome() {
         <div className="bg-white rounded-xl border border-green-200 shadow-sm p-6">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">🌐 Supported Platforms</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {['Facebook Marketplace', 'Kijiji', 'Craigslist', 'Zillow', 'Realtor.com', 'Trulia', 'Redfin', 'Zoopla'].map((platform) => (
+            {['Facebook Marketplace', 'Kijiji', 'Craigslist', 'Zillow', 'Realtor.com', 'Trulia', 'Redfin', 'Zoopla', 'Property Pro Nigeria', 'Jumia House'].map((platform) => (
               <div key={platform} className="flex items-center gap-2 px-4 py-3 bg-green-50 rounded-lg text-sm text-green-700 font-medium">
                 <span className="text-green-500">✓</span>
                 {platform}

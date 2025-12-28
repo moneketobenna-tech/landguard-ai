@@ -43,6 +43,16 @@ const SUPPORTED_SITES = {
     name: "Craigslist",
     pattern: /craigslist\.org/i,
     enabled: true
+  },
+  propertyproNigeria: {
+    name: "Property Pro Nigeria",
+    pattern: /propertypro\.ng/i,
+    enabled: true
+  },
+  jumiaHouse: {
+    name: "Jumia House",
+    pattern: /jumia\.com\.ng\/house/i,
+    enabled: true
   }
 };
 

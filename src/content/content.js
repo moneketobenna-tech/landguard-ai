@@ -68,6 +68,16 @@
       title: 'h1',
       description: '[data-testid="description"]',
       price: '[data-testid="price"]'
+    }},
+    'propertypro.ng': { name: 'Property Pro Nigeria', selectors: {
+      title: 'h1, .property-title',
+      description: '.property-description, .description',
+      price: '.property-price, .price'
+    }},
+    'jumia.com.ng': { name: 'Jumia House', selectors: {
+      title: 'h1, .product-title',
+      description: '.product-description, .description',
+      price: '.product-price, .price'
     }}
   };
 

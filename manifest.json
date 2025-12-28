@@ -37,6 +37,8 @@
     "*://*.redfin.com/*",
     "*://*.rightmove.co.uk/*",
     "*://*.zoopla.co.uk/*",
+    "*://*.propertypro.ng/*",
+    "*://*.jumia.com.ng/*",
     "https://landguardai.co/*",
     "https://www.landguardai.co/*"
   ],
@@ -56,7 +58,9 @@
         "*://*.trulia.com/*",
         "*://*.redfin.com/*",
         "*://*.rightmove.co.uk/*",
-        "*://*.zoopla.co.uk/*"
+        "*://*.zoopla.co.uk/*",
+        "*://*.propertypro.ng/*",
+        "*://*.jumia.com.ng/house/*"
       ],
       "js": ["src/content/content.js"],
       "css": ["src/content/content.css"],
