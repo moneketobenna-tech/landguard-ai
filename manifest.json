@@ -1,12 +1,12 @@
 {
   "name": "LandGuard AI - Property Scam Detector",
   "description": "AI-powered property scam detector. Analyze real estate listings for fraud, verify sellers, and protect your investment.",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "manifest_version": 3,
 
   "action": {
     "default_popup": "src/popup/popup.html",
-    "default_title": "LandGuard AI v2.0",
+    "default_title": "LandGuard AI v3.0",
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",
@@ -39,6 +39,8 @@
     "*://*.zoopla.co.uk/*",
     "*://*.propertypro.ng/*",
     "*://*.jumia.com.ng/*",
+    "*://*.juwai.com/*",
+    "*://*.propertystar.my/*",
     "https://landguardai.co/*",
     "https://www.landguardai.co/*"
   ],
@@ -60,7 +62,9 @@
         "*://*.rightmove.co.uk/*",
         "*://*.zoopla.co.uk/*",
         "*://*.propertypro.ng/*",
-        "*://*.jumia.com.ng/house/*"
+        "*://*.jumia.com.ng/house/*",
+        "*://*.juwai.com/*",
+        "*://*.propertystar.my/*"
       ],
       "js": ["src/content/content.js"],
       "css": ["src/content/content.css"],

@@ -62,7 +62,8 @@ export default function DownloadPage() {
               {[
                 { icon: '✅', text: 'Auto-scan on Facebook Marketplace' },
                 { icon: '✅', text: 'Works on Kijiji & Craigslist' },
-                { icon: '✅', text: 'Supports Property Pro Nigeria & Jumia House' },
+                { icon: '✅', text: 'Supports Juwai, Rightmove & PropertyStar' },
+                { icon: '✅', text: 'Works on Property Pro Nigeria & Jumia House' },
                 { icon: '✅', text: 'Instant risk analysis' },
                 { icon: '✅', text: 'No account required' },
                 { icon: '✅', text: '100% free basic plan' },

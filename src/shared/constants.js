@@ -53,6 +53,21 @@ const SUPPORTED_SITES = {
     name: "Jumia House",
     pattern: /jumia\.com\.ng\/house/i,
     enabled: true
+  },
+  juwai: {
+    name: "Juwai",
+    pattern: /juwai\.com/i,
+    enabled: true
+  },
+  propertyStar: {
+    name: "PropertyStar",
+    pattern: /propertystar\.my/i,
+    enabled: true
+  },
+  rightmove: {
+    name: "Rightmove",
+    pattern: /rightmove\.co\.uk/i,
+    enabled: true
   }
 };
 

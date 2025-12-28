@@ -300,7 +300,10 @@ function HomePageContent() {
               { nameKey: 'works.kijiji', icon: '🟢' },
               { nameKey: 'works.craigslist', icon: '📋' },
               { nameKey: 'works.propertypro', icon: '🇳🇬' },
-              { nameKey: 'works.jumia', icon: '🏠' }
+              { nameKey: 'works.jumia', icon: '🏠' },
+              { nameKey: 'works.juwai', icon: '🇨🇳' },
+              { nameKey: 'works.rightmove', icon: '🇬🇧' },
+              { nameKey: 'works.propertystar', icon: '🇲🇾' }
             ].map((site, i) => (
               <div key={i} className="card px-8 py-6 flex items-center gap-4">
                 <span className="text-3xl">{site.icon}</span>

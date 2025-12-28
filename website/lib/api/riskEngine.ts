@@ -206,7 +206,7 @@ function analyzeUrl(url: string): RiskFlag[] {
   }
   
   // Check for typosquatting
-  const legitDomains = ['facebook', 'craigslist', 'kijiji', 'realtor', 'zillow', 'trulia', 'redfin', 'propertypro', 'jumia']
+  const legitDomains = ['facebook', 'craigslist', 'kijiji', 'realtor', 'zillow', 'trulia', 'redfin', 'propertypro', 'jumia', 'juwai', 'rightmove', 'propertystar']
   for (const domain of legitDomains) {
     const typos = [
       domain.replace('a', '4'),

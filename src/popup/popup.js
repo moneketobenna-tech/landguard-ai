@@ -23,7 +23,9 @@ const SUPPORTED_SITES = [
   { hostname: 'rightmove.co.uk', name: 'Rightmove', icon: '🇬🇧' },
   { hostname: 'zoopla.co.uk', name: 'Zoopla', icon: '🏘️' },
   { hostname: 'propertypro.ng', name: 'Property Pro Nigeria', icon: '🇳🇬' },
-  { hostname: 'jumia.com.ng', name: 'Jumia House', icon: '🏠' }
+  { hostname: 'jumia.com.ng', name: 'Jumia House', icon: '🏠' },
+  { hostname: 'juwai.com', name: 'Juwai', icon: '🇨🇳' },
+  { hostname: 'propertystar.my', name: 'PropertyStar', icon: '🇲🇾' }
 ];
 
 // State

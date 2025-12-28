@@ -78,6 +78,16 @@
       title: 'h1, .product-title',
       description: '.product-description, .description',
       price: '.product-price, .price'
+    }},
+    'juwai.com': { name: 'Juwai', selectors: {
+      title: 'h1, .property-title, .listing-title',
+      description: '.property-description, .listing-description',
+      price: '.property-price, .listing-price, .price'
+    }},
+    'propertystar.my': { name: 'PropertyStar', selectors: {
+      title: 'h1, .property-title',
+      description: '.property-description, .description',
+      price: '.property-price, .price'
     }}
   };
 

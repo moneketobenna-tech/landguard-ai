@@ -49,7 +49,7 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     // Hero
     'hero.badge': '🏠 AI-Powered Protection',
     'hero.title': 'Stop Property Scams Before They Start',
-    'hero.subtitle': 'LandGuard AI protects buyers from land and property scams before money changes hands. Our AI analyzes listings on Facebook Marketplace, Kijiji, Craigslist, Property Pro Nigeria, and Jumia House to detect fraud.',
+    'hero.subtitle': 'LandGuard AI protects buyers from land and property scams before money changes hands. Our AI analyzes listings on Facebook Marketplace, Kijiji, Craigslist, Rightmove, Juwai, and more to detect fraud.',
     'hero.cta.chrome': 'Get Free Chrome Extension',
     'hero.cta.pro': 'Upgrade to Pro',
     'hero.cta.api': 'Explore API',
@@ -87,6 +87,9 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
     'works.craigslist': 'Craigslist',
     'works.propertypro': 'Property Pro Nigeria',
     'works.jumia': 'Jumia House',
+    'works.juwai': 'Juwai',
+    'works.rightmove': 'Rightmove',
+    'works.propertystar': 'PropertyStar',
     
     // Pricing
     'pricing.title': 'Choose Your Protection',
