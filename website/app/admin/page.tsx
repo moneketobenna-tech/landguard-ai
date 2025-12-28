@@ -69,8 +69,13 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<TabType>('overview')
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [confirmAction, setConfirmAction] = useState<{ userId: string; action: 'delete' | 'ban' | 'unban'; email: string } | null>(null)
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [forgotEmail, setForgotEmail] = useState('')
+  const [forgotLoading, setForgotLoading] = useState(false)
+  const [forgotSuccess, setForgotSuccess] = useState(false)
 
   const ADMIN_PASSWORD = 'LandGuardAdmin2025!'
+  const ADMIN_EMAIL = 'moneketobenna@gmail.com' // Owner email for password recovery
 
   const handleLogin = () => {
     if (password === ADMIN_PASSWORD) {
@@ -78,6 +83,37 @@ export default function AdminPage() {
       fetchAllData()
     } else {
       setError('Invalid password')
+    }
+  }
+
+  const handleForgotPassword = async () => {
+    if (forgotEmail.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+      setError('Email does not match the admin email on file.')
+      return
+    }
+    
+    setForgotLoading(true)
+    setError('')
+    
+    try {
+      // Send email with admin password
+      const response = await fetch('/api/admin/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotEmail })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        setForgotSuccess(true)
+      } else {
+        setError(data.error || 'Failed to send recovery email')
+      }
+    } catch {
+      setError('Network error. Please try again.')
+    } finally {
+      setForgotLoading(false)
     }
   }
 
@@ -249,7 +285,159 @@ export default function AdminPage() {
           >
             Access Dashboard
           </button>
+          
+          <button
+            onClick={() => setShowForgotPassword(true)}
+            style={{
+              width: '100%',
+              padding: '12px',
+              background: 'transparent',
+              border: 'none',
+              color: '#4ADE80',
+              fontSize: '14px',
+              cursor: 'pointer',
+              marginTop: '12px'
+            }}
+          >
+            Forgot password?
+          </button>
         </div>
+
+        {/* Forgot Password Modal */}
+        {showForgotPassword && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 100,
+            padding: '20px'
+          }}>
+            <div style={{
+              background: 'rgba(20, 83, 45, 0.95)',
+              borderRadius: '16px',
+              padding: '32px',
+              maxWidth: '400px',
+              width: '100%',
+              border: '1px solid rgba(34, 197, 94, 0.3)',
+              boxShadow: '0 25px 50px rgba(0,0,0,0.5)'
+            }}>
+              {forgotSuccess ? (
+                <>
+                  <div style={{ fontSize: '48px', textAlign: 'center', marginBottom: '16px' }}>✉️</div>
+                  <h3 style={{ color: '#fff', fontSize: '20px', fontWeight: 'bold', textAlign: 'center', margin: '0 0 12px 0' }}>
+                    Check Your Email
+                  </h3>
+                  <p style={{ color: '#86EFAC', textAlign: 'center', margin: '0 0 24px 0', fontSize: '15px' }}>
+                    We&apos;ve sent the admin password to your email address.
+                  </p>
+                  <button
+                    onClick={() => { setShowForgotPassword(false); setForgotSuccess(false); setForgotEmail(''); }}
+                    style={{
+                      width: '100%',
+                      padding: '14px',
+                      background: 'linear-gradient(135deg, #22C55E 0%, #16A34A 100%)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      color: '#fff',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Back to Login
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div style={{ fontSize: '48px', textAlign: 'center', marginBottom: '16px' }}>🔐</div>
+                  <h3 style={{ color: '#fff', fontSize: '20px', fontWeight: 'bold', textAlign: 'center', margin: '0 0 12px 0' }}>
+                    Forgot Password?
+                  </h3>
+                  <p style={{ color: '#86EFAC', textAlign: 'center', margin: '0 0 24px 0', fontSize: '15px' }}>
+                    Enter your admin email to receive the password.
+                  </p>
+                  
+                  {error && (
+                    <div style={{
+                      background: 'rgba(239, 68, 68, 0.2)',
+                      border: '1px solid #ef4444',
+                      color: '#f87171',
+                      padding: '12px',
+                      borderRadius: '8px',
+                      marginBottom: '16px',
+                      fontSize: '14px'
+                    }}>
+                      {error}
+                    </div>
+                  )}
+                  
+                  <input
+                    type="email"
+                    placeholder="Admin Email"
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleForgotPassword()}
+                    style={{
+                      width: '100%',
+                      padding: '14px 16px',
+                      background: 'rgba(34, 197, 94, 0.1)',
+                      border: '1px solid rgba(34, 197, 94, 0.3)',
+                      borderRadius: '8px',
+                      color: '#fff',
+                      fontSize: '16px',
+                      marginBottom: '16px',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                  
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button
+                      onClick={() => { setShowForgotPassword(false); setError(''); setForgotEmail(''); }}
+                      style={{
+                        flex: 1,
+                        padding: '14px',
+                        background: 'rgba(34, 197, 94, 0.2)',
+                        border: '1px solid rgba(34, 197, 94, 0.3)',
+                        borderRadius: '8px',
+                        color: '#fff',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleForgotPassword}
+                      disabled={forgotLoading}
+                      style={{
+                        flex: 1,
+                        padding: '14px',
+                        background: 'linear-gradient(135deg, #22C55E 0%, #16A34A 100%)',
+                        border: 'none',
+                        borderRadius: '8px',
+                        color: '#fff',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        opacity: forgotLoading ? 0.7 : 1
+                      }}
+                    >
+                      {forgotLoading ? 'Sending...' : 'Send Password'}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     )
   }
