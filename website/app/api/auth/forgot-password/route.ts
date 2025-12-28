@@ -7,7 +7,6 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getUserByEmail } from '@/lib/db/users'
-import { sendPasswordResetEmail } from '@/lib/email'
 import { createClient } from '@vercel/kv'
 
 export const dynamic = 'force-dynamic'
@@ -48,35 +47,62 @@ export async function POST(request: NextRequest) {
     }
 
     const normalizedEmail = email.toLowerCase().trim()
-
-    // Check if user exists
-    const user = await getUserByEmail(normalizedEmail)
     
-    // Always return success to prevent email enumeration attacks
-    if (user) {
-      // Generate reset token
-      const resetToken = generateResetToken()
-      const expiresAt = Date.now() + RESET_TOKEN_EXPIRY
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(normalizedEmail)) {
+      return NextResponse.json(
+        { success: false, error: 'Please enter a valid email address' },
+        { status: 400 }
+      )
+    }
 
-      // Store reset token in KV
-      const kvClient = await getKV()
-      if (kvClient) {
-        await kvClient.set(
-          `reset:${resetToken}`,
-          JSON.stringify({
-            userId: user.id,
-            email: normalizedEmail,
-            expiresAt
-          }),
-          { ex: 3600 } // Expire after 1 hour
-        )
-        
-        console.log(`[Auth] Password reset token generated for: ${normalizedEmail}`)
-        
-        // Send password reset email
-        await sendPasswordResetEmail(normalizedEmail, resetToken)
-      } else {
-        console.warn('[Auth] KV not available, cannot store reset token')
+    console.log(`[Auth] Forgot password request for: ${normalizedEmail}`)
+
+    // Try to get user - wrap in try/catch to handle DB errors gracefully
+    let user = null
+    try {
+      user = await getUserByEmail(normalizedEmail)
+    } catch (dbError) {
+      console.error('[Auth] Database error while fetching user:', dbError)
+      // Continue - we'll return success anyway to prevent email enumeration
+    }
+    
+    // If user exists, try to generate reset token and send email
+    if (user) {
+      try {
+        // Generate reset token
+        const resetToken = generateResetToken()
+        const expiresAt = Date.now() + RESET_TOKEN_EXPIRY
+
+        // Try to store reset token in KV
+        const kvClient = await getKV()
+        if (kvClient) {
+          await kvClient.set(
+            `reset:${resetToken}`,
+            JSON.stringify({
+              userId: user.id,
+              email: normalizedEmail,
+              expiresAt
+            }),
+            { ex: 3600 } // Expire after 1 hour
+          )
+          
+          console.log(`[Auth] Password reset token generated for: ${normalizedEmail}`)
+          
+          // Try to send password reset email
+          try {
+            const { sendPasswordResetEmail } = await import('@/lib/email')
+            await sendPasswordResetEmail(normalizedEmail, resetToken)
+            console.log(`[Auth] Password reset email sent to: ${normalizedEmail}`)
+          } catch (emailError) {
+            console.error('[Auth] Failed to send email:', emailError)
+          }
+        } else {
+          console.warn('[Auth] KV not available, cannot store reset token')
+        }
+      } catch (tokenError) {
+        console.error('[Auth] Error generating/storing reset token:', tokenError)
       }
     } else {
       console.log(`[Auth] Password reset requested for non-existent email: ${normalizedEmail}`)
@@ -90,10 +116,18 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('[Auth] Forgot password error:', error)
+    
+    // Check if it's a JSON parse error
+    if (error instanceof SyntaxError) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid request format' },
+        { status: 400 }
+      )
+    }
+    
     return NextResponse.json(
       { success: false, error: 'Failed to process request. Please try again.' },
       { status: 500 }
     )
   }
 }
-
