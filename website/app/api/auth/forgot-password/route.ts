@@ -1,22 +1,15 @@
 /**
  * Forgot Password API - LandGuard AI
  * POST /api/auth/forgot-password
- * 
- * Sends a password reset email to the user
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getUserByEmail } from '@/lib/db/users'
 import { createClient } from '@vercel/kv'
 
 export const dynamic = 'force-dynamic'
 
-// Token expiry: 1 hour
-const RESET_TOKEN_EXPIRY = 60 * 60 * 1000
+const BASE_URL = 'https://landguardai.co'
 
-/**
- * Generate a secure reset token
- */
 function generateResetToken(): string {
   const array = new Uint8Array(32)
   crypto.getRandomValues(array)
@@ -38,96 +31,96 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { email } = body
 
-    // Validate email
     if (!email || typeof email !== 'string') {
-      return NextResponse.json(
-        { success: false, error: 'Email is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ success: false, error: 'Email is required' }, { status: 400 })
     }
 
     const normalizedEmail = email.toLowerCase().trim()
-    
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(normalizedEmail)) {
-      return NextResponse.json(
-        { success: false, error: 'Please enter a valid email address' },
-        { status: 400 }
-      )
+      return NextResponse.json({ success: false, error: 'Invalid email format' }, { status: 400 })
     }
 
-    console.log(`[Auth] Forgot password request for: ${normalizedEmail}`)
+    // Import dependencies
+    const { getUserByEmail } = await import('@/lib/db/users')
+    const nodemailer = await import('nodemailer')
 
-    // Try to get user - wrap in try/catch to handle DB errors gracefully
-    let user = null
-    try {
-      user = await getUserByEmail(normalizedEmail)
-    } catch (dbError) {
-      console.error('[Auth] Database error while fetching user:', dbError)
-      // Continue - we'll return success anyway to prevent email enumeration
-    }
+    // Check if user exists
+    const user = await getUserByEmail(normalizedEmail)
     
-    // If user exists, try to generate reset token and send email
     if (user) {
-      try {
-        // Generate reset token
-        const resetToken = generateResetToken()
-        const expiresAt = Date.now() + RESET_TOKEN_EXPIRY
-
-        // Try to store reset token in KV
-        const kvClient = await getKV()
-        if (kvClient) {
-          await kvClient.set(
-            `reset:${resetToken}`,
-            JSON.stringify({
-              userId: user.id,
-              email: normalizedEmail,
-              expiresAt
-            }),
-            { ex: 3600 } // Expire after 1 hour
-          )
-          
-          console.log(`[Auth] Password reset token generated for: ${normalizedEmail}`)
-          
-          // Try to send password reset email
-          try {
-            const { sendPasswordResetEmail } = await import('@/lib/email')
-            await sendPasswordResetEmail(normalizedEmail, resetToken)
-            console.log(`[Auth] Password reset email sent to: ${normalizedEmail}`)
-          } catch (emailError) {
-            console.error('[Auth] Failed to send email:', emailError)
-          }
-        } else {
-          console.warn('[Auth] KV not available, cannot store reset token')
-        }
-      } catch (tokenError) {
-        console.error('[Auth] Error generating/storing reset token:', tokenError)
+      // Generate token
+      const resetToken = generateResetToken()
+      
+      // Store in KV
+      const kvClient = await getKV()
+      if (kvClient) {
+        await kvClient.set(
+          `reset:${resetToken}`,
+          JSON.stringify({
+            userId: user.id,
+            email: normalizedEmail,
+            expiresAt: Date.now() + 3600000
+          }),
+          { ex: 3600 }
+        )
       }
-    } else {
-      console.log(`[Auth] Password reset requested for non-existent email: ${normalizedEmail}`)
+      
+      // Send email
+      const transporter = nodemailer.default.createTransport({
+        host: process.env.SMTP_HOST || 'mail.privateemail.com',
+        port: parseInt(process.env.SMTP_PORT || '465'),
+        secure: true,
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS
+        }
+      })
+
+      const resetUrl = `${BASE_URL}/app/reset-password?token=${resetToken}`
+      
+      await transporter.sendMail({
+        from: `"LandGuard AI" <${process.env.SMTP_USER}>`,
+        to: normalizedEmail,
+        subject: '🔐 Reset Your LandGuard AI Password',
+        html: `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f7fa;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff;">
+    <div style="background: linear-gradient(135deg, #16a34a 0%, #166534 100%); padding: 40px 30px; text-align: center;">
+      <h1 style="color: #ffffff; font-size: 24px; margin: 0;">Password Reset Request</h1>
+    </div>
+    <div style="padding: 40px 30px;">
+      <h2 style="color: #1a2b3c;">Reset Your Password 🔐</h2>
+      <p style="color: #4a5568;">We received a request to reset the password for <strong>${normalizedEmail}</strong>.</p>
+      <p style="color: #4a5568;">Click the button below to reset your password. This link expires in 1 hour.</p>
+      <p style="text-align: center; margin: 30px 0;">
+        <a href="${resetUrl}" style="display: inline-block; background: #16a34a; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600;">Reset Password →</a>
+      </p>
+      <p style="font-size: 14px; color: #6b7280;">Or copy this link: ${resetUrl}</p>
+    </div>
+    <div style="background: #f5f7fa; padding: 20px; text-align: center;">
+      <p style="color: #6b7280; font-size: 14px; margin: 0;">LandGuard AI · Moneke Industries</p>
+    </div>
+  </div>
+</body>
+</html>
+        `
+      })
     }
 
-    // Always return success to prevent email enumeration
     return NextResponse.json({
       success: true,
       message: 'If an account with that email exists, we\'ve sent a password reset link.'
     })
 
   } catch (error) {
-    console.error('[Auth] Forgot password error:', error)
-    
-    // Check if it's a JSON parse error
-    if (error instanceof SyntaxError) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid request format' },
-        { status: 400 }
-      )
-    }
-    
-    return NextResponse.json(
-      { success: false, error: 'Failed to process request. Please try again.' },
-      { status: 500 }
-    )
+    console.error('[ForgotPassword] Error:', error)
+    return NextResponse.json({
+      success: true,
+      message: 'If an account with that email exists, we\'ve sent a password reset link.'
+    })
   }
 }
