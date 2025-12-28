@@ -288,25 +288,29 @@
     const siteName = site ? site.name : 'this page';
     
     bannerElement.innerHTML = `
-      <div class="lg-content">
-        <div class="lg-logo">
-          <img src="${chrome.runtime.getURL('icons/icon32.png')}" alt="LandGuard AI" class="lg-logo-img">
-          <span class="lg-logo-text">LandGuard AI</span>
-          <span class="lg-version">v${VERSION}</span>
-        </div>
-        
-        <div class="lg-status">
-          <span class="lg-status-text">Ready to analyze ${siteName}</span>
-        </div>
-        
-        <div class="lg-actions">
-          <button class="lg-btn lg-btn-primary lg-scan-btn" id="lg-scan-now">
-            🔍 Scan This Listing
-          </button>
-          <button class="lg-btn lg-btn-close" id="lg-close">✕</button>
+      <div class="lg-banner-inner">
+        <div class="lg-content">
+          <div class="lg-logo">
+            <img src="${chrome.runtime.getURL('icons/icon32.png')}" alt="LandGuard AI" class="lg-logo-img">
+            <div class="lg-logo-text-block">
+              <span class="lg-logo-text">LandGuard AI</span>
+              <span class="lg-logo-subtitle">Property Scam Scanner</span>
+            </div>
+          </div>
+          
+          <div class="lg-status">
+            <span class="lg-pill lg-pill-neutral">🏠 ${siteName}</span>
+            <span class="lg-pill lg-pill-neutral">Ready to Scan</span>
+          </div>
+          
+          <div class="lg-actions">
+            <button class="lg-btn lg-btn-primary lg-scan-btn" id="lg-scan-now">
+              🔍 Scan Listing
+            </button>
+            <button class="lg-btn lg-btn-close" id="lg-close">✕</button>
+          </div>
         </div>
       </div>
-      <div class="lg-disclaimer">${BRAND.disclaimer}</div>
     `;
 
     // Attach event listeners
@@ -324,19 +328,26 @@
   function showLoadingState() {
     if (!bannerElement) return;
     
+    const site = getCurrentSite();
+    const siteName = site ? site.name : 'Property';
+    
     bannerElement.innerHTML = `
-      <div class="lg-content">
-        <div class="lg-logo">
-          <img src="${chrome.runtime.getURL('icons/icon32.png')}" alt="LandGuard AI" class="lg-logo-img">
-          <span class="lg-logo-text">LandGuard AI</span>
-          <span class="lg-version">v${VERSION}</span>
-        </div>
-        <div class="lg-loading">
-          <div class="lg-spinner"></div>
-          <span>Analyzing listing for scam indicators...</span>
-        </div>
-        <div class="lg-actions">
-          <button class="lg-btn lg-btn-close" id="lg-close">✕</button>
+      <div class="lg-banner-inner">
+        <div class="lg-content">
+          <div class="lg-logo">
+            <img src="${chrome.runtime.getURL('icons/icon32.png')}" alt="LandGuard AI" class="lg-logo-img">
+            <div class="lg-logo-text-block">
+              <span class="lg-logo-text">LandGuard AI</span>
+              <span class="lg-logo-subtitle">Property Scam Scanner</span>
+            </div>
+          </div>
+          <div class="lg-loading">
+            <div class="lg-spinner"></div>
+            <span>Analyzing ${siteName} listing...</span>
+          </div>
+          <div class="lg-actions">
+            <button class="lg-btn lg-btn-close" id="lg-close">✕</button>
+          </div>
         </div>
       </div>
     `;
@@ -405,56 +416,65 @@
     
     currentScan = result;
     const { score, riskLevel, flags, recommendations } = result;
-    const color = COLORS[riskLevel] || COLORS.medium;
+    const site = getCurrentSite();
+    const siteName = site ? site.name.toUpperCase() : 'PROPERTY';
+    
+    // Risk pill styling
+    const riskPillClass = {
+      safe: 'lg-pill-safe',
+      low: 'lg-pill-low',
+      medium: 'lg-pill-medium',
+      high: 'lg-pill-high',
+      critical: 'lg-pill-critical'
+    };
     
     const riskLabels = {
-      safe: '✅ Safe',
+      safe: '✓ AI Verified',
       low: '✓ Low Risk',
       medium: '⚠️ Medium Risk',
       high: '🚨 High Risk',
-      critical: '⛔ Critical Risk'
+      critical: '⛔ Critical'
     };
 
-    const displayFlags = (flags || []).slice(0, 4);
+    const displayFlags = (flags || []).slice(0, 3);
+    const safetyScore = Math.max(0, 100 - score);
     
     bannerElement.innerHTML = `
-      <div class="lg-content">
-        <div class="lg-logo">
-          <img src="${chrome.runtime.getURL('icons/icon32.png')}" alt="LandGuard AI" class="lg-logo-img">
-          <span class="lg-logo-text">LandGuard AI</span>
-        </div>
-        
-        <div class="lg-score-section">
-          <div class="lg-score-display">
-            <span class="lg-score-value" style="color: ${color}">${score}</span>
-            <span class="lg-score-max">/ 100</span>
-          </div>
-          <div class="lg-risk-pill lg-risk-${riskLevel}">
-            ${riskLabels[riskLevel] || riskLevel}
-          </div>
-        </div>
-        
-        <div class="lg-flags">
-          ${displayFlags.length > 0 ? displayFlags.map(flag => `
-            <div class="lg-flag-chip lg-flag-${flag.severity || 'medium'}">
-              <span class="lg-flag-icon">${flag.severity === 'high' || flag.severity === 'critical' ? '🚨' : '⚠️'}</span>
-              <span>${flag.description}</span>
+      <div class="lg-banner-inner">
+        <div class="lg-content">
+          <div class="lg-logo">
+            <img src="${chrome.runtime.getURL('icons/icon32.png')}" alt="LandGuard AI" class="lg-logo-img">
+            <div class="lg-logo-text-block">
+              <span class="lg-logo-text">LandGuard AI</span>
+              <span class="lg-logo-subtitle">Property Scam Scanner</span>
             </div>
-          `).join('') : `
-            <div class="lg-flag-chip lg-flag-low">
-              <span class="lg-flag-icon">✅</span>
-              <span>No red flags detected</span>
-            </div>
-          `}
-        </div>
-        
-        <div class="lg-actions">
-          <button class="lg-btn lg-btn-secondary" id="lg-rescan">🔄 Re-scan</button>
-          <button class="lg-btn lg-btn-primary" id="lg-details">📋 Details</button>
-          <button class="lg-btn lg-btn-close" id="lg-close">✕</button>
+          </div>
+          
+          <div class="lg-status">
+            <span class="lg-pill ${riskPillClass[riskLevel] || 'lg-pill-neutral'}">
+              ${riskLabels[riskLevel] || riskLevel}
+            </span>
+            ${displayFlags.length > 0 ? displayFlags.map(flag => `
+              <span class="lg-flag-chip lg-flag-${flag.severity || 'medium'}">
+                ${flag.description}
+              </span>
+            `).join('') : `
+              <span class="lg-pill lg-pill-neutral">✨ Clean Listing</span>
+            `}
+            <span class="lg-live-score">
+              <span class="lg-live-dot"></span>
+              Live: ${safetyScore}/100
+            </span>
+            <span class="lg-timestamp">· Just now</span>
+            <span class="lg-platform-badge">${siteName}</span>
+          </div>
+          
+          <div class="lg-actions">
+            <button class="lg-btn lg-btn-primary" id="lg-details">📋 View Report</button>
+            <button class="lg-btn lg-btn-close" id="lg-close">✕</button>
+          </div>
         </div>
       </div>
-      <div class="lg-disclaimer">${BRAND.disclaimer}</div>
     `;
 
     // Attach event listeners
@@ -473,21 +493,24 @@
     if (!bannerElement) return;
     
     bannerElement.innerHTML = `
-      <div class="lg-content">
-        <div class="lg-logo">
-          <img src="${chrome.runtime.getURL('icons/icon32.png')}" alt="LandGuard AI" class="lg-logo-img">
-          <span class="lg-logo-text">LandGuard AI</span>
-          <span class="lg-version">v${VERSION}</span>
-        </div>
-        
-        <div class="lg-error">
-          <span class="lg-error-icon">⚠️</span>
-          <span class="lg-error-text">${errorMessage}</span>
-        </div>
-        
-        <div class="lg-actions">
-          <button class="lg-btn lg-btn-primary" id="lg-scan-now">🔄 Try Again</button>
-          <button class="lg-btn lg-btn-close" id="lg-close">✕</button>
+      <div class="lg-banner-inner">
+        <div class="lg-content">
+          <div class="lg-logo">
+            <img src="${chrome.runtime.getURL('icons/icon32.png')}" alt="LandGuard AI" class="lg-logo-img">
+            <div class="lg-logo-text-block">
+              <span class="lg-logo-text">LandGuard AI</span>
+              <span class="lg-logo-subtitle">Property Scam Scanner</span>
+            </div>
+          </div>
+          
+          <div class="lg-error">
+            <span class="lg-error-pill">⚠️ ${errorMessage}</span>
+          </div>
+          
+          <div class="lg-actions">
+            <button class="lg-btn lg-btn-primary" id="lg-scan-now">🔄 Try Again</button>
+            <button class="lg-btn lg-btn-close" id="lg-close">✕</button>
+          </div>
         </div>
       </div>
     `;
