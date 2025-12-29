@@ -279,21 +279,21 @@ export default function DashboardHome() {
             <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-2xl shrink-0">
-                  🎉
+                  🏘️
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs font-semibold rounded-full">NEW</span>
+                    <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs font-semibold rounded-full">NEW - V8</span>
                     <span className="text-slate-400 text-sm">Latest Feature</span>
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-1">Document Verification Now Available!</h3>
+                  <h3 className="text-xl font-bold text-white mb-1">🏘️ Property Scam History & Alert System</h3>
                   <p className="text-slate-300 text-sm">
-                    Upload property documents to verify authenticity. Detect fake certificates and fraudulent paperwork instantly.
+                    Track property scams across platforms, get community alerts, detect price manipulation, and view scam heatmaps. Know if a property has been flagged before you contact the seller!
                   </p>
                 </div>
               </div>
-              <Link href="/features" className="shrink-0 px-5 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-white text-sm font-medium transition-colors">
-                Learn More →
+              <Link href="/app/property-scams" className="shrink-0 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 border border-white/20 rounded-lg text-white text-sm font-medium transition-all shadow-lg">
+                Try It Now →
               </Link>
             </div>
           </div>
@@ -568,7 +568,7 @@ export default function DashboardHome() {
           <div className="text-center py-8 border-t border-white/5">
             <p className="text-slate-500 text-sm">
               <span className="text-emerald-400 font-semibold">Moneke Industries</span>
-              {' '}· LandGuard AI v3.0 · © {new Date().getFullYear()}
+              {' '}· LandGuard AI v8.0 · © {new Date().getFullYear()}
             </p>
           </div>
         </main>
