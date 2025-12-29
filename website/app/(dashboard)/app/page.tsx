@@ -564,6 +564,104 @@ export default function DashboardHome() {
             </div>
           </div>
 
+          {/* Featured Ad Space - Property Scam System */}
+          <div className="bg-gradient-to-br from-emerald-900/40 via-teal-900/40 to-cyan-900/40 backdrop-blur-sm border border-emerald-500/30 rounded-2xl overflow-hidden">
+            <div className="p-8">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-full border border-emerald-500/30">
+                  ⭐ FEATURED UPDATE
+                </span>
+                <span className="px-3 py-1 bg-teal-500/20 text-teal-400 text-xs font-bold rounded-full border border-teal-500/30">
+                  NEW IN V8.0
+                </span>
+              </div>
+              
+              <div className="grid lg:grid-cols-2 gap-8 items-center">
+                <div>
+                  <h3 className="text-3xl font-bold text-white mb-3">
+                    🏘️ Property Scam History & Alert System
+                  </h3>
+                  <p className="text-slate-300 text-lg mb-6">
+                    The most powerful property fraud detection system ever built. Track scams across platforms, 
+                    get real-time community alerts, and never fall victim to property fraud again.
+                  </p>
+                  
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">✓</div>
+                      <div>
+                        <div className="font-semibold text-white">Cross-Platform Scam Tracking</div>
+                        <div className="text-sm text-slate-400">Monitor listings across Craigslist, Facebook, Zillow, and more</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">✓</div>
+                      <div>
+                        <div className="font-semibold text-white">Community Alert Network</div>
+                        <div className="text-sm text-slate-400">Get warned when others flag suspicious properties</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">✓</div>
+                      <div>
+                        <div className="font-semibold text-white">Price Manipulation Detection</div>
+                        <div className="text-sm text-slate-400">Catch sellers changing prices to lure victims</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">✓</div>
+                      <div>
+                        <div className="font-semibold text-white">Seller Pattern Recognition</div>
+                        <div className="text-sm text-slate-400">Detect scammers operating multiple fraudulent listings</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <Link
+                    href="/app/property-scams"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 rounded-xl text-white font-semibold transition-all shadow-lg shadow-emerald-500/25"
+                  >
+                    <span>🔍 Try Property Scam Scanner</span>
+                    <span>→</span>
+                  </Link>
+                </div>
+                
+                <div className="bg-slate-900/50 rounded-xl p-6 border border-white/10">
+                  <div className="text-center mb-4">
+                    <div className="text-6xl mb-3">🏘️</div>
+                    <div className="text-2xl font-bold text-white mb-2">Over 1,000+ Scams Detected</div>
+                    <div className="text-slate-400">Join our community of protected property buyers</div>
+                  </div>
+                  
+                  <div className="grid grid-cols-3 gap-4 mt-6">
+                    <div className="text-center p-3 bg-white/5 rounded-lg">
+                      <div className="text-2xl font-bold text-emerald-400">500+</div>
+                      <div className="text-xs text-slate-400">Properties Flagged</div>
+                    </div>
+                    <div className="text-center p-3 bg-white/5 rounded-lg">
+                      <div className="text-2xl font-bold text-teal-400">12</div>
+                      <div className="text-xs text-slate-400">Platforms Monitored</div>
+                    </div>
+                    <div className="text-center p-3 bg-white/5 rounded-lg">
+                      <div className="text-2xl font-bold text-cyan-400">24/7</div>
+                      <div className="text-xs text-slate-400">Real-Time Alerts</div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-6 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <span className="text-lg">💡</span>
+                      <div className="text-sm text-emerald-300">
+                        <strong>Pro Tip:</strong> Scan every property before sending a deposit. 
+                        Our system checks if the address has been used in previous scams!
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Footer */}
           <div className="text-center py-8 border-t border-white/5">
             <p className="text-slate-500 text-sm">
