@@ -48,6 +48,7 @@ export interface UserPublic {
   licenseKey?: string
   nextBillingDate?: string
   referralCode?: string
+  stripePortalUrl?: string
 }
 
 export interface AuthTokenPayload {

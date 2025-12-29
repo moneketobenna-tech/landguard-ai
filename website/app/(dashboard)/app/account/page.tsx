@@ -131,7 +131,7 @@ export default function AccountPage() {
               
               {isPro && user?.stripePortalUrl && (
                 <a
-                  href={user.stripePortalUrl}
+                  href={user?.stripePortalUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="border border-green-600 text-green-600 hover:bg-green-50 px-6 py-2 rounded-lg font-semibold transition-colors"
