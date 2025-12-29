@@ -28,7 +28,7 @@
           <option value="nl">🇳🇱 NL</option>
         </select>
         <span class="tier-badge" id="tierBadge">FREE</span>
-        <span class="version-badge">v2.0</span>
+        <span class="version-badge">v3.2</span>
       </div>
     </div>
   </div>
@@ -249,6 +249,41 @@
       <div class="empty-state">
         <span class="empty-icon">📋</span>
         <span class="empty-text">No scans yet</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Referral Section (Free users) -->
+  <div class="referral-section" id="referralSection">
+    <div class="referral-banner">
+      <div class="referral-header">
+        <span class="referral-icon">🎁</span>
+        <span class="referral-title">Get Pro FREE!</span>
+      </div>
+      <p class="referral-desc">Invite 3 friends → Get 1 month Pro FREE</p>
+      <div class="referral-progress">
+        <div class="referral-progress-bar">
+          <div class="referral-progress-fill" id="referralProgressFill" style="width: 0%"></div>
+        </div>
+        <span class="referral-progress-text" id="referralProgressText">0/3 friends</span>
+      </div>
+      <div class="referral-link-box" id="referralLinkBox">
+        <input type="text" id="referralLinkInput" readonly value="Loading...">
+        <button class="copy-btn" id="copyReferralLink">📋</button>
+      </div>
+      <div class="referral-share-btns">
+        <button class="share-btn whatsapp" id="shareWhatsApp" title="Share on WhatsApp">
+          <span>WhatsApp</span>
+        </button>
+        <button class="share-btn telegram" id="shareTelegram" title="Share on Telegram">
+          <span>Telegram</span>
+        </button>
+        <button class="share-btn twitter" id="shareTwitter" title="Share on X">
+          <span>X</span>
+        </button>
+      </div>
+      <div class="referral-stats" id="referralStats">
+        <span id="freeMonthsEarned">0 free months earned</span>
       </div>
     </div>
   </div>

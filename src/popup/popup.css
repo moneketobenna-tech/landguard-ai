@@ -1084,3 +1084,144 @@ body {
 .score-circle.safe .score-value {
   color: #166534;
 }
+
+/* Referral Section */
+.referral-section {
+  padding: 12px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-top: 1px solid #bbf7d0;
+}
+
+.referral-banner {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.1);
+  border: 1px solid #bbf7d0;
+}
+
+.referral-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.referral-icon {
+  font-size: 20px;
+}
+
+.referral-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #166534;
+}
+
+.referral-desc {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.referral-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.referral-progress-bar {
+  flex: 1;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.referral-progress-fill {
+  height: 100%;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.referral-progress-text {
+  font-size: 11px;
+  font-weight: 600;
+  color: #166534;
+  white-space: nowrap;
+}
+
+.referral-link-box {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.referral-link-box input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 11px;
+  color: #374151;
+  background: #f9fafb;
+}
+
+.copy-btn {
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copy-btn:hover {
+  transform: scale(1.05);
+}
+
+.referral-share-btns {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.share-btn {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: none;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #fff;
+}
+
+.share-btn:hover {
+  transform: translateY(-1px);
+}
+
+.share-btn.whatsapp {
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+}
+
+.share-btn.telegram {
+  background: linear-gradient(135deg, #0088cc 0%, #0077b5 100%);
+}
+
+.share-btn.twitter {
+  background: linear-gradient(135deg, #1DA1F2 0%, #0d8bd9 100%);
+}
+
+.referral-stats {
+  text-align: center;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.referral-stats span {
+  font-weight: 600;
+  color: #166534;
+}

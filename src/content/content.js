@@ -429,8 +429,8 @@
     };
     
     const riskLabels = {
-      safe: '✓ AI Verified',
-      low: '✓ Low Risk',
+      safe: '✓ AI Analyzed',
+      low: '✓ Low Risk Detected',
       medium: '⚠️ Medium Risk',
       high: '🚨 High Risk',
       critical: '⛔ Critical'
@@ -459,7 +459,7 @@
                 ${flag.description}
               </span>
             `).join('') : `
-              <span class="lg-pill lg-pill-neutral">✨ Clean Listing</span>
+              <span class="lg-pill lg-pill-neutral">✨ Low Risk Detected</span>
             `}
             <span class="lg-live-score">
               <span class="lg-live-dot"></span>

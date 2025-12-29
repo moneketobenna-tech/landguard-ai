@@ -1383,3 +1383,200 @@ async function updateCreditsDisplay(credits) {
 
 // Make exportReport available globally
 window.exportReport = exportReport;
+
+// ==========================================
+// REFERRAL SYSTEM
+// ==========================================
+
+let referralData = {
+  completed: 0,
+  required: 3,
+  freeMonthsEarned: 0,
+  maxFreeMonths: 6,
+  referralLink: ''
+};
+
+// Load referral status
+async function loadReferralStatus() {
+  try {
+    // First check storage for cached data
+    const stored = await chrome.storage.local.get(['lg_referral_code', 'lg_referral_data']);
+    
+    if (stored.lg_referral_code) {
+      referralData.referralLink = `https://landguardai.co/invite/${stored.lg_referral_code}`;
+    }
+    
+    if (stored.lg_referral_data) {
+      referralData = { ...referralData, ...stored.lg_referral_data };
+    }
+    
+    // Try to fetch from API if we have an API key
+    if (settings.apiKey) {
+      try {
+        const response = await fetch('https://landguardai.co/api/referrals/status', {
+          headers: {
+            'Authorization': `Bearer ${settings.apiKey}`
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            referralData = {
+              completed: data.completed || 0,
+              required: data.required || 3,
+              freeMonthsEarned: data.freeMonthsEarned || 0,
+              maxFreeMonths: data.maxFreeMonths || 6,
+              referralLink: data.referralLink || referralData.referralLink
+            };
+            
+            // Extract and save referral code
+            if (data.referralLink) {
+              const code = data.referralLink.split('/').pop();
+              await chrome.storage.local.set({ 
+                lg_referral_code: code,
+                lg_referral_data: referralData
+              });
+            }
+          }
+        }
+      } catch (apiError) {
+        console.log('[LandGuard AI] Could not fetch referral status from API:', apiError.message);
+      }
+    }
+    
+    // Generate a local code if none exists
+    if (!referralData.referralLink) {
+      const localCode = generateLocalReferralCode();
+      referralData.referralLink = `https://landguardai.co/invite/${localCode}`;
+      await chrome.storage.local.set({ lg_referral_code: localCode });
+    }
+    
+    updateReferralUI();
+  } catch (e) {
+    console.error('[LandGuard AI] Error loading referral status:', e);
+  }
+}
+
+// Generate a local referral code
+function generateLocalReferralCode() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
+// Update referral UI
+function updateReferralUI() {
+  const referralSection = document.getElementById('referralSection');
+  
+  // Hide referral section for Pro users (they already have Pro)
+  if (settings.tier === 'pro') {
+    if (referralSection) referralSection.style.display = 'none';
+    return;
+  }
+  
+  if (referralSection) referralSection.style.display = 'block';
+  
+  // Update progress bar
+  const progressFill = document.getElementById('referralProgressFill');
+  const progressText = document.getElementById('referralProgressText');
+  
+  if (progressFill) {
+    const progress = (referralData.completed / referralData.required) * 100;
+    progressFill.style.width = `${Math.min(progress, 100)}%`;
+  }
+  
+  if (progressText) {
+    progressText.textContent = `${referralData.completed}/${referralData.required} friends`;
+  }
+  
+  // Update referral link
+  const linkInput = document.getElementById('referralLinkInput');
+  if (linkInput && referralData.referralLink) {
+    linkInput.value = referralData.referralLink;
+  }
+  
+  // Update free months earned
+  const freeMonthsEl = document.getElementById('freeMonthsEarned');
+  if (freeMonthsEl) {
+    if (referralData.freeMonthsEarned > 0) {
+      freeMonthsEl.textContent = `🎉 ${referralData.freeMonthsEarned} free month${referralData.freeMonthsEarned > 1 ? 's' : ''} earned!`;
+    } else {
+      freeMonthsEl.textContent = `Max ${referralData.maxFreeMonths} free months available`;
+    }
+  }
+}
+
+// Setup referral event listeners
+function setupReferralListeners() {
+  // Copy referral link
+  const copyBtn = document.getElementById('copyReferralLink');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', async () => {
+      const linkInput = document.getElementById('referralLinkInput');
+      if (linkInput && linkInput.value) {
+        try {
+          await navigator.clipboard.writeText(linkInput.value);
+          copyBtn.textContent = '✓';
+          setTimeout(() => {
+            copyBtn.textContent = '📋';
+          }, 2000);
+        } catch (e) {
+          // Fallback for older browsers
+          linkInput.select();
+          document.execCommand('copy');
+          copyBtn.textContent = '✓';
+          setTimeout(() => {
+            copyBtn.textContent = '📋';
+          }, 2000);
+        }
+      }
+    });
+  }
+  
+  // Share buttons
+  const shareMessage = encodeURIComponent(
+    `🛡️ Protect yourself from property scams with LandGuard AI!\n\n` +
+    `I use this free Chrome extension to scan real estate listings for fraud.\n\n` +
+    `Use my link to get started: ${referralData.referralLink || 'https://landguardai.co'}`
+  );
+  
+  const shareWhatsApp = document.getElementById('shareWhatsApp');
+  if (shareWhatsApp) {
+    shareWhatsApp.addEventListener('click', () => {
+      chrome.tabs.create({ url: `https://wa.me/?text=${shareMessage}` });
+    });
+  }
+  
+  const shareTelegram = document.getElementById('shareTelegram');
+  if (shareTelegram) {
+    shareTelegram.addEventListener('click', () => {
+      chrome.tabs.create({ url: `https://t.me/share/url?url=${encodeURIComponent(referralData.referralLink || 'https://landguardai.co')}&text=${encodeURIComponent('🛡️ Protect yourself from property scams with LandGuard AI!')}` });
+    });
+  }
+  
+  const shareTwitter = document.getElementById('shareTwitter');
+  if (shareTwitter) {
+    shareTwitter.addEventListener('click', () => {
+      chrome.tabs.create({ url: `https://twitter.com/intent/tweet?text=${shareMessage}` });
+    });
+  }
+}
+
+// Initialize referral system
+async function initReferralSystem() {
+  await loadReferralStatus();
+  setupReferralListeners();
+}
+
+// Add to DOMContentLoaded - call initReferralSystem
+document.addEventListener('DOMContentLoaded', async () => {
+  // ... existing init code runs first from the main DOMContentLoaded
+  // This will run after
+  setTimeout(() => {
+    initReferralSystem();
+  }, 100);
+});
