@@ -1,12 +1,12 @@
 {
   "name": "LandGuard AI - Property Scam Detector",
   "description": "AI-powered property scam detector. Analyze real estate listings for fraud, verify sellers, and protect your investment.",
-  "version": "3.2.0",
+  "version": "5.0.0",
   "manifest_version": 3,
 
   "action": {
     "default_popup": "src/popup/popup.html",
-    "default_title": "LandGuard AI v3.2",
+    "default_title": "LandGuard AI v5.0",
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",
