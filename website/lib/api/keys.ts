@@ -42,6 +42,7 @@ export function generateApiKey(): string {
 
 /**
  * Create a new API key
+ * NOTE: This function should only be called after verifying the user has userType='business'
  */
 export async function createApiKey(
   userId: string,
