@@ -376,3 +376,4 @@ export default function AutoScanSettings({ isPro, authToken }: AutoScanSettingsP
   )
 }
 
+

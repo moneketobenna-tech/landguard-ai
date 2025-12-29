@@ -65,3 +65,4 @@ export const DEFAULT_AUTO_SCAN_SETTINGS: AutoScanSettings = {
   scanOnLogin: true,
 }
 
+
