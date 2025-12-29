@@ -15,11 +15,14 @@ export interface ScanUsage {
   lastScanAt?: string
 }
 
+export type UserType = 'customer' | 'business'
+
 export interface User {
   id: string
   email: string
   passwordHash: string
   planType: PlanType
+  userType?: UserType
   licenseKey?: string
   stripeCustomerId?: string
   createdAt: string
@@ -121,7 +124,7 @@ async function removeUserIdFromList(kv: any, userId: string): Promise<void> {
   await kv.set('users:all_ids', JSON.stringify(newList))
 }
 
-export async function createUser(email: string, passwordHash: string): Promise<User> {
+export async function createUser(email: string, passwordHash: string, userType?: UserType): Promise<User> {
   const normalizedEmail = email.toLowerCase().trim()
   const id = generateId()
   
@@ -130,6 +133,7 @@ export async function createUser(email: string, passwordHash: string): Promise<U
     email: normalizedEmail,
     passwordHash,
     planType: 'free',
+    userType: userType,
     licenseKey: generateLicenseKey(),
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),

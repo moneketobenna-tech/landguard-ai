@@ -11,6 +11,8 @@
 
 export type PlanType = 'free' | 'pro' | 'business' | 'enterprise' | 'banned'
 
+export type UserType = 'customer' | 'business'
+
 /**
  * Check if a plan has API access (business/enterprise only)
  */
@@ -32,6 +34,7 @@ export interface User {
   createdAt: string
   updatedAt: string
   planType: PlanType
+  userType?: UserType
   stripeCustomerId?: string
   licenseKey?: string
   ipAddress?: string
@@ -45,6 +48,7 @@ export interface UserPublic {
   email: string
   createdAt: string
   planType: PlanType
+  userType?: UserType
   licenseKey?: string
   nextBillingDate?: string
   referralCode?: string
@@ -67,6 +71,7 @@ export interface LoginRequest {
 export interface RegisterRequest {
   email: string
   password: string
+  userType?: UserType
 }
 
 export interface AuthResponse {

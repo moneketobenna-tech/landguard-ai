@@ -13,12 +13,13 @@ export const dynamic = 'force-dynamic'
 interface RegisterRequest {
   email: string
   password: string
+  userType?: 'customer' | 'business'
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: RegisterRequest = await request.json()
-    const { email, password } = body
+    const { email, password, userType } = body
 
     // Validate input
     if (!email || !password) {
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     // Hash password and create user
     const passwordHash = await bcrypt.hash(password, 12)
-    const user = await createUser(email, passwordHash)
+    const user = await createUser(email, passwordHash, userType)
 
     // Generate JWT
     const token = signToken({
@@ -62,6 +63,7 @@ export async function POST(request: NextRequest) {
         id: user.id,
         email: user.email,
         planType: user.planType,
+        userType: user.userType,
         licenseKey: user.licenseKey
       }
     })

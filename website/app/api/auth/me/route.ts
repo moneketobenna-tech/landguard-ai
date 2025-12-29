@@ -49,6 +49,7 @@ export async function GET(request: NextRequest) {
         id: user.id,
         email: user.email,
         planType: user.planType,
+        userType: user.userType,
         licenseKey: maskLicenseKey(user.licenseKey),
         createdAt: user.createdAt
       }

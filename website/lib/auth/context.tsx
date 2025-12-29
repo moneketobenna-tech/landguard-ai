@@ -6,7 +6,7 @@
  */
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
-import type { UserPublic } from '@/types/user'
+import type { UserPublic, UserType } from '@/types/user'
 
 interface AuthContextType {
   user: UserPublic | null
@@ -14,7 +14,7 @@ interface AuthContextType {
   isAuthenticated: boolean
   isPro: boolean
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
-  register: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
+  register: (email: string, password: string, userType?: UserType) => Promise<{ success: boolean; error?: string }>
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
 }
@@ -73,13 +73,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const register = async (email: string, password: string) => {
+  const register = async (email: string, password: string, userType?: UserType) => {
     try {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password, userType })
       })
 
       const data = await res.json()
