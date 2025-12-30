@@ -5,12 +5,55 @@
 
 const VERSION = '2.0.0';
 const API_BASE = 'https://landguardai.co/api/v1';
+const ANALYTICS_API = 'https://landguardai.co/api/analytics/extension';
+
+// Generate or get unique instance ID for this extension install
+async function getInstanceId() {
+  const result = await chrome.storage.local.get('lg_instance_id');
+  if (result.lg_instance_id) {
+    return result.lg_instance_id;
+  }
+  
+  const instanceId = `lg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  await chrome.storage.local.set({ lg_instance_id: instanceId });
+  return instanceId;
+}
+
+// Report to analytics server
+async function reportToAnalytics(action, additionalData = {}) {
+  try {
+    const instanceId = await getInstanceId();
+    const apiKey = (await chrome.storage.local.get('lg_api_key')).lg_api_key;
+    
+    await fetch(ANALYTICS_API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        action,
+        instanceId,
+        version: VERSION,
+        licenseKey: apiKey || undefined,
+        ...additionalData
+      })
+    });
+    
+    console.log(`LandGuard AI: Analytics ${action} reported`);
+  } catch (e) {
+    // Silent fail - don't break extension if analytics fails
+    console.warn('LandGuard AI: Analytics reporting failed', e);
+  }
+}
 
 // Extension installed/updated
 chrome.runtime.onInstalled.addListener((details) => {
   console.log(`LandGuard AI v${VERSION}: ${details.reason}`);
   
   if (details.reason === 'install') {
+    // Report installation to analytics
+    reportToAnalytics('install');
+    
     // Set default settings
     chrome.storage.local.set({
       lg_settings: {
@@ -28,6 +71,9 @@ chrome.runtime.onInstalled.addListener((details) => {
       url: chrome.runtime.getURL('src/options/options.html')
     });
   } else if (details.reason === 'update') {
+    // Report update/activation to analytics
+    reportToAnalytics('activate');
+    
     // Show update notification
     console.log(`Updated from ${details.previousVersion} to ${VERSION}`);
     
@@ -99,6 +145,10 @@ async function handleMessage(message, sender, sendResponse) {
       history.unshift(message.scan);
       if (history.length > 50) history = history.slice(0, 50);
       await chrome.storage.local.set({ lg_scan_history: history });
+      
+      // Report scan to analytics
+      reportToAnalytics('scan', { scanType: message.scan?.type || 'property' });
+      
       sendResponse({ success: true });
       break;
       
