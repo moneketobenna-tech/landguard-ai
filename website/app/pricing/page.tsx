@@ -193,6 +193,9 @@ export default function PricingPage() {
                   'Advanced AI analysis',
                   'Auto-scan on all sites',
                   'Detailed risk reports',
+                  'Seller Verification',
+                  'Price Analysis',
+                  'Document Scanning',
                   'Priority support',
                   'Scan history (unlimited)'
                 ].map((f, i) => (

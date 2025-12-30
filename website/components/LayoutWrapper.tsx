@@ -6,6 +6,7 @@
  */
 
 import { LanguageProvider } from '@/lib/i18n/LanguageContext'
+import CookieNotice from './CookieNotice'
 
 export default function LayoutWrapper({ 
   children 
@@ -15,6 +16,7 @@ export default function LayoutWrapper({
   return (
     <LanguageProvider>
       {children}
+      <CookieNotice />
     </LanguageProvider>
   )
 }
