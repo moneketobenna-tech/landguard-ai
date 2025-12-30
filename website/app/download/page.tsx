@@ -4,7 +4,7 @@ import Link from 'next/link'
 import LanguageSelector from '@/components/LanguageSelector'
 
 export default function DownloadPage() {
-  const chromeStoreUrl = 'https://chrome.google.com/webstore/detail/landguard-ai' // Update when published
+  const chromeStoreUrl = 'https://chromewebstore.google.com/detail/landguard-ai-property-sca/fhbjldknlbmcchkieenmhlggjkliellh'
   
   return (
     <main className="min-h-screen">

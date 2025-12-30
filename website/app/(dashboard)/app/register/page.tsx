@@ -327,7 +327,7 @@ export default function RegisterPage() {
       {/* Footer */}
       <footer className="p-6 text-center">
         <p className="text-sm text-gray-600">
-          <span className="text-green-600 font-semibold">Moneke Industries</span> · LandGuard AI © 2025
+          <span className="text-green-600 font-semibold">Guard AI Systems</span> · LandGuard AI © 2025
         </p>
       </footer>
     </div>

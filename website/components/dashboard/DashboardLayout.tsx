@@ -200,7 +200,7 @@ export default function DashboardLayoutComponent({ children }: { children: React
 
         {/* Footer */}
         <footer className="p-4 lg:p-8 border-t border-green-200 text-center text-sm text-gray-500">
-          <span className="text-green-600 font-medium">Moneke Industries</span>
+          <span className="text-green-600 font-medium">Guard AI Systems</span>
           {' · '}
           LandGuard AI v1.0
         </footer>

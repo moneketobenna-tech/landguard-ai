@@ -77,7 +77,7 @@ export function welcomeEmailTemplate(email: string, licenseKey?: string): { subj
     </div>
     
     <div class="footer">
-      <p><strong>Moneke Industries</strong> · LandGuard AI</p>
+      <p><strong>Guard AI Systems</strong> · LandGuard AI</p>
       <p>Protecting your property investments, one scan at a time.</p>
       <p><a href="${BASE_URL}">landguardai.co</a> · <a href="mailto:support@landguardai.co">support@landguardai.co</a></p>
     </div>
@@ -140,7 +140,7 @@ export function passwordResetEmailTemplate(
     </div>
     
     <div class="footer">
-      <p><strong>Moneke Industries</strong> · LandGuard AI</p>
+      <p><strong>Guard AI Systems</strong> · LandGuard AI</p>
       <p>This is an automated email. Please do not reply.</p>
       <p><a href="${BASE_URL}">landguardai.co</a> · <a href="mailto:support@landguardai.co">support@landguardai.co</a></p>
     </div>
@@ -208,7 +208,7 @@ export function subscriptionEmailTemplate(
     </div>
     
     <div class="footer">
-      <p><strong>Moneke Industries</strong> · LandGuard AI PRO</p>
+      <p><strong>Guard AI Systems</strong> · LandGuard AI PRO</p>
       <p>Thank you for trusting us!</p>
       <p><a href="${BASE_URL}">landguardai.co</a> · <a href="mailto:support@landguardai.co">support@landguardai.co</a></p>
     </div>

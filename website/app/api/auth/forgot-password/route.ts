@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
       <p style="font-size: 14px; color: #6b7280;">Or copy this link: <span style="color: #16a34a;">${resetUrl}</span></p>
     </div>
     <div style="background: #f5f7fa; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
-      <p style="color: #6b7280; font-size: 14px; margin: 0;"><strong>Moneke Industries</strong> · LandGuard AI</p>
+      <p style="color: #6b7280; font-size: 14px; margin: 0;"><strong>Guard AI Systems</strong> · LandGuard AI</p>
     </div>
   </div>
 </body>

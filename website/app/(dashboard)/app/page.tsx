@@ -665,7 +665,7 @@ export default function DashboardHome() {
           {/* Footer */}
           <div className="text-center py-8 border-t border-white/5">
             <p className="text-slate-500 text-sm">
-              <span className="text-emerald-400 font-semibold">Moneke Industries</span>
+              <span className="text-emerald-400 font-semibold">Guard AI Systems</span>
               {' '}· LandGuard AI v8.0 · © {new Date().getFullYear()}
             </p>
           </div>

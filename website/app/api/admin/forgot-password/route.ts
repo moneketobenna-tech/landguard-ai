@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       </p>
     </div>
     <div style="background: #f5f7fa; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
-      <p style="color: #6b7280; font-size: 14px; margin: 0;"><strong>Moneke Industries</strong> · LandGuard AI</p>
+      <p style="color: #6b7280; font-size: 14px; margin: 0;"><strong>Guard AI Systems</strong> · LandGuard AI</p>
     </div>
   </div>
 </body>
